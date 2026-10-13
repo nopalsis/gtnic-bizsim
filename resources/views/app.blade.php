@@ -6,15 +6,16 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <!-- Fonts: Plus Jakarta Sans, Epilogue & Space Grotesk -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Epilogue:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
         <!-- Scripts & Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased bg-slate-900 text-slate-100 min-h-screen">
+    <body class="font-sans antialiased bg-[#eaecdf] text-[#0e0f0c] min-h-screen">
         @inertia
     </body>
 </html>

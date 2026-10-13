@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 defineProps({
@@ -47,7 +47,7 @@ const features = [
 </script>
 
 <template>
-    <Head title="Welcome to GTNIC" />
+    <Head title="Beranda" />
 
     <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-rose-500 selection:text-white">
         <!-- Background Glow Effects -->
@@ -73,6 +73,15 @@ const features = [
                 </div>
 
                 <div class="flex items-center gap-4 text-xs font-medium text-slate-400">
+                    <Link
+                        href="/dashboard"
+                        class="px-3.5 py-1.5 rounded-full bg-[#c6ef4e] hover:bg-[#b5e03b] text-slate-950 font-bold transition flex items-center gap-1.5 shadow-sm"
+                    >
+                        <span>Dashboard</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </Link>
                     <span class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         Laravel v{{ laravelVersion }}
@@ -99,6 +108,19 @@ const features = [
             <p class="mt-5 text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed">
                 Project berhasil dikonfigurasi dengan arsitektur Monolith modern berbasis JavaScript (Vue 3 Composition API), Inertia.js, Vite, dan database MySQL di Laragon.
             </p>
+
+            <!-- Dashboard CTA Button -->
+            <div class="mt-6 flex items-center justify-center">
+                <Link
+                    href="/dashboard"
+                    class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#c6ef4e] to-emerald-400 text-slate-950 font-extrabold text-sm hover:opacity-95 shadow-lg shadow-lime-500/20 transition flex items-center gap-2"
+                >
+                    <span>Buka OptimaBiz Financial Dashboard</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </Link>
+            </div>
 
             <!-- Interactive Reactivity Demo Card -->
             <div class="mt-8 p-6 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl max-w-md w-full backdrop-blur-sm">
@@ -154,7 +176,7 @@ const features = [
         <footer class="relative z-10 border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
             <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <p>GTNIC • Dijalankan di Laragon local environment</p>
-                <p>Edit halaman ini di <code class="px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded text-slate-300">resources/js/Pages/Welcome.vue</code></p>
+                <p>Edit halaman ini di <code class="px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded text-slate-300">resources/js/Pages/Index.vue</code></p>
             </div>
         </footer>
     </div>

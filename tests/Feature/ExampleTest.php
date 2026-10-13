@@ -16,7 +16,7 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Welcome')
+            ->component('Index')
             ->has('laravelVersion')
             ->has('phpVersion')
         );
