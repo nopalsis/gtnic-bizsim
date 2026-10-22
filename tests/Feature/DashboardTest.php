@@ -19,8 +19,13 @@ class DashboardTest extends TestCase
             ->component('Dashboard/Index')
             ->has('kpis')
             ->has('capacity')
+            ->has('categorySales')
             ->has('costDistribution')
             ->has('recentTransactions')
+            ->has('topProducts')
+            ->has('trendHistory')
+            ->has('inventoryStats')
+            ->has('staffPerformance')
             ->has('healthScore')
             ->has('alerts')
         );
