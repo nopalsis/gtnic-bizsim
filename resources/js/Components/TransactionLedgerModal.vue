@@ -29,6 +29,7 @@ const filteredTransactions = computed(() => {
     return props.transactions.filter(
         (tx) =>
             tx.invoice_number?.toLowerCase().includes(q) ||
+            tx.customer_name?.toLowerCase().includes(q) ||
             tx.sales_person?.toLowerCase().includes(q) ||
             tx.items?.toLowerCase().includes(q)
     );
@@ -38,17 +39,17 @@ const handleExport = () => {
     const txs = props.transactions;
     const csvContent =
         'data:text/csv;charset=utf-8,' +
-        'Invoice,Date,Cashier,Category,Items,Gross,Discount,Net,Status\n' +
+        'Invoice,Date,Customer,Sales,Category,Items,Gross,Discount,Net,Status\n' +
         txs
             .map(
                 (t) =>
-                    `"${t.invoice_number}","${t.date}","${t.sales_person}","${t.primary_category || ''}","${(t.items || '').replace(/"/g, '""')}",${t.total_amount},${t.total_discount},${t.net_amount},"${t.status}"`
+                    `"${t.invoice_number}","${t.date}","${t.customer_name || ''}","${t.sales_person}","${t.primary_category || ''}","${(t.items || '').replace(/"/g, '""')}",${t.total_amount},${t.total_discount},${t.net_amount},"${t.status}"`
             )
             .join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `buku_besar_transaksi_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `buku_besar_transaksi_sepatu_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -65,8 +66,8 @@ const handleExport = () => {
             <!-- Header -->
             <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
                 <div>
-                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Besar Transaksi</h3>
-                    <p class="text-xs text-neutral-500 mt-0.5">Daftar riil seluruh rekaman transaksi kasir dari database</p>
+                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Besar Penjualan Sepatu & Sandal</h3>
+                    <p class="text-xs text-neutral-500 mt-0.5">Daftar riil seluruh transaksi eceran & wholesale dari database</p>
                 </div>
                 <button
                     type="button"
@@ -82,7 +83,7 @@ const handleExport = () => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Cari invoice, kasir, atau nama item menu..."
+                    placeholder="Cari nomor invoice, nama pelanggan/toko, sales, atau model sepatu..."
                     class="w-full bg-[#f4f5ee] rounded-xl px-4 py-2.5 text-xs font-semibold border-0 focus:ring-2 focus:ring-[#0e0f0c] outline-none"
                 />
                 <button
@@ -103,10 +104,10 @@ const handleExport = () => {
                     <thead>
                         <tr class="border-b border-neutral-200 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                             <th class="py-2.5 px-3">Faktur & Tanggal</th>
-                            <th class="py-2.5 px-3">Kategori</th>
+                            <th class="py-2.5 px-3">Pelanggan / Toko</th>
                             <th class="py-2.5 px-3">Item Pesanan</th>
-                            <th class="py-2.5 px-3">Kasir</th>
-                            <th class="py-2.5 px-3 text-center">Status Diskon</th>
+                            <th class="py-2.5 px-3">Sales Person</th>
+                            <th class="py-2.5 px-3 text-center">Negosiasi / Diskon</th>
                             <th class="py-2.5 px-3 text-right">Nominal Bersih</th>
                         </tr>
                     </thead>
@@ -121,8 +122,9 @@ const handleExport = () => {
                                 <div class="text-[10px] text-neutral-400">{{ tx.date }}</div>
                             </td>
                             <td class="py-3 px-3">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700">
-                                    {{ tx.primary_category }}
+                                <div class="font-bold text-[#0e0f0c]">{{ tx.customer_name || 'Pelanggan Showroom' }}</div>
+                                <span class="text-[9px] font-semibold text-neutral-500">
+                                    {{ tx.payment_method || 'Transfer Bank' }}
                                 </span>
                             </td>
                             <td class="py-3 px-3 max-w-[240px]">

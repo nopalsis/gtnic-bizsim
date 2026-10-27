@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('deal_price', 12, 2);
             $table->decimal('cost_price', 12, 2);
             $table->decimal('subtotal', 14, 2);
+            $table->string('notes')->nullable();
             $table->timestamps();
         });
     }

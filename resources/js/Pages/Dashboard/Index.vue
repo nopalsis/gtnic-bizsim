@@ -5,6 +5,7 @@ import SidebarNav from '@/Components/SidebarNav.vue';
 import TransactionLedgerModal from '@/Components/TransactionLedgerModal.vue';
 
 const props = defineProps({
+    workshopName: String,
     kpis: Object,
     capacity: Object,
     categorySales: Array,
@@ -86,7 +87,7 @@ const bezierPathD = computed(() => {
 </script>
 
 <template>
-    <Head title="Executive Dashboard · GTNIC BizSim" />
+    <Head title="Executive Dashboard · OptimaBiz Leathercraft" />
 
     <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
@@ -99,10 +100,10 @@ const bezierPathD = computed(() => {
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">GTNIC Flagship Café</h1>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Simulasi Bisnis</span>
+                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">{{ props.workshopName || 'OptimaBiz Leathercraft & Shoes' }}</h1>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Workshop & Manufaktur UMKM</span>
                     </div>
-                    <p class="text-xs text-neutral-500 font-medium mt-1">Ringkasan performa finansial & operasional gerai real-time</p>
+                    <p class="text-xs text-neutral-500 font-medium mt-1">Sistem intelijen penjualan & pendukung keputusan workshop sepatu & sandal kulit</p>
                 </div>
 
                 <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
@@ -170,7 +171,7 @@ const bezierPathD = computed(() => {
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Beban Tetap (Opex)</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-700">
-                            4 Karyawan + Sewa
+                            5 Pengrajin + Bengkel
                         </span>
                     </div>
                     <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
@@ -193,7 +194,7 @@ const bezierPathD = computed(() => {
                         {{ formatRupiah(props.kpis?.bepRevenue) }}
                     </div>
                     <div class="text-[11px] text-neutral-500 font-medium mt-1 truncate">
-                        Terjual: {{ props.capacity?.soldUnits || 0 }} / {{ props.capacity?.maxCapacity || 5000 }} Unit
+                        Terjual: {{ props.capacity?.soldUnits || 0 }} / {{ props.capacity?.maxCapacity || 500 }} Pasang
                     </div>
                 </div>
             </section>
@@ -205,7 +206,7 @@ const bezierPathD = computed(() => {
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <h2 class="text-base font-black text-[#0e0f0c]">Tren Penjualan Harian</h2>
-                            <p class="text-[11px] text-neutral-400 font-medium">Berdasarkan 20 rekaman transaksi riil dari database</p>
+                            <p class="text-[11px] text-neutral-400 font-medium">Berdasarkan {{ props.trendHistory?.length || 0 }} rekaman transaksi riil bengkel</p>
                         </div>
                         <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
                             {{ props.trendHistory?.length || 0 }} Hari Terdata
@@ -281,7 +282,7 @@ const bezierPathD = computed(() => {
                                 <p class="text-[11px] text-neutral-400 font-medium">Kontribusi tiap kategori terhadap total omzet</p>
                             </div>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c]">
-                                4 Kategori
+                                {{ props.categorySales?.length || 0 }} Kategori
                             </span>
                         </div>
 
@@ -296,10 +297,11 @@ const bezierPathD = computed(() => {
                                     <div
                                         class="h-full rounded-full transition-all duration-500"
                                         :class="{
-                                            'bg-amber-500': cat.category === 'Beverage',
-                                            'bg-emerald-600': cat.category === 'Merchandise',
-                                            'bg-stone-700': cat.category === 'Coffee Beans',
-                                            'bg-orange-500': cat.category === 'Food',
+                                            'bg-[#0e0f0c]': cat.category === 'Sepatu Pria',
+                                            'bg-[#828876]': cat.category === 'Sepatu Wanita',
+                                            'bg-amber-700': cat.category === 'Sandal Kulit Pria',
+                                            'bg-orange-600': cat.category === 'Sandal Kulit Wanita',
+                                            'bg-[#a2c833]': cat.category === 'Perawatan & Aksesoris',
                                         }"
                                         :style="{ width: `${cat.percentage}%` }"
                                     ></div>
@@ -363,7 +365,7 @@ const bezierPathD = computed(() => {
                                     :class="activeBottomTab === 'topProducts' ? 'bg-white text-[#0e0f0c] shadow-sm font-bold' : 'text-neutral-500 font-semibold'"
                                     class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer"
                                 >
-                                    5 Menu Terlaris
+                                    5 Model Terlaris
                                 </button>
                                 <button
                                     type="button"
@@ -396,14 +398,17 @@ const bezierPathD = computed(() => {
                                         {{ i + 1 }}
                                     </div>
                                     <div>
-                                        <h4 class="text-xs font-bold text-[#0e0f0c]">{{ prod.name }}</h4>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-[9px] font-mono font-bold text-neutral-400">{{ prod.sku }}</span>
+                                            <h4 class="text-xs font-bold text-[#0e0f0c]">{{ prod.name }}</h4>
+                                        </div>
                                         <span class="text-[10px] text-neutral-400 font-medium">{{ prod.category }}</span>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-xs font-black text-[#0e0f0c] tabular-nums">{{ formatRupiah(prod.sales) }}</div>
                                     <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
-                                        {{ prod.quantity }} unit terjual
+                                        {{ prod.quantity }} {{ prod.unit || 'pasang' }} terjual
                                     </span>
                                 </div>
                             </div>
@@ -417,9 +422,10 @@ const bezierPathD = computed(() => {
                                 class="flex items-center justify-between p-2.5 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
                             >
                                 <div class="min-w-0 flex-1 mr-3">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
                                         <span class="font-mono text-[11px] font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</span>
-                                        <span class="text-[10px] text-neutral-400">{{ tx.sales_person }}</span>
+                                        <span class="text-[10px] font-bold text-neutral-700">· {{ tx.customer_name || 'Pelanggan Showroom' }}</span>
+                                        <span class="text-[10px] text-neutral-400">({{ tx.sales_person }})</span>
                                     </div>
                                     <div class="text-[11px] text-neutral-600 truncate mt-0.5" :title="tx.items">{{ tx.items }}</div>
                                 </div>

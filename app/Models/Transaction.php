@@ -20,10 +20,13 @@ class Transaction extends Model
     protected $fillable = [
         'invoice_number',
         'transaction_date',
+        'customer_name',
         'sales_person_name',
+        'payment_method',
         'total_amount',
         'total_discount',
         'net_amount',
+        'notes',
     ];
 
     /**

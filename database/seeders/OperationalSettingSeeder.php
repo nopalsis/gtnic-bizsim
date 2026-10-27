@@ -15,10 +15,11 @@ class OperationalSettingSeeder extends Seeder
         OperationalSetting::updateOrCreate(
             ['id' => 1],
             [
-                'employee_count' => 4,
-                'salary_per_employee' => 2800000.00,
-                'monthly_fixed_cost' => 4500000.00,
-                'monthly_max_capacity' => 5000,
+                'workshop_name' => 'OptimaBiz Leathercraft & Shoes Workshop',
+                'employee_count' => 5, // 5 Pengrajin terampil (pola, seset, jahit upper, pasang sol/bottoming, finishing)
+                'salary_per_employee' => 3200000.00, // Rp 3.200.000 / pengrajin
+                'monthly_fixed_cost' => 6500000.00, // Sewa bengkel workshop, listrik kompresor & mesin gerinda, lem & perlengkapan
+                'monthly_max_capacity' => 500, // Kapasitas produksi 500 pasang sepatu/sandal kulit per bulan
             ]
         );
     }

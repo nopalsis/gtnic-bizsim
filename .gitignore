@@ -26,7 +26,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-# Skills & AI agent configurations
+
 /.aider-desk/
 /skills-lock.json
 /.agents/skills/
@@ -35,3 +35,5 @@ Thumbs.db
 /.agent/skill/
 /.claude/skills/
 /.claude/skill/
+AGENTS.md
+AGENT.md

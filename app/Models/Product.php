@@ -18,8 +18,10 @@ class Product extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'sku',
         'name',
         'category',
+        'unit',
         'base_price',
         'cost_price',
         'current_stock',

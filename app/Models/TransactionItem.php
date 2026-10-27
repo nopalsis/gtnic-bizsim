@@ -25,6 +25,7 @@ class TransactionItem extends Model
         'deal_price',
         'cost_price',
         'subtotal',
+        'notes',
     ];
 
     /**

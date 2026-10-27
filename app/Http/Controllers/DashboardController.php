@@ -14,7 +14,7 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     /**
-     * Display the executive dashboard.
+     * Display the executive dashboard for OptimaBiz Leathercraft.
      */
     public function index(): Response
     {
@@ -29,10 +29,11 @@ class DashboardController extends Controller
         $profitMargin = $netRevenue > 0 ? round(($grossProfit / $netRevenue) * 100, 1) : 0.0;
 
         $setting = OperationalSetting::first() ?? new OperationalSetting([
-            'employee_count' => 4,
-            'salary_per_employee' => 2800000,
-            'monthly_fixed_cost' => 4500000,
-            'monthly_max_capacity' => 5000,
+            'workshop_name' => 'OptimaBiz Leathercraft & Shoes Workshop',
+            'employee_count' => 5,
+            'salary_per_employee' => 3200000,
+            'monthly_fixed_cost' => 6500000,
+            'monthly_max_capacity' => 500,
         ]);
 
         $totalSalary = (float) ($setting->employee_count * $setting->salary_per_employee);
@@ -50,12 +51,12 @@ class DashboardController extends Controller
         // Break Even Point (BEP) Revenue Calculation
         $bepRevenue = $profitMargin > 0 ? round($totalFixedOpex / ($profitMargin / 100)) : 0.0;
 
-        // 2. Capacity & Sales Volume
+        // 2. Capacity & Sales Volume (Produksi Sepatu & Sandal)
         $totalItemsSold = (int) TransactionItem::sum('quantity');
         $maxCapacity = (int) $setting->monthly_max_capacity;
         $capacityUsagePercent = $maxCapacity > 0 ? round(($totalItemsSold / $maxCapacity) * 100, 1) : 0.0;
 
-        // 3. Category Sales Breakdown from Real Database
+        // 3. Category Sales Breakdown (Sepatu Pria, Sepatu Wanita, Sandal Kulit, Aksesoris)
         $categorySales = TransactionItem::join('products', 'transaction_items.product_id', '=', 'products.id')
             ->select(
                 'products.category',
@@ -77,57 +78,59 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 4. Recent Transactions with Detailed Items
+        // 4. Recent Transactions with Detailed Items and Customer Information
         $recentTransactions = Transaction::with(['transactionItems.product'])
             ->latest('transaction_date')
             ->take(6)
             ->get()
             ->map(function ($tx) {
-                $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.')')->implode(', ');
-                $primaryCategory = $tx->transactionItems->first()?->product?->category ?? 'Beverage';
+                $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.' '.($it->product->unit ?? 'pasang').')')->implode(', ');
+                $primaryCategory = $tx->transactionItems->first()?->product?->category ?? 'Sepatu Pria';
                 $discountPct = $tx->total_amount > 0 ? round(($tx->total_discount / $tx->total_amount) * 100, 1) : 0.0;
 
                 return [
                     'id' => $tx->id,
                     'invoice_number' => $tx->invoice_number,
                     'date' => $tx->transaction_date?->format('d M Y · H:i'),
-                    'sales_person' => $tx->sales_person_name ?? 'Staff',
+                    'customer_name' => $tx->customer_name ?? 'Pelanggan Showroom',
+                    'sales_person' => $tx->sales_person_name ?? 'Staff Workshop',
+                    'payment_method' => $tx->payment_method ?? 'Transfer Bank',
                     'primary_category' => $primaryCategory,
                     'items' => $itemNames,
                     'total_amount' => (float) $tx->total_amount,
                     'total_discount' => (float) $tx->total_discount,
                     'net_amount' => (float) $tx->net_amount,
                     'discount_percent' => $discountPct,
-                    'status' => $discountPct === 0.0 ? 'normal' : ($discountPct <= 8.0 ? 'safe' : 'warning'),
+                    'status' => $discountPct === 0.0 ? 'normal' : ($discountPct <= 10.0 ? 'safe' : 'warning'),
                 ];
             });
 
-        // 5. Cost Distribution Breakdown
+        // 5. Cost Distribution Breakdown (Struktur Biaya Bengkel Sepatu Kulit)
         $totalExpenses = $cogs + $totalSalary + $fixedCost + $wasteCost;
         $costDistribution = [
             [
-                'category' => 'HPP Bahan (COGS)',
+                'category' => 'HPP Bahan Kulit & Sol (COGS)',
                 'amount' => $cogs,
                 'percentage' => $totalExpenses > 0 ? round(($cogs / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Gaji Karyawan (4 Staff)',
+                'category' => 'Upah 5 Pengrajin Sepatu',
                 'amount' => $totalSalary,
                 'percentage' => $totalExpenses > 0 ? round(($totalSalary / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Sewa Toko & Operasional',
+                'category' => 'Sewa Bengkel Workshop & Listrik',
                 'amount' => $fixedCost,
                 'percentage' => $totalExpenses > 0 ? round(($fixedCost / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Kerugian Limbah (Waste)',
+                'category' => 'Kerugian Limbah & Reject Kulit (Waste)',
                 'amount' => $wasteCost,
                 'percentage' => $totalExpenses > 0 ? round(($wasteCost / $totalExpenses) * 100, 1) : 0.0,
             ],
         ];
 
-        // 6. Intelligent Health & Risk Alerts
+        // 6. Intelligent Health & Risk Alerts (Sepatu & Sandal Kulit Context)
         $lowStockProducts = Product::where('is_active', true)
             ->whereColumn('current_stock', '<=', 'min_stock_alert')
             ->pluck('name')
@@ -137,29 +140,29 @@ class DashboardController extends Controller
         if (! empty($lowStockProducts)) {
             $alerts[] = [
                 'type' => 'warning',
-                'title' => 'Stok Mendekati Habis',
-                'message' => 'Produk '.implode(', ', array_slice($lowStockProducts, 0, 3)).' sudah menyentuh batas minimum stok alert.',
+                'title' => 'Stok Model Sepatu/Sandal Menipis',
+                'message' => 'Produk '.implode(', ', array_slice($lowStockProducts, 0, 3)).' sudah menyentuh batas minimum stok alert. Jadwalkan antrian produksi workshop.',
             ];
         }
 
         if ($wasteCost > 0) {
             $alerts[] = [
                 'type' => 'risk',
-                'title' => 'Peringatan Kebocoran Waste',
-                'message' => 'Terjadi kerugian bahan senilai Rp '.number_format($wasteCost, 0, ',', '.').' ('.$wasteCount.' unit produk pastry terbuang). Evaluasi batas kedaluwarsa etalase.',
+                'title' => 'Peringatan Reject QC & Kerugian Bahan',
+                'message' => 'Terjadi kerugian bahan senilai Rp '.number_format($wasteCost, 0, ',', '.').' ('.$wasteCount.' pasang/pcs reject lasting, cacat lem sol, atau kerusakan kulit). Evaluasi proses penarikan upper dan suhu oven lem.',
             ];
         }
 
         $alerts[] = [
             'type' => 'negotiation',
-            'title' => 'Proteksi Margin Negosiasi',
-            'message' => 'Rata-rata diskon kasir tercatat '.$discountRate.'% dengan margin kotor '.$profitMargin.'%. Pertahankan toleransi diskon di bawah 10%.',
+            'title' => 'Disiplin Margin Negosiasi (Deal Price)',
+            'message' => 'Rata-rata diskon negosiasi pesanan grosir tercatat '.$discountRate.'% dengan margin kotor '.$profitMargin.'%. Pertahankan toleransi diskon grosir di bawah 15% untuk menjaga laba pengrajin.',
         ];
 
         $alerts[] = [
             'type' => 'target',
-            'title' => 'Target Impas (BEP) Operasional',
-            'message' => 'Untuk menutup biaya operasional bulanan (Rp '.number_format($totalFixedOpex, 0, ',', '.').'), target omzet impas adalah Rp '.number_format($bepRevenue, 0, ',', '.').'.',
+            'title' => 'Target Impas (BEP) Produksi Workshop',
+            'message' => 'Untuk menutup upah pengrajin dan sewa bengkel (Rp '.number_format($totalFixedOpex, 0, ',', '.').'/bulan), target omzet minimum impas adalah Rp '.number_format($bepRevenue, 0, ',', '.').'.',
         ];
 
         // 7. All Transactions for Detailed Ledger Modal
@@ -167,22 +170,24 @@ class DashboardController extends Controller
             ->latest('transaction_date')
             ->get()
             ->map(function ($tx) {
-                $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.')')->implode(', ');
-                $primaryCategory = $tx->transactionItems->first()?->product?->category ?? 'Beverage';
+                $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.' '.($it->product->unit ?? 'pasang').')')->implode(', ');
+                $primaryCategory = $tx->transactionItems->first()?->product?->category ?? 'Sepatu Pria';
                 $discountPct = $tx->total_amount > 0 ? round(($tx->total_discount / $tx->total_amount) * 100, 1) : 0.0;
 
                 return [
                     'id' => $tx->id,
                     'invoice_number' => $tx->invoice_number,
                     'date' => $tx->transaction_date?->format('d M Y · H:i'),
-                    'sales_person' => $tx->sales_person_name ?? 'Staff',
+                    'customer_name' => $tx->customer_name ?? 'Pelanggan Showroom',
+                    'sales_person' => $tx->sales_person_name ?? 'Staff Workshop',
+                    'payment_method' => $tx->payment_method ?? 'Transfer Bank',
                     'primary_category' => $primaryCategory,
                     'items' => $itemNames,
                     'total_amount' => (float) $tx->total_amount,
                     'total_discount' => (float) $tx->total_discount,
                     'net_amount' => (float) $tx->net_amount,
                     'discount_percent' => $discountPct,
-                    'status' => $discountPct === 0.0 ? 'normal' : ($discountPct <= 8.0 ? 'safe' : 'warning'),
+                    'status' => $discountPct === 0.0 ? 'normal' : ($discountPct <= 10.0 ? 'safe' : 'warning'),
                 ];
             });
 
@@ -194,10 +199,10 @@ class DashboardController extends Controller
             ->map(fn ($name, $idx) => [
                 'id' => $idx + 1,
                 'name' => $name,
-                'role' => 'Kasir / Sales Barista',
+                'role' => 'Sales Pengrajin & Toko',
             ]);
 
-        // 9. Top Selling Products
+        // 9. Top Selling Shoe & Sandal Models
         $topProducts = TransactionItem::select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
             ->with('product')
             ->groupBy('product_id')
@@ -205,8 +210,10 @@ class DashboardController extends Controller
             ->take(5)
             ->get()
             ->map(fn ($item) => [
-                'name' => $item->product?->name ?? 'Produk',
-                'category' => $item->product?->category ?? 'General',
+                'name' => $item->product?->name ?? 'Produk Kulit',
+                'sku' => $item->product?->sku ?? '-',
+                'category' => $item->product?->category ?? 'Sepatu Pria',
+                'unit' => $item->product?->unit ?? 'pasang',
                 'quantity' => (int) $item->total_qty,
                 'sales' => (float) $item->total_sales,
             ]);
@@ -233,9 +240,11 @@ class DashboardController extends Controller
             ->get()
             ->map(fn ($m) => [
                 'id' => $m->id,
-                'product_name' => $m->product?->name ?? 'Produk',
+                'product_name' => $m->product?->name ?? 'Produk Kulit',
+                'product_sku' => $m->product?->sku ?? '-',
                 'type' => $m->type,
                 'quantity' => (int) $m->quantity,
+                'unit' => $m->product?->unit ?? 'pasang',
                 'date' => $m->movement_date?->format('d M Y') ?? (string) $m->movement_date,
                 'notes' => $m->notes,
             ]);
@@ -244,20 +253,24 @@ class DashboardController extends Controller
             ->join('products', 'stock_movements.product_id', '=', 'products.id')
             ->select(
                 'products.name',
+                'products.sku',
                 'products.category',
+                'products.unit',
                 DB::raw('SUM(stock_movements.quantity) as waste_qty'),
                 DB::raw('SUM(stock_movements.quantity * products.cost_price) as waste_loss')
             )
-            ->groupBy('products.name', 'products.category')
+            ->groupBy('products.name', 'products.sku', 'products.category', 'products.unit')
             ->get()
             ->map(fn ($w) => [
                 'name' => $w->name,
+                'sku' => $w->sku,
                 'category' => $w->category,
                 'quantity' => (int) $w->waste_qty,
+                'unit' => $w->unit ?? 'pasang',
                 'loss' => (float) $w->waste_loss,
             ]);
 
-        // 12. Staff Cashier Performance Metrics
+        // 12. Staff Sales Performance Metrics
         $staffPerformance = Transaction::select(
             'sales_person_name',
             DB::raw('COUNT(*) as total_transactions'),
@@ -275,11 +288,11 @@ class DashboardController extends Controller
                 'avg_discount' => (float) $s->avg_discount_pct,
             ]);
 
-        // 13. Dynamic Business Health Score Algorithm (Margin + Waste + Discount Discipline)
-        $marginPoints = min(40, max(0, ($profitMargin / 60) * 40));
+        // 13. Dynamic Business Health Score Algorithm for Leathercraft Workshop
+        $marginPoints = min(40, max(0, ($profitMargin / 55) * 40));
         $wasteRatio = $netRevenue > 0 ? ($wasteCost / $netRevenue) * 100 : 0.0;
-        $wastePoints = $wasteRatio <= 2.0 ? 30 : max(0, 30 - (($wasteRatio - 2.0) * 5));
-        $discountPoints = $discountRate <= 5.0 ? 30 : max(0, 30 - (($discountRate - 5.0) * 3));
+        $wastePoints = $wasteRatio <= 2.5 ? 30 : max(0, 30 - (($wasteRatio - 2.5) * 5));
+        $discountPoints = $discountRate <= 10.0 ? 30 : max(0, 30 - (($discountRate - 10.0) * 2));
         $healthScoreValue = (int) round($marginPoints + $wastePoints + $discountPoints);
 
         $grade = match (true) {
@@ -290,12 +303,13 @@ class DashboardController extends Controller
             default => 'C',
         };
         $healthStatus = match (true) {
-            $healthScoreValue >= 85 => 'Stabilitas Finansial Sangat Sehat',
-            $healthScoreValue >= 70 => 'Stabilitas Finansial Cukup Terjaga',
-            default => 'Perlu Pengawasan Biaya & Diskon',
+            $healthScoreValue >= 85 => 'Stabilitas Finansial Workshop Sangat Sehat',
+            $healthScoreValue >= 70 => 'Kinerja Produksi & Penjualan Terjaga',
+            default => 'Perlu Evaluasi Waste Reject & Diskon Negosiasi',
         };
 
         return Inertia::render('Dashboard/Index', [
+            'workshopName' => $setting->workshop_name ?? 'OptimaBiz Leathercraft & Shoes',
             'kpis' => [
                 'netRevenue' => $netRevenue,
                 'grossRevenue' => $grossRevenue,
@@ -313,7 +327,7 @@ class DashboardController extends Controller
                 'soldUnits' => $totalItemsSold,
                 'maxCapacity' => $maxCapacity,
                 'usagePercent' => $capacityUsagePercent,
-                'status' => $capacityUsagePercent > 85 ? 'Kritis / Mendekati Beban Puncak' : 'Optimal & Terkendali',
+                'status' => $capacityUsagePercent > 85 ? 'Kritis / Mendekati Kapasitas Puncak Workshop' : 'Optimal & Terkendali',
             ],
             'categorySales' => $categorySales,
             'costDistribution' => $costDistribution,

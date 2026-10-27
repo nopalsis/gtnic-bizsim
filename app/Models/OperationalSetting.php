@@ -17,6 +17,7 @@ class OperationalSetting extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'workshop_name',
         'employee_count',
         'salary_per_employee',
         'monthly_fixed_cost',

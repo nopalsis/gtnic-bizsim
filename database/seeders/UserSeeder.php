@@ -14,19 +14,19 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@gtnic.test'],
+            ['email' => 'owner@optimabiz.test'],
             [
-                'name' => 'Admin GTNIC',
+                'name' => 'Pemilik Workshop OptimaBiz',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );
 
         $staffMembers = [
-            ['name' => 'Budi Santoso', 'email' => 'budi@gtnic.test'],
-            ['name' => 'Siti Rahmawati', 'email' => 'siti@gtnic.test'],
-            ['name' => 'Fajar Nugraha', 'email' => 'fajar@gtnic.test'],
-            ['name' => 'Dewi Lestari', 'email' => 'dewi@gtnic.test'],
+            ['name' => 'Kang Asep (Sales Pengrajin)', 'email' => 'asep@optimabiz.test'],
+            ['name' => 'Pak Bambang (Workshop Head)', 'email' => 'bambang@optimabiz.test'],
+            ['name' => 'Rian (Wholesale & Store)', 'email' => 'rian@optimabiz.test'],
+            ['name' => 'Siti (Admin Toko & Reseller)', 'email' => 'siti@optimabiz.test'],
         ];
 
         foreach ($staffMembers as $staff) {

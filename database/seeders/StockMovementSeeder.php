@@ -19,12 +19,22 @@ class StockMovementSeeder extends Seeder
 
         $products = Product::all();
 
-        foreach ($products as $product) {
+        $wasteNotesPool = [
+            'Reject QC: kulit sobek saat penarikan cetakan kayu (lasting)',
+            'Cacat lem: sol terkelupas akibat suhu oven pemanas tidak stabil',
+            'Kulit berkerut parah & serat pecah saat proses pengeleman upper',
+            'Bercak jamur pada lembaran kulit akibat kelembapan gudang workshop',
+            'Reject jahitan: jarum mesin jahit patah & merusak tekstur kulit finish',
+            'Goresan pisau seset terlalu dalam pada material kulit pull-up',
+        ];
+
+        foreach ($products as $index => $product) {
+            // 1. Stok Awal Setup Sistem
             StockMovement::firstOrCreate(
                 [
                     'product_id' => $product->id,
                     'type' => 'in',
-                    'notes' => 'Stok awal setup sistem',
+                    'notes' => 'Stok awal setup sistem bengkel sepatu & sandal',
                 ],
                 [
                     'quantity' => $product->current_stock,
@@ -32,42 +42,48 @@ class StockMovementSeeder extends Seeder
                 ]
             );
 
+            // 2. Produksi Masuk Tambahan dari Workshop Pengrajin
             StockMovement::firstOrCreate(
                 [
                     'product_id' => $product->id,
                     'type' => 'in',
-                    'notes' => 'Pengadaan stok dari supplier utama',
+                    'notes' => 'Batch produksi selesai dari workshop pengrajin',
                 ],
                 [
-                    'quantity' => 25,
-                    'movement_date' => now()->subDays(14)->toDateString(),
+                    'quantity' => rand(8, 20),
+                    'movement_date' => now()->subDays(rand(10, 20))->toDateString(),
                 ]
             );
 
-            if ($product->category === 'Food') {
+            // 3. Catatan Waste / Reject Produksi pada Sebagian Produk Sepatu & Sandal
+            if ($index % 2 === 0) {
+                $noteIndex = $index % count($wasteNotesPool);
+                $wasteQty = ($product->category === 'Sepatu Pria' || $product->category === 'Sepatu Wanita') ? rand(1, 2) : rand(1, 3);
+
                 StockMovement::firstOrCreate(
                     [
                         'product_id' => $product->id,
                         'type' => 'waste',
-                        'notes' => 'Produk melewati batas kedaluwarsa',
+                        'notes' => $wasteNotesPool[$noteIndex],
                     ],
                     [
-                        'quantity' => 2,
-                        'movement_date' => now()->subDays(5)->toDateString(),
+                        'quantity' => $wasteQty,
+                        'movement_date' => now()->subDays(rand(2, 12))->toDateString(),
                     ]
                 );
             }
 
-            if ($product->id % 3 === 0) {
+            // 4. Koreksi Stock Opname Berkala
+            if ($index % 4 === 0) {
                 StockMovement::firstOrCreate(
                     [
                         'product_id' => $product->id,
                         'type' => 'adjustment',
-                        'notes' => 'Koreksi hasil stock opname berkala',
+                        'notes' => 'Koreksi hasil stock opname fisik gudang & showroom',
                     ],
                     [
                         'quantity' => 1,
-                        'movement_date' => now()->subDays(2)->toDateString(),
+                        'movement_date' => now()->subDays(rand(1, 5))->toDateString(),
                     ]
                 );
             }

@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table): void {
             $table->id();
+            $table->string('sku')->unique()->nullable();
             $table->string('name');
             $table->string('category');
+            $table->string('unit')->default('pasang');
             $table->decimal('base_price', 12, 2);
             $table->decimal('cost_price', 12, 2);
             $table->integer('current_stock')->default(0);
-            $table->integer('min_stock_alert')->default(10);
+            $table->integer('min_stock_alert')->default(5);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

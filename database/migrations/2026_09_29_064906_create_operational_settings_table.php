@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('operational_settings', function (Blueprint $table): void {
             $table->id();
-            $table->integer('employee_count')->default(2);
-            $table->decimal('salary_per_employee', 12, 2)->default(2500000);
-            $table->decimal('monthly_fixed_cost', 14, 2)->default(3000000);
-            $table->integer('monthly_max_capacity')->default(4000);
+            $table->string('workshop_name')->default('OptimaBiz Leathercraft & Shoes');
+            $table->integer('employee_count')->default(5);
+            $table->decimal('salary_per_employee', 12, 2)->default(3200000);
+            $table->decimal('monthly_fixed_cost', 14, 2)->default(6500000);
+            $table->integer('monthly_max_capacity')->default(500);
             $table->timestamps();
         });
     }

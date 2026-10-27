@@ -28,30 +28,49 @@ class TransactionItemSeeder extends Seeder
             return;
         }
 
-        foreach ($transactions as $transaction) {
+        foreach ($transactions as $index => $transaction) {
             if ($transaction->transactionItems()->exists()) {
                 continue;
             }
 
-            $itemCount = rand(1, min(4, $products->count()));
-            $selectedProducts = $products->random($itemCount);
+            // Apakah pesanan partai/wholesale atau eceran/retail
+            $isWholesale = str_contains($transaction->customer_name, 'Toko') ||
+                           str_contains($transaction->customer_name, 'Distributor') ||
+                           str_contains($transaction->customer_name, 'CV') ||
+                           str_contains($transaction->customer_name, 'Boutique');
+
+            // Ambil 1 sampai 3 jenis produk berbeda per transaksi
+            $itemCount = $isWholesale ? rand(2, 4) : rand(1, 2);
+            $selectedProducts = $products->random(min($itemCount, $products->count()));
 
             $totalAmount = 0.0;
             $totalDiscount = 0.0;
             $netAmount = 0.0;
 
             foreach ($selectedProducts as $product) {
-                $qty = rand(1, 3);
+                // Kuantitas: wholesale 3-8 pasang, retail 1-2 pasang
+                $qty = $isWholesale ? rand(3, 8) : rand(1, 2);
                 $basePrice = (float) $product->base_price;
                 $costPrice = (float) $product->cost_price;
 
-                $hasDiscount = (rand(1, 100) <= 25);
-                $discountPerUnit = $hasDiscount ? round(($basePrice * rand(5, 10) / 100) / 500) * 500 : 0.0;
-                $dealPrice = $basePrice - $discountPerUnit;
+                // Negosiasi Harga (Deal Price):
+                // Jika wholesale: diskon berkisar 10% - 18% dari base price
+                // Jika retail: diskon berkisar 0% - 8% (kadang tawar, kadang pas)
+                $discountPercent = $isWholesale ? rand(10, 18) : (rand(1, 100) <= 40 ? rand(5, 8) : 0);
+                $discountPerUnit = round(($basePrice * $discountPercent / 100) / 1000) * 1000;
+                $dealPrice = max($costPrice * 1.15, $basePrice - $discountPerUnit); // Pastikan tetap di atas HPP
 
+                $effectiveDiscountPerUnit = $basePrice - $dealPrice;
                 $itemSubtotal = $dealPrice * $qty;
                 $itemGross = $basePrice * $qty;
-                $itemDiscountTotal = $discountPerUnit * $qty;
+                $itemDiscountTotal = $effectiveDiscountPerUnit * $qty;
+
+                $notes = null;
+                if ($effectiveDiscountPerUnit > 0) {
+                    $notes = $isWholesale
+                        ? 'Diskon negosiasi partai grosir (potongan Rp '.number_format($effectiveDiscountPerUnit, 0, ',', '.').'/'.$product->unit.')'
+                        : 'Diskon promo showroom / tawar langsung';
+                }
 
                 TransactionItem::create([
                     'transaction_id' => $transaction->id,
@@ -61,6 +80,7 @@ class TransactionItemSeeder extends Seeder
                     'deal_price' => $dealPrice,
                     'cost_price' => $costPrice,
                     'subtotal' => $itemSubtotal,
+                    'notes' => $notes,
                 ]);
 
                 $totalAmount += $itemGross;
