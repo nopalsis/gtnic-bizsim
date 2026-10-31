@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SimulatorController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -26,3 +27,10 @@ Route::post('/inventory/in', [InventoryController::class, 'recordProductionIn'])
 // 4. What-If Scenario Simulator
 Route::get('/simulator', [SimulatorController::class, 'index'])->name('simulator.index');
 Route::post('/simulator/settings', [SimulatorController::class, 'updateSettings'])->name('simulator.settings');
+
+// 5. Team & User Management (Staff Directory)
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
+Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+Route::get('/users/export', [UserController::class, 'exportCsv'])->name('users.export');

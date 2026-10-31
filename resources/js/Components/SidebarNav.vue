@@ -37,6 +37,21 @@ defineProps({
                 <span class="sr-only">Dashboard</span>
             </Link>
 
+            <!-- 5. Team & User Management -->
+            <Link
+                href="/users"
+                :class="[
+                    'w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer relative group',
+                    active === 'users' ? 'bg-[#262822] text-[#c6ef4e] shadow-inner' : 'text-[#828876] hover:text-white hover:bg-[#1a1c17]'
+                ]"
+                title="Team & User Management"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span class="sr-only">Users & Team</span>
+            </Link>
+
             <!-- 2. Sales Intelligence & History -->
             <Link
                 href="/sales"
@@ -81,6 +96,8 @@ defineProps({
                 </svg>
                 <span class="sr-only">Simulator</span>
             </Link>
+
+            
         </nav>
 
         <!-- Bottom Status Indicator -->
