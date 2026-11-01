@@ -32,5 +32,6 @@ Route::post('/simulator/settings', [SimulatorController::class, 'updateSettings'
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::post('/users', [UserController::class, 'store'])->name('users.store');
 Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 Route::get('/users/export', [UserController::class, 'exportCsv'])->name('users.export');
