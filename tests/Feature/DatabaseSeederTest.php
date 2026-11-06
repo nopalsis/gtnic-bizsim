@@ -20,7 +20,7 @@ class DatabaseSeederTest extends TestCase
         $this->seed();
 
         $this->assertDatabaseHas('users', [
-            'email' => 'admin@gtnic.test',
+            'email' => 'owner@optimabiz.test',
         ]);
         $this->assertGreaterThanOrEqual(5, User::count());
 

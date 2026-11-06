@@ -133,7 +133,7 @@ const toggleUserStatus = (user) => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Cari nama staf, email, nomor WA, atau bank..."
+                    placeholder="Cari nama staf, email, atau nomor WA..."
                     class="w-full pl-10 pr-9 py-2.5 bg-[#f4f4ed] rounded-full text-xs md:text-sm text-[#0e0f0c] placeholder:text-[#868b7d] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0e0f0c] transition-all"
                     @input="currentPage = 1"
                 />
@@ -149,7 +149,7 @@ const toggleUserStatus = (user) => {
 
             <!-- Toolbar Controls & Counter -->
             <div class="flex items-center gap-3">
-                <span class="px-3.5 py-1.5 rounded-full bg-[#eeeee7] text-[#0e0f0c] font-label text-xs font-semibold select-none">
+                <span class="px-3.5 py-1.5 rounded-full bg-[#eeeee7] text-[#0e0f0c] text-xs font-semibold select-none">
                     Total {{ filteredUsers.length }} Staf
                 </span>
 
@@ -181,17 +181,17 @@ const toggleUserStatus = (user) => {
         <div class="overflow-x-auto -mx-5 md:-mx-6 px-5 md:px-6 mt-2">
             <table class="w-full text-left align-middle border-collapse">
                 <thead>
-                    <tr class="bg-[#f4f4ed]/80 text-[#4c4546] rounded-2xl select-none">
-                        <th class="py-3 px-4 font-label text-xs font-semibold rounded-l-2xl">Nama & Email</th>
-                        <th class="py-3 px-3 font-label text-xs font-semibold">Role</th>
-                        <th class="py-3 px-3 font-label text-xs font-semibold">Kontak / WA</th>
-                        <th class="py-3 px-3 font-label text-xs font-semibold">Performa Bulan Ini</th>
-                        <th class="py-3 px-3 font-label text-xs font-semibold text-center">Status</th>
-                        <th class="py-3 px-4 font-label text-xs font-semibold text-right rounded-r-2xl">Aksi</th>
+                    <tr class="bg-[#f4f4ed]/80 text-[#4c4546] rounded-2xl select-none text-xs font-semibold">
+                        <th class="py-3 px-4 rounded-l-2xl">Nama & Email</th>
+                        <th class="py-3 px-3">Role</th>
+                        <th class="py-3 px-3">Kontak / WA</th>
+                        <th class="py-3 px-3">Performa Bulan Ini</th>
+                        <th class="py-3 px-3 text-center">Status</th>
+                        <th class="py-3 px-4 text-right rounded-r-2xl">Aksi</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y-0 text-[#0e0f0c]">
+                <tbody class="divide-y-0 text-[#0e0f0c] text-xs">
                     <tr
                         v-for="user in paginatedUsers"
                         :key="user.id"
@@ -202,7 +202,7 @@ const toggleUserStatus = (user) => {
                             <div class="flex items-center gap-3">
                                 <div
                                     :class="[
-                                        'w-10 h-10 rounded-full flex items-center justify-center font-headline text-xs font-bold flex-shrink-0 select-none shadow-xs',
+                                        'w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 select-none shadow-xs',
                                         user.role === 'admin'
                                             ? 'bg-[#0e0f0c] text-[#c6ef4e]'
                                             : (user.role === 'sales' ? 'bg-[#c9f250]/40 text-[#3b4d00]' : 'bg-[#eeeee7] text-[#0e0f0c]')
@@ -211,10 +211,10 @@ const toggleUserStatus = (user) => {
                                     {{ getInitials(user.name) }}
                                 </div>
                                 <div class="min-w-0">
-                                    <div class="font-headline text-sm font-semibold text-[#0e0f0c] tracking-tight truncate max-w-[180px]">
+                                    <div class="text-sm font-semibold text-[#0e0f0c] tracking-tight truncate max-w-[180px]">
                                         {{ user.name }}
                                     </div>
-                                    <div class="font-body text-xs text-[#868b7d] truncate max-w-[180px]">
+                                    <div class="text-xs text-[#868b7d] truncate max-w-[180px]">
                                         {{ user.email }}
                                     </div>
                                 </div>
@@ -225,7 +225,7 @@ const toggleUserStatus = (user) => {
                         <td class="py-3.5 px-3 whitespace-nowrap">
                             <span
                                 v-if="user.role === 'admin'"
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0e0f0c] text-white font-label text-[11px] font-bold shadow-xs"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0e0f0c] text-white text-[11px] font-bold shadow-xs"
                             >
                                 <span class="material-symbols-outlined text-xs text-[#c6ef4e]">admin_panel_settings</span>
                                 Admin
@@ -233,7 +233,7 @@ const toggleUserStatus = (user) => {
 
                             <span
                                 v-else-if="user.role === 'sales'"
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#c9f250]/40 text-[#3b4d00] font-label text-[11px] font-bold"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#c9f250]/40 text-[#3b4d00] text-[11px] font-bold"
                             >
                                 <span class="material-symbols-outlined text-xs text-[#506600]">point_of_sale</span>
                                 Sales Force
@@ -241,7 +241,7 @@ const toggleUserStatus = (user) => {
 
                             <span
                                 v-else
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#eeeee7] text-[#1a1c18] font-label text-[11px] font-semibold"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#eeeee7] text-[#1a1c18] text-[11px] font-semibold"
                             >
                                 <span class="material-symbols-outlined text-xs text-[#868b7d]">precision_manufacturing</span>
                                 Pengrajin
@@ -249,7 +249,7 @@ const toggleUserStatus = (user) => {
                         </td>
 
                         <!-- Kolom 3: Kontak & WA -->
-                        <td class="py-3.5 px-3 font-body text-xs text-[#0e0f0c] whitespace-nowrap">
+                        <td class="py-3.5 px-3 text-xs text-[#0e0f0c] whitespace-nowrap">
                             <div class="flex items-center gap-1.5">
                                 <span>{{ user.phone || '-' }}</span>
                                 <a
@@ -268,26 +268,26 @@ const toggleUserStatus = (user) => {
                         <td class="py-3.5 px-3 whitespace-nowrap">
                             <!-- Sales Snippet -->
                             <div v-if="user.role === 'sales'" class="flex flex-col">
-                                <span class="font-headline text-xs font-bold text-[#0e0f0c]">
+                                <span class="text-xs font-bold text-[#0e0f0c]">
                                     {{ user.performance?.monthly_deals || 0 }} Deals
                                 </span>
-                                <span class="font-body text-[10px] text-[#506600] font-semibold">
+                                <span class="text-[10px] text-[#506600] font-semibold">
                                     {{ formatRupiah(user.performance?.monthly_revenue || 0) }}
                                 </span>
                             </div>
 
                             <!-- Craftsman Snippet -->
                             <div v-else-if="user.role === 'craftsman'" class="flex flex-col">
-                                <span class="font-headline text-xs font-bold text-[#0e0f0c]">
+                                <span class="text-xs font-bold text-[#0e0f0c]">
                                     {{ user.performance?.pairs_completed || 0 }} Pasang Selesai
                                 </span>
-                                <span class="font-body text-[10px] text-amber-700">
+                                <span class="text-[10px] text-amber-700">
                                     {{ user.performance?.waste_logged || 0 }} waste log
                                 </span>
                             </div>
 
                             <!-- Admin Snippet -->
-                            <div v-else class="text-xs font-body text-[#868b7d]">
+                            <div v-else class="text-xs text-[#868b7d]">
                                 Operasional & Sistem
                             </div>
                         </td>
@@ -298,7 +298,7 @@ const toggleUserStatus = (user) => {
                                 type="button"
                                 @click="toggleUserStatus(user)"
                                 :class="[
-                                    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-label text-[11px] font-bold transition-all cursor-pointer select-none',
+                                    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer select-none',
                                     user.is_active
                                         ? 'bg-[#c9f250]/40 text-[#3b4d00] hover:bg-[#c9f250]/60'
                                         : 'bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffdad6]/80'
@@ -321,7 +321,7 @@ const toggleUserStatus = (user) => {
                                 <button
                                     type="button"
                                     @click="emit('openDetail', user)"
-                                    class="px-3 py-1.5 rounded-full bg-[#0e0f0c] hover:bg-[#20221c] text-white font-label text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 shadow-xs"
+                                    class="px-3 py-1.5 rounded-full bg-[#0e0f0c] hover:bg-[#20221c] text-white text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 shadow-xs"
                                 >
                                     <span class="material-symbols-outlined text-xs text-[#c6ef4e]">tune</span>
                                     <span>Payroll & Detail</span>
@@ -341,10 +341,10 @@ const toggleUserStatus = (user) => {
 
                     <!-- Empty State -->
                     <tr v-if="filteredUsers.length === 0">
-                        <td colspan="7" class="py-12 text-center text-[#868b7d]">
+                        <td colspan="6" class="py-12 text-center text-[#868b7d]">
                             <div class="flex flex-col items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-4xl text-neutral-400">group_off</span>
-                                <p class="font-body text-sm font-medium text-neutral-600">Tidak ada staf yang sesuai dengan kriteria filter.</p>
+                                <p class="text-sm font-medium text-neutral-600">Tidak ada staf yang sesuai dengan kriteria filter.</p>
                                 <button
                                     type="button"
                                     @click="searchQuery = ''; statusFilter = 'all'"
@@ -361,7 +361,7 @@ const toggleUserStatus = (user) => {
 
         <!-- Pagination Bar -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 mt-2 border-t border-[#f4f4ed]">
-            <span class="font-body text-xs text-[#868b7d]">
+            <span class="text-xs text-[#868b7d]">
                 Menampilkan <span class="font-bold text-[#0e0f0c]">{{ showingStart }}-{{ showingEnd }}</span> dari
                 <span class="font-bold text-[#0e0f0c]">{{ filteredUsers.length }}</span> staf
             </span>
@@ -371,7 +371,7 @@ const toggleUserStatus = (user) => {
                     type="button"
                     @click="goToPage(currentPage - 1)"
                     :disabled="currentPage <= 1"
-                    class="px-3 py-1.5 rounded-full bg-[#f4f4ed] text-[#4c4546] hover:text-[#0e0f0c] font-label text-xs font-medium cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    class="px-3 py-1.5 rounded-full bg-[#f4f4ed] text-[#4c4546] hover:text-[#0e0f0c] text-xs font-medium cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                     Sebelumnya
                 </button>
@@ -382,7 +382,7 @@ const toggleUserStatus = (user) => {
                     type="button"
                     @click="goToPage(page)"
                     :class="[
-                        'w-8 h-8 rounded-full font-label text-xs font-bold flex items-center justify-center transition cursor-pointer',
+                        'w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer',
                         currentPage === page
                             ? 'bg-[#0e0f0c] text-white shadow-xs'
                             : 'bg-[#f4f4ed] text-[#0e0f0c] hover:bg-[#e8e9e2]'
@@ -395,7 +395,7 @@ const toggleUserStatus = (user) => {
                     type="button"
                     @click="goToPage(currentPage + 1)"
                     :disabled="currentPage >= totalPages"
-                    class="px-3 py-1.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] hover:bg-[#e8e9e2] font-label text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    class="px-3 py-1.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] hover:bg-[#e8e9e2] text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                     Selanjutnya
                 </button>

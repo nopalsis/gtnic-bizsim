@@ -118,7 +118,7 @@ const handleExport = () => {
                             class="hover:bg-[#fafbf7] transition-colors"
                         >
                             <td class="py-3 px-3">
-                                <div class="font-mono font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</div>
+                                <div class="font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</div>
                                 <div class="text-[10px] text-neutral-400">{{ tx.date }}</div>
                             </td>
                             <td class="py-3 px-3">
@@ -141,7 +141,7 @@ const handleExport = () => {
                                     {{ tx.discount_percent === 0 ? 'Normal' : `Diskon ${tx.discount_percent}%` }}
                                 </span>
                             </td>
-                            <td class="py-3 px-3 text-right font-mono font-black text-[#0e0f0c] tabular-nums">
+                            <td class="py-3 px-3 text-right font-black text-[#0e0f0c]">
                                 {{ formatRupiah(tx.net_amount) }}
                             </td>
                         </tr>

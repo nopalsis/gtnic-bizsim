@@ -285,6 +285,84 @@ class ProductSeeder extends Seeder
                 'min_stock_alert' => 10,
                 'is_active' => true,
             ],
+
+            // ==========================================
+            // Kategori: Bahan Baku Kulit (Raw Leather Hides)
+            // ==========================================
+            [
+                'sku' => 'RAW-LEA-001',
+                'name' => 'Kulit Nabati Tan Natural A-Grade',
+                'category' => 'Bahan Baku Kulit',
+                'unit' => 'sq ft',
+                'base_price' => 45000.00,
+                'cost_price' => 38000.00,
+                'current_stock' => 120,
+                'min_stock_alert' => 50,
+                'is_active' => true,
+            ],
+            [
+                'sku' => 'RAW-LEA-009',
+                'name' => 'Kulit Crazy Horse Antique',
+                'category' => 'Bahan Baku Kulit',
+                'unit' => 'sq ft',
+                'base_price' => 52000.00,
+                'cost_price' => 44000.00,
+                'current_stock' => 65,
+                'min_stock_alert' => 30,
+                'is_active' => true,
+            ],
+            [
+                'sku' => 'RAW-LEA-015',
+                'name' => 'Kulit Pull-Up Dark Brown 5-6oz',
+                'category' => 'Bahan Baku Kulit',
+                'unit' => 'sq ft',
+                'base_price' => 50000.00,
+                'cost_price' => 42000.00,
+                'current_stock' => 18,
+                'min_stock_alert' => 25,
+                'is_active' => true,
+            ],
+
+            // ==========================================
+            // Kategori: Komponen Sol & Hak (Shoe Soles)
+            // ==========================================
+            [
+                'sku' => 'CMP-SOL-004',
+                'name' => 'Sol Karet Dainite Import',
+                'category' => 'Komponen Sol',
+                'unit' => 'pasang',
+                'base_price' => 210000.00,
+                'cost_price' => 165000.00,
+                'current_stock' => 3,
+                'min_stock_alert' => 15,
+                'is_active' => true,
+            ],
+            [
+                'sku' => 'CMP-SOL-008',
+                'name' => 'Sol Karet Vibram Lugged',
+                'category' => 'Komponen Sol',
+                'unit' => 'pasang',
+                'base_price' => 250000.00,
+                'cost_price' => 195000.00,
+                'current_stock' => 4,
+                'min_stock_alert' => 12,
+                'is_active' => true,
+            ],
+
+            // ==========================================
+            // Kategori: Bahan Pendukung (Chemicals & Glue)
+            // ==========================================
+            [
+                'sku' => 'SUP-CHM-002',
+                'name' => 'Lem Sepatu Super Bond 500ml',
+                'category' => 'Bahan Pendukung',
+                'unit' => 'kaleng',
+                'base_price' => 55000.00,
+                'cost_price' => 45000.00,
+                'current_stock' => 2,
+                'min_stock_alert' => 10,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($products as $item) {

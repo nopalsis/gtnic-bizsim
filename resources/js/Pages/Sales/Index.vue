@@ -236,7 +236,7 @@ const submitOrder = () => {
                                 class="hover:bg-[#fafbf7] transition-colors"
                             >
                                 <td class="py-3 px-3">
-                                    <div class="font-mono font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</div>
+                                    <div class="font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</div>
                                     <div class="text-[10px] text-neutral-400">{{ tx.transaction_date }}</div>
                                 </td>
                                 <td class="py-3 px-3 font-bold text-[#0e0f0c]">
@@ -260,7 +260,7 @@ const submitOrder = () => {
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-3 px-3 text-right font-mono text-neutral-500 tabular-nums">
+                                <td class="py-3 px-3 text-right text-neutral-500">
                                     {{ formatRupiah(tx.total_amount) }}
                                 </td>
                                 <td class="py-3 px-3 text-center">
@@ -277,7 +277,7 @@ const submitOrder = () => {
                                         {{ tx.discount_percent === 0 ? 'Harga Normal' : `Diskon ${tx.discount_percent}% (${formatRupiah(tx.total_discount)})` }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-3 text-right font-mono font-black text-[#0e0f0c] tabular-nums">
+                                <td class="py-3 px-3 text-right font-black text-[#0e0f0c]">
                                     {{ formatRupiah(tx.net_amount) }}
                                 </td>
                             </tr>

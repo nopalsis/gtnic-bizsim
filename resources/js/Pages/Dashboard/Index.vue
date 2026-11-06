@@ -399,14 +399,14 @@ const bezierPathD = computed(() => {
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-1.5">
-                                            <span class="text-[9px] font-mono font-bold text-neutral-400">{{ prod.sku }}</span>
+                                            <span class="text-[9px] font-bold text-neutral-400">{{ prod.sku }}</span>
                                             <h4 class="text-xs font-bold text-[#0e0f0c]">{{ prod.name }}</h4>
                                         </div>
                                         <span class="text-[10px] text-neutral-400 font-medium">{{ prod.category }}</span>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs font-black text-[#0e0f0c] tabular-nums">{{ formatRupiah(prod.sales) }}</div>
+                                    <div class="text-xs font-black text-[#0e0f0c]">{{ formatRupiah(prod.sales) }}</div>
                                     <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
                                         {{ prod.quantity }} {{ prod.unit || 'pasang' }} terjual
                                     </span>
@@ -423,14 +423,14 @@ const bezierPathD = computed(() => {
                             >
                                 <div class="min-w-0 flex-1 mr-3">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="font-mono text-[11px] font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</span>
+                                        <span class="text-[11px] font-bold text-[#0e0f0c]">{{ tx.invoice_number }}</span>
                                         <span class="text-[10px] font-bold text-neutral-700">· {{ tx.customer_name || 'Pelanggan Showroom' }}</span>
                                         <span class="text-[10px] text-neutral-400">({{ tx.sales_person }})</span>
                                     </div>
                                     <div class="text-[11px] text-neutral-600 truncate mt-0.5" :title="tx.items">{{ tx.items }}</div>
                                 </div>
                                 <div class="text-right flex-shrink-0">
-                                    <div class="text-xs font-black text-[#0e0f0c] tabular-nums">+ {{ formatRupiah(tx.net_amount) }}</div>
+                                    <div class="text-xs font-black text-[#0e0f0c]">+ {{ formatRupiah(tx.net_amount) }}</div>
                                     <span class="text-[10px] text-neutral-400">{{ tx.date }}</span>
                                 </div>
                             </div>

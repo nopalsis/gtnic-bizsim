@@ -12,7 +12,12 @@ class DashboardTest extends TestCase
 
     public function test_dashboard_page_returns_successful_response(): void
     {
-        $response = $this->get('/dashboard');
+        $user = \App\Models\User::factory()->create([
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page

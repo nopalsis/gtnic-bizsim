@@ -2,11 +2,12 @@
 
 namespace Tests\Feature;
 
-use Inertia\Testing\AssertableInertia as Assert;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    use RefreshDatabase;
     /**
      * A basic test example.
      */
@@ -14,11 +15,16 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
-        $response->assertInertia(fn (Assert $page) => $page
-            ->component('Index')
-            ->has('laravelVersion')
-            ->has('phpVersion')
-        );
+        $response->assertStatus(302);
+        $response->assertRedirect('/login');
+
+        $user = \App\Models\User::factory()->create([
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $authenticatedResponse = $this->actingAs($user)->get('/');
+        $authenticatedResponse->assertStatus(302);
+        $authenticatedResponse->assertRedirect('/dashboard');
     }
 }

@@ -17,16 +17,18 @@ class UserSeeder extends Seeder
             ['email' => 'owner@optimabiz.test'],
             [
                 'name' => 'Pemilik Workshop OptimaBiz',
-                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'password' => Hash::make('password123'),
+                'is_active' => true,
                 'email_verified_at' => now(),
             ]
         );
 
         $staffMembers = [
-            ['name' => 'Kang Asep (Sales Pengrajin)', 'email' => 'asep@optimabiz.test'],
-            ['name' => 'Pak Bambang (Workshop Head)', 'email' => 'bambang@optimabiz.test'],
-            ['name' => 'Rian (Wholesale & Store)', 'email' => 'rian@optimabiz.test'],
-            ['name' => 'Siti (Admin Toko & Reseller)', 'email' => 'siti@optimabiz.test'],
+            ['name' => 'Kang Asep (Sales Pengrajin)', 'email' => 'asep@optimabiz.test', 'role' => 'sales'],
+            ['name' => 'Pak Bambang (Workshop Head)', 'email' => 'bambang@optimabiz.test', 'role' => 'craftsman'],
+            ['name' => 'Rian (Wholesale & Store)', 'email' => 'rian@optimabiz.test', 'role' => 'sales'],
+            ['name' => 'Siti (Admin Toko & Reseller)', 'email' => 'siti@optimabiz.test', 'role' => 'sales'],
         ];
 
         foreach ($staffMembers as $staff) {
@@ -34,7 +36,9 @@ class UserSeeder extends Seeder
                 ['email' => $staff['email']],
                 [
                     'name' => $staff['name'],
-                    'password' => Hash::make('password'),
+                    'role' => $staff['role'],
+                    'password' => Hash::make('password123'),
+                    'is_active' => true,
                     'email_verified_at' => now(),
                 ]
             );
