@@ -62,6 +62,9 @@ RUN composer dump-autoload --optimize
 # Build frontend assets (Vite / Inertia)
 RUN npm run build
 
+# Simpan salinan cadangan build ke /tmp/build agar bisa disinkronkan ke host jika tertimpa volume mount
+RUN cp -r /var/www/html/public/build /tmp/build
+
 # Setup entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Sinkronkan public/build dari image ke host jika belum ada (akibat tertimpa volume mount)
+if [ ! -d "/var/www/html/public/build" ] && [ -d "/tmp/build" ]; then
+    echo "Syncing public/build from image to host..."
+    cp -r /tmp/build /var/www/html/public/build
+    chmod -R 755 /var/www/html/public/build 2>/dev/null || true
+fi
+
 # Buat semua struktur folder storage yang dibutuhkan Laravel jika belum ada
 mkdir -p /var/www/html/storage/app/public \
          /var/www/html/storage/framework/sessions \

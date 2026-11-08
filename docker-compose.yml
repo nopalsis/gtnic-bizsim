@@ -9,6 +9,8 @@ services:
       - "8001:9000"
     volumes:
       - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
     environment:
       APP_ENV: ${APP_ENV:-local}
       APP_DEBUG: ${APP_DEBUG:-true}
