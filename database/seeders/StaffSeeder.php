@@ -18,12 +18,22 @@ class StaffSeeder extends Seeder
 
         $staffMembers = [
             [
-                'name' => 'Pemilik Workshop OptimaBiz',
+                'name' => 'Pemilik Workshop OptimaBiz (Super Admin)',
                 'email' => 'owner@optimabiz.test',
-                'role' => 'admin',
+                'role' => 'superadmin',
                 'phone' => '+62 811-0000-1111',
                 'salary_type' => 'fixed_monthly',
                 'base_salary' => 5000000,
+                'piece_rate' => 0,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Dewi (Admin Operasional)',
+                'email' => 'admin@optimabiz.test',
+                'role' => 'admin',
+                'phone' => '+62 811-3322-1100',
+                'salary_type' => 'fixed_monthly',
+                'base_salary' => 3200000,
                 'piece_rate' => 0,
                 'is_active' => true,
             ],

@@ -13,10 +13,23 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 1. Super Admin (Owner Workshop & Manajer Finansial)
         User::updateOrCreate(
             ['email' => 'owner@optimabiz.test'],
             [
-                'name' => 'Pemilik Workshop OptimaBiz',
+                'name' => 'Pemilik Workshop OptimaBiz (Super Admin)',
+                'role' => 'superadmin',
+                'password' => Hash::make('password123'),
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 2. Admin Biasa / Operasional (Input Data, Produk, Mutasi Stok - Tanpa Akses Finansial)
+        User::updateOrCreate(
+            ['email' => 'admin@optimabiz.test'],
+            [
+                'name' => 'Dewi (Admin Operasional)',
                 'role' => 'admin',
                 'password' => Hash::make('password123'),
                 'is_active' => true,

@@ -8,6 +8,7 @@ defineProps({
         type: Object,
         default: () => ({
             all: 0,
+            superadmin: 0,
             admin: 0,
             sales: 0,
             craftsman: 0,
@@ -39,6 +40,30 @@ const emit = defineEmits(['selectRole']);
                 ]"
             >
                 {{ counts.all }}
+            </span>
+        </button>
+
+        <!-- Tab: Super Admin -->
+        <button
+            v-if="counts.superadmin > 0"
+            type="button"
+            @click="emit('selectRole', 'superadmin')"
+            :class="[
+                'px-4 py-2 rounded-full font-label text-xs tracking-tight transition-all cursor-pointer flex items-center gap-2 select-none',
+                activeRole === 'superadmin'
+                    ? 'bg-[#0e0f0c] text-white font-bold shadow-xs'
+                    : 'bg-white text-[#4c4546] hover:text-[#0e0f0c] border border-[#e1e5d3] font-medium'
+            ]"
+        >
+            <span class="material-symbols-outlined text-xs" :class="activeRole === 'superadmin' ? 'text-[#c6ef4e]' : 'text-neutral-500'">shield_person</span>
+            <span>Super Admin</span>
+            <span
+                :class="[
+                    'text-[11px] px-2 py-0.5 rounded-full font-bold',
+                    activeRole === 'superadmin' ? 'bg-[#262822] text-[#c6ef4e]' : 'bg-[#f4f4ed] text-[#4c4546]'
+                ]"
+            >
+                {{ counts.superadmin }}
             </span>
         </button>
 

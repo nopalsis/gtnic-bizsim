@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,19 +15,17 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     /**
-     * Display the executive dashboard for OptimaBiz Leathercraft.
+     * Display the role-tailored dashboard for OptimaBiz Leathercraft.
+     * Superadmin: Executive & Financial View (Keuntungan, Omzet, Margin, HPP, BEP)
+     * Admin: Admin Operasional View (Input Transaksi, Katalog Produk & Mutasi Stok - Tanpa Finansial)
+     * Sales: Sales Performance & Deal View
+     * Craftsman: Workshop Operations & Task View
      */
     public function index(): Response
     {
-        // 1. KPI & Profit Calculations
-        $netRevenue = (float) Transaction::sum('net_amount');
-        $grossRevenue = (float) Transaction::sum('total_amount');
-        $totalDiscount = (float) Transaction::sum('total_discount');
-        $discountRate = $grossRevenue > 0 ? round(($totalDiscount / $grossRevenue) * 100, 1) : 0.0;
-
-        $cogs = (float) TransactionItem::sum(DB::raw('quantity * cost_price'));
-        $grossProfit = $netRevenue - $cogs;
-        $profitMargin = $netRevenue > 0 ? round(($grossProfit / $netRevenue) * 100, 1) : 0.0;
+        $user = Auth::user();
+        $role = $user->role ?? 'admin';
+        $isSuperAdmin = ($role === 'superadmin');
 
         $setting = OperationalSetting::first() ?? new OperationalSetting([
             'workshop_name' => 'OptimaBiz Leathercraft & Shoes Workshop',
@@ -35,6 +34,20 @@ class DashboardController extends Controller
             'monthly_fixed_cost' => 6500000,
             'monthly_max_capacity' => 500,
         ]);
+
+        $maxCapacity = (int) ($setting->monthly_max_capacity ?? 500);
+
+        // ==========================================
+        // 1. EXECUTIVE & FINANCIAL CALCULATIONS (SUPERADMIN ONLY)
+        // ==========================================
+        $netRevenue = (float) Transaction::sum('net_amount');
+        $grossRevenue = (float) Transaction::sum('total_amount');
+        $totalDiscount = (float) Transaction::sum('total_discount');
+        $discountRate = $grossRevenue > 0 ? round(($totalDiscount / $grossRevenue) * 100, 1) : 0.0;
+
+        $cogs = (float) TransactionItem::sum(DB::raw('quantity * cost_price'));
+        $grossProfit = $netRevenue - $cogs;
+        $profitMargin = $netRevenue > 0 ? round(($grossProfit / $netRevenue) * 100, 1) : 0.0;
 
         $totalSalary = (float) ($setting->employee_count * $setting->salary_per_employee);
         $fixedCost = (float) $setting->monthly_fixed_cost;
@@ -51,12 +64,10 @@ class DashboardController extends Controller
         // Break Even Point (BEP) Revenue Calculation
         $bepRevenue = $profitMargin > 0 ? round($totalFixedOpex / ($profitMargin / 100)) : 0.0;
 
-        // 2. Capacity & Sales Volume (Produksi Sepatu & Sandal)
         $totalItemsSold = (int) TransactionItem::sum('quantity');
-        $maxCapacity = (int) $setting->monthly_max_capacity;
         $capacityUsagePercent = $maxCapacity > 0 ? round(($totalItemsSold / $maxCapacity) * 100, 1) : 0.0;
 
-        // 3. Category Sales Breakdown (Sepatu Pria, Sepatu Wanita, Sandal Kulit, Aksesoris)
+        // Category Sales Breakdown
         $categorySales = TransactionItem::join('products', 'transaction_items.product_id', '=', 'products.id')
             ->select(
                 'products.category',
@@ -78,7 +89,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 4. Recent Transactions with Detailed Items and Customer Information
+        // Recent Transactions with Margin Analysis for Super Admin
         $recentTransactions = Transaction::with(['transactionItems.product'])
             ->latest('transaction_date')
             ->take(6)
@@ -105,7 +116,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 5. Cost Distribution Breakdown (Struktur Biaya Bengkel Sepatu Kulit)
+        // Cost Distribution Breakdown
         $totalExpenses = $cogs + $totalSalary + $fixedCost + $wasteCost;
         $costDistribution = [
             [
@@ -114,7 +125,7 @@ class DashboardController extends Controller
                 'percentage' => $totalExpenses > 0 ? round(($cogs / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Upah 5 Pengrajin Sepatu',
+                'category' => 'Upah Pengrajin Sepatu',
                 'amount' => $totalSalary,
                 'percentage' => $totalExpenses > 0 ? round(($totalSalary / $totalExpenses) * 100, 1) : 0.0,
             ],
@@ -130,7 +141,7 @@ class DashboardController extends Controller
             ],
         ];
 
-        // 6. Intelligent Health & Risk Alerts (Sepatu & Sandal Kulit Context)
+        // Intelligent Health & Risk Alerts
         $lowStockProducts = Product::where('is_active', true)
             ->whereColumn('current_stock', '<=', 'min_stock_alert')
             ->pluck('name')
@@ -165,7 +176,7 @@ class DashboardController extends Controller
             'message' => 'Untuk menutup upah pengrajin dan sewa bengkel (Rp '.number_format($totalFixedOpex, 0, ',', '.').'/bulan), target omzet minimum impas adalah Rp '.number_format($bepRevenue, 0, ',', '.').'.',
         ];
 
-        // 7. All Transactions for Detailed Ledger Modal
+        // All Transactions for Ledger (Super Admin Only)
         $allTransactions = Transaction::with(['transactionItems.product'])
             ->latest('transaction_date')
             ->get()
@@ -191,18 +202,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 8. Dynamic Team / Sales Recipients
-        $recipients = Transaction::select('sales_person_name')
-            ->distinct()
-            ->whereNotNull('sales_person_name')
-            ->pluck('sales_person_name')
-            ->map(fn ($name, $idx) => [
-                'id' => $idx + 1,
-                'name' => $name,
-                'role' => 'Sales Pengrajin & Toko',
-            ]);
-
-        // 9. Top Selling Shoe & Sandal Models
+        // Top Selling Footwear
         $topProducts = TransactionItem::select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
             ->with('product')
             ->groupBy('product_id')
@@ -218,7 +218,7 @@ class DashboardController extends Controller
                 'sales' => (float) $item->total_sales,
             ]);
 
-        // 10. Chronological Daily Sales Trend for Bézier Line Chart
+        // Daily Sales Trend
         $trendHistory = Transaction::selectRaw('DATE(transaction_date) as tx_date, SUM(net_amount) as total_net, SUM(total_amount) as total_gross, COUNT(*) as tx_count')
             ->groupBy('tx_date')
             ->orderBy('tx_date')
@@ -231,64 +231,7 @@ class DashboardController extends Controller
                 'count' => (int) $t->tx_count,
             ]);
 
-        // 11. Inventory & Waste Statistics
-        $totalStockUnits = (int) Product::sum('current_stock');
-        $totalProductsCount = (int) Product::count();
-        $recentMovements = StockMovement::with('product')
-            ->latest('movement_date')
-            ->take(5)
-            ->get()
-            ->map(fn ($m) => [
-                'id' => $m->id,
-                'product_name' => $m->product?->name ?? 'Produk Kulit',
-                'product_sku' => $m->product?->sku ?? '-',
-                'type' => $m->type,
-                'quantity' => (int) $m->quantity,
-                'unit' => $m->product?->unit ?? 'pasang',
-                'date' => $m->movement_date?->format('d M Y') ?? (string) $m->movement_date,
-                'notes' => $m->notes,
-            ]);
-
-        $wasteBreakdown = StockMovement::where('type', 'waste')
-            ->join('products', 'stock_movements.product_id', '=', 'products.id')
-            ->select(
-                'products.name',
-                'products.sku',
-                'products.category',
-                'products.unit',
-                DB::raw('SUM(stock_movements.quantity) as waste_qty'),
-                DB::raw('SUM(stock_movements.quantity * products.cost_price) as waste_loss')
-            )
-            ->groupBy('products.name', 'products.sku', 'products.category', 'products.unit')
-            ->get()
-            ->map(fn ($w) => [
-                'name' => $w->name,
-                'sku' => $w->sku,
-                'category' => $w->category,
-                'quantity' => (int) $w->waste_qty,
-                'unit' => $w->unit ?? 'pasang',
-                'loss' => (float) $w->waste_loss,
-            ]);
-
-        // 12. Staff Sales Performance Metrics
-        $staffPerformance = Transaction::select(
-            'sales_person_name',
-            DB::raw('COUNT(*) as total_transactions'),
-            DB::raw('SUM(net_amount) as total_revenue'),
-            DB::raw('ROUND(AVG(CASE WHEN total_amount > 0 THEN (total_discount / total_amount) * 100 ELSE 0 END), 1) as avg_discount_pct')
-        )
-            ->whereNotNull('sales_person_name')
-            ->groupBy('sales_person_name')
-            ->orderByDesc('total_revenue')
-            ->get()
-            ->map(fn ($s) => [
-                'name' => $s->sales_person_name,
-                'transactions' => (int) $s->total_transactions,
-                'revenue' => (float) $s->total_revenue,
-                'avg_discount' => (float) $s->avg_discount_pct,
-            ]);
-
-        // 13. Dynamic Business Health Score Algorithm for Leathercraft Workshop
+        // Health Score
         $marginPoints = min(40, max(0, ($profitMargin / 55) * 40));
         $wasteRatio = $netRevenue > 0 ? ($wasteCost / $netRevenue) * 100 : 0.0;
         $wastePoints = $wasteRatio <= 2.5 ? 30 : max(0, 30 - (($wasteRatio - 2.5) * 5));
@@ -308,9 +251,310 @@ class DashboardController extends Controller
             default => 'Perlu Evaluasi Waste Reject & Diskon Negosiasi',
         };
 
+        // Staff Performance Metrics
+        $staffPerformance = Transaction::select(
+            'sales_person_name',
+            DB::raw('COUNT(*) as total_transactions'),
+            DB::raw('SUM(net_amount) as total_revenue'),
+            DB::raw('ROUND(AVG(CASE WHEN total_amount > 0 THEN (total_discount / total_amount) * 100 ELSE 0 END), 1) as avg_discount_pct')
+        )
+            ->whereNotNull('sales_person_name')
+            ->groupBy('sales_person_name')
+            ->orderByDesc('total_revenue')
+            ->get()
+            ->map(fn ($s) => [
+                'name' => $s->sales_person_name,
+                'transactions' => (int) $s->total_transactions,
+                'revenue' => (float) $s->total_revenue,
+                'avg_discount' => (float) $s->avg_discount_pct,
+            ]);
+
+        // Quick Simulator Baseline Data for Super Admin
+        $avgPricePerPair = $totalItemsSold > 0 ? round($netRevenue / $totalItemsSold) : 450000;
+        $avgCostPerPair = $totalItemsSold > 0 ? round($cogs / $totalItemsSold) : 220000;
+        $quickSimulatorBaseline = [
+            'avgPricePerPair' => $avgPricePerPair,
+            'avgCostPerPair' => $avgCostPerPair,
+            'fixedCost' => $totalFixedOpex,
+            'wasteCost' => $wasteCost,
+            'currentVolume' => $totalItemsSold,
+            'maxCapacity' => $maxCapacity,
+            'currentNetProfit' => $netProfit,
+        ];
+
+        // ==========================================
+        // 2. ADMIN OPERASIONAL VIEW (ADMIN BIASA)
+        // Fokus hanya pada kuantitas fisik, input data, kontrol stok tanpa finansial/keuntungan/omzet
+        // ==========================================
+        $totalTransactionsCount = (int) Transaction::count();
+        $dailyInputTrend = Transaction::selectRaw('DATE(transaction_date) as tx_date, COUNT(*) as tx_count')
+            ->groupBy('tx_date')
+            ->orderBy('tx_date')
+            ->get()
+            ->map(fn ($t) => [
+                'date' => date('d M', strtotime($t->tx_date)),
+                'count' => (int) $t->tx_count,
+            ]);
+
+        $lowStockProductsDetailed = Product::where('is_active', true)
+            ->whereColumn('current_stock', '<=', 'min_stock_alert')
+            ->orderBy('current_stock')
+            ->take(6)
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
+                'category' => $p->category,
+                'current_stock' => (int) $p->current_stock,
+                'min_stock_alert' => (int) $p->min_stock_alert,
+                'unit' => $p->unit ?? 'pasang',
+            ]);
+
+        $recentInputActivities = Transaction::with(['transactionItems.product'])
+            ->latest('transaction_date')
+            ->take(5)
+            ->get()
+            ->map(function ($tx) {
+                $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.' '.($it->product->unit ?? 'pasang').')')->implode(', ');
+
+                return [
+                    'id' => $tx->id,
+                    'invoice_number' => $tx->invoice_number,
+                    'date' => $tx->transaction_date?->format('d M Y · H:i'),
+                    'customer_name' => $tx->customer_name ?? 'Pelanggan Showroom',
+                    'sales_person' => $tx->sales_person_name ?? 'Staff Input',
+                    'payment_method' => $tx->payment_method ?? 'Transfer Bank',
+                    'items' => $itemNames,
+                ];
+            });
+
+        $adminOperationsData = [
+            'totalTransactionsInput' => $totalTransactionsCount,
+            'totalItemsSoldQty' => $totalItemsSold,
+            'activeProductsCount' => (int) Product::where('is_active', true)->count(),
+            'lowStockCount' => count($lowStockProducts),
+            'dailyInputTrend' => $dailyInputTrend,
+            'lowStockProducts' => $lowStockProductsDetailed,
+            'recentInputActivities' => $recentInputActivities,
+        ];
+
+        // ==========================================
+        // 3. SALES PERFORMANCE & DEAL VIEW (SALES)
+        // ==========================================
+        $userName = $user->name ?? '';
+        $salesTxQuery = Transaction::where(function ($q) use ($userName) {
+            $q->where('sales_person_name', $userName)
+                ->orWhere('sales_person_name', 'LIKE', '%'.strtok($userName, ' ').'%');
+        });
+
+        if ($salesTxQuery->count() === 0) {
+            $salesTxQuery = Transaction::query();
+        }
+
+        $myNetRevenue = (float) (clone $salesTxQuery)->sum('net_amount');
+        $myGrossRevenue = (float) (clone $salesTxQuery)->sum('total_amount');
+        $myTotalDiscount = (float) (clone $salesTxQuery)->sum('total_discount');
+        $myAvgDiscount = $myGrossRevenue > 0 ? round(($myTotalDiscount / $myGrossRevenue) * 100, 1) : 0.0;
+        $myTotalTx = (clone $salesTxQuery)->count();
+
+        $myWholesaleTx = (clone $salesTxQuery)->where(function ($q) {
+            $q->where('total_discount', '>', 0)
+                ->orWhere('total_amount', '>=', 1000000);
+        })->count();
+        $myRetailTx = max(0, $myTotalTx - $myWholesaleTx);
+
+        $mySalesTrend = (clone $salesTxQuery)
+            ->selectRaw('DATE(transaction_date) as tx_date, SUM(net_amount) as total_net, COUNT(*) as tx_count')
+            ->groupBy('tx_date')
+            ->orderBy('tx_date')
+            ->get()
+            ->map(fn ($t) => [
+                'date' => date('d M', strtotime($t->tx_date)),
+                'amount' => (float) $t->total_net,
+                'count' => (int) $t->tx_count,
+            ]);
+
+        $topSellingStock = TransactionItem::select('product_id', DB::raw('SUM(quantity) as sold_qty'))
+            ->with('product')
+            ->groupBy('product_id')
+            ->orderByDesc('sold_qty')
+            ->take(5)
+            ->get()
+            ->map(function ($it) {
+                $p = $it->product;
+                $stock = $p ? (int) $p->current_stock : 0;
+                $min = $p ? (int) $p->min_stock_alert : 5;
+                $status = $stock <= 0 ? 'Habis' : ($stock <= $min ? 'Stok Menipis' : 'Ready');
+
+                return [
+                    'id' => $p?->id,
+                    'name' => $p?->name ?? 'Sepatu Kulit',
+                    'sku' => $p?->sku ?? '-',
+                    'category' => $p?->category ?? 'Sepatu',
+                    'unit' => $p?->unit ?? 'pasang',
+                    'current_stock' => $stock,
+                    'min_stock_alert' => $min,
+                    'sold_qty' => (int) $it->sold_qty,
+                    'status' => $status,
+                ];
+            });
+
+        $myRecentTransactions = (clone $salesTxQuery)
+            ->with('transactionItems.product')
+            ->latest('transaction_date')
+            ->take(5)
+            ->get()
+            ->map(function ($tx) {
+                $itemsDesc = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.')')->implode(', ');
+                $discountPct = $tx->total_amount > 0 ? round(($tx->total_discount / $tx->total_amount) * 100, 1) : 0.0;
+
+                return [
+                    'id' => $tx->id,
+                    'invoice_number' => $tx->invoice_number,
+                    'date' => $tx->transaction_date?->format('d M Y · H:i'),
+                    'customer_name' => $tx->customer_name ?? 'Pelanggan Showroom',
+                    'payment_method' => $tx->payment_method ?? 'Transfer Bank',
+                    'net_amount' => (float) $tx->net_amount,
+                    'total_discount' => (float) $tx->total_discount,
+                    'discount_percent' => $discountPct,
+                    'items' => $itemsDesc,
+                    'status' => $discountPct > 10.0 ? 'Diskon Nego Tinggi' : 'Normal / Aman',
+                ];
+            });
+
+        $salesData = [
+            'myNetRevenue' => $myNetRevenue,
+            'myGrossRevenue' => $myGrossRevenue,
+            'myAvgDiscount' => $myAvgDiscount,
+            'completedTransactions' => [
+                'total' => $myTotalTx,
+                'retail' => $myRetailTx,
+                'wholesale' => $myWholesaleTx,
+            ],
+            'salesTrend' => $mySalesTrend,
+            'topSellingStock' => $topSellingStock,
+            'recentTransactions' => $myRecentTransactions,
+        ];
+
+        // ==========================================
+        // 4. WORKSHOP OPERATIONS & TASK VIEW (CRAFTSMAN)
+        // ==========================================
+        $completedProductionUnits = (int) StockMovement::where('type', 'in')->sum('quantity');
+
+        $salaryType = $user->salary_type ?? 'fixed_monthly';
+        $baseSalary = (float) ($user->base_salary ?? 3200000);
+        $pieceRate = (float) ($user->piece_rate ?? 25000);
+
+        $pieceEarnings = $completedProductionUnits * $pieceRate;
+        $totalEstimatedSalary = match ($salaryType) {
+            'piece_rate' => $pieceEarnings,
+            'hybrid' => $baseSalary + $pieceEarnings,
+            default => $baseSalary,
+        };
+
+        $salaryTypeLabel = match ($salaryType) {
+            'piece_rate' => 'Upah Borongan Murni',
+            'hybrid' => 'Gaji Pokok + Borongan',
+            default => 'Gaji Pokok Tetap',
+        };
+
+        $totalWasteUnits = (int) StockMovement::where('type', 'waste')->sum('quantity');
+        $totalWasteLogs = (int) StockMovement::where('type', 'waste')->count();
+
+        $capacityLoadPercent = $maxCapacity > 0 ? round(($completedProductionUnits / $maxCapacity) * 100, 1) : 0.0;
+        $capacityLoadStatus = match (true) {
+            $capacityLoadPercent >= 90 => 'Kritis / Mendekati Maksimal',
+            $capacityLoadPercent >= 75 => 'Tinggi / Waspada Overload',
+            default => 'Optimal & Terkendali',
+        };
+
+        $lowStockRawMaterials = Product::where('is_active', true)
+            ->where(function ($q) {
+                $q->whereIn('category', ['Bahan Baku Kulit', 'Komponen Sol & Lem', 'Perawatan & Aksesoris'])
+                    ->orWhere('unit', 'sq ft')
+                    ->orWhere('unit', 'lembar');
+            })
+            ->whereColumn('current_stock', '<=', 'min_stock_alert')
+            ->orderBy('current_stock')
+            ->take(5)
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
+                'category' => $p->category,
+                'current_stock' => (int) $p->current_stock,
+                'min_stock_alert' => (int) $p->min_stock_alert,
+                'unit' => $p->unit ?? 'feet',
+                'urgency' => $p->current_stock <= max(1, floor($p->min_stock_alert / 2)) ? 'Kritis' : 'Menipis',
+            ]);
+
+        if ($lowStockRawMaterials->isEmpty()) {
+            $lowStockRawMaterials = Product::where('is_active', true)
+                ->whereIn('category', ['Bahan Baku Kulit', 'Komponen Sol & Lem', 'Perawatan & Aksesoris'])
+                ->orderBy('current_stock')
+                ->take(4)
+                ->get()
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'sku' => $p->sku,
+                    'category' => $p->category,
+                    'current_stock' => (int) $p->current_stock,
+                    'min_stock_alert' => (int) $p->min_stock_alert,
+                    'unit' => $p->unit ?? 'feet',
+                    'urgency' => 'Normal',
+                ]);
+        }
+
+        $recentWorkshopLogs = StockMovement::whereIn('type', ['in', 'waste'])
+            ->with('product')
+            ->latest('movement_date')
+            ->take(6)
+            ->get()
+            ->map(fn ($m) => [
+                'id' => $m->id,
+                'product_name' => $m->product?->name ?? 'Produk Kulit',
+                'product_sku' => $m->product?->sku ?? '-',
+                'category' => $m->product?->category ?? 'Produksi',
+                'type' => $m->type,
+                'quantity' => (int) $m->quantity,
+                'unit' => $m->product?->unit ?? 'pasang',
+                'date' => $m->movement_date?->format('d M Y') ?? (string) $m->movement_date,
+                'notes' => $m->notes ?? ($m->type === 'in' ? 'Hasil produksi workshop selesai' : 'Cacat proses pemotongan/skiving'),
+            ]);
+
+        $craftsmanData = [
+            'completedProductionUnits' => $completedProductionUnits,
+            'estimatedSalary' => [
+                'totalEstimatedSalary' => $totalEstimatedSalary,
+                'baseSalary' => $baseSalary,
+                'pieceEarnings' => $pieceEarnings,
+                'pieceRate' => $pieceRate,
+                'salaryType' => $salaryType,
+                'salaryTypeLabel' => $salaryTypeLabel,
+            ],
+            'wasteMetrics' => [
+                'totalUnits' => $totalWasteUnits,
+                'totalLogs' => $totalWasteLogs,
+            ],
+            'capacityLoad' => [
+                'producedUnits' => $completedProductionUnits,
+                'maxCapacity' => $maxCapacity,
+                'percentage' => $capacityLoadPercent,
+                'remaining' => max(0, $maxCapacity - $completedProductionUnits),
+                'status' => $capacityLoadStatus,
+            ],
+            'lowStockRawMaterials' => $lowStockRawMaterials,
+            'recentWorkshopLogs' => $recentWorkshopLogs,
+        ];
+
         return Inertia::render('Dashboard/Index', [
+            'currentRole' => $role,
             'workshopName' => $setting->workshop_name ?? 'OptimaBiz Leathercraft & Shoes',
-            'kpis' => [
+            // Data Finansial Eksekutif: Hanya diberikan jika Super Admin
+            'kpis' => $isSuperAdmin ? [
                 'netRevenue' => $netRevenue,
                 'grossRevenue' => $grossRevenue,
                 'totalDiscount' => $totalDiscount,
@@ -322,35 +566,36 @@ class DashboardController extends Controller
                 'bepRevenue' => $bepRevenue,
                 'wasteCost' => $wasteCost,
                 'wasteCount' => $wasteCount,
-            ],
+            ] : null,
             'capacity' => [
                 'soldUnits' => $totalItemsSold,
                 'maxCapacity' => $maxCapacity,
                 'usagePercent' => $capacityUsagePercent,
                 'status' => $capacityUsagePercent > 85 ? 'Kritis / Mendekati Kapasitas Puncak Workshop' : 'Optimal & Terkendali',
             ],
-            'categorySales' => $categorySales,
-            'costDistribution' => $costDistribution,
-            'recentTransactions' => $recentTransactions,
-            'allTransactions' => $allTransactions,
-            'recipients' => $recipients,
+            'categorySales' => $isSuperAdmin ? $categorySales : [],
+            'costDistribution' => $isSuperAdmin ? $costDistribution : [],
+            'recentTransactions' => $isSuperAdmin ? $recentTransactions : [],
+            'allTransactions' => $isSuperAdmin ? $allTransactions : [],
             'topProducts' => $topProducts,
-            'trendHistory' => $trendHistory,
+            'trendHistory' => $isSuperAdmin ? $trendHistory : [],
             'inventoryStats' => [
-                'totalStockUnits' => $totalStockUnits,
-                'totalProductsCount' => $totalProductsCount,
+                'totalStockUnits' => (int) Product::sum('current_stock'),
+                'totalProductsCount' => (int) Product::count(),
                 'lowStockCount' => count($lowStockProducts),
                 'lowStockProducts' => $lowStockProducts,
-                'recentMovements' => $recentMovements,
-                'wasteBreakdown' => $wasteBreakdown,
             ],
-            'staffPerformance' => $staffPerformance,
-            'healthScore' => [
+            'staffPerformance' => $isSuperAdmin ? $staffPerformance : [],
+            'healthScore' => $isSuperAdmin ? [
                 'score' => $healthScoreValue,
                 'grade' => $grade,
                 'status' => $healthStatus,
-            ],
+            ] : null,
             'alerts' => $alerts,
+            'quickSimulatorBaseline' => $isSuperAdmin ? $quickSimulatorBaseline : null,
+            'adminOperationsData' => $adminOperationsData,
+            'salesData' => $salesData,
+            'craftsmanData' => $craftsmanData,
         ]);
     }
 }

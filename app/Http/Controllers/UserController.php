@@ -121,16 +121,18 @@ class UserController extends Controller
         // 3. Query User dengan filtering
         $query = User::query();
 
-        // Filter tab Role (all, admin, sales, craftsman)
+        // Filter tab Role (all, superadmin, admin, sales, craftsman)
         $roleFilter = $request->get('role', 'all');
         if ($roleFilter !== 'all' && $hasRole) {
             $query->where(function ($q) use ($roleFilter) {
-                if ($roleFilter === 'admin') {
+                if ($roleFilter === 'superadmin') {
+                    $q->where('role', 'superadmin');
+                } elseif ($roleFilter === 'admin') {
                     $q->whereIn('role', ['admin', 'Administrator']);
                 } elseif ($roleFilter === 'sales') {
                     $q->whereIn('role', ['sales', 'Manager']);
                 } else {
-                    $q->whereNotIn('role', ['admin', 'Administrator', 'sales', 'Manager']);
+                    $q->whereNotIn('role', ['superadmin', 'admin', 'Administrator', 'sales', 'Manager']);
                 }
             });
         }
@@ -193,9 +195,11 @@ class UserController extends Controller
             $perCraftsmanProducedEst,
             $perCraftsmanWasteEst
         ) {
-            // Normalisasi role agar konsisten (admin, sales, craftsman)
+            // Normalisasi role agar konsisten (superadmin, admin, sales, craftsman)
             $rawRole = strtolower(trim((string) ($u->role ?? 'craftsman')));
-            if (in_array($rawRole, ['admin', 'administrator'])) {
+            if ($rawRole === 'superadmin') {
+                $role = 'superadmin';
+            } elseif (in_array($rawRole, ['admin', 'administrator'])) {
                 $role = 'admin';
             } elseif (in_array($rawRole, ['sales', 'manager'])) {
                 $role = 'sales';
@@ -313,10 +317,11 @@ class UserController extends Controller
             : 0;
 
         // Hitung count per role dengan normalisasi
+        $superAdminCount = User::where('role', 'superadmin')->count();
         $adminCount = User::whereIn('role', ['admin', 'Administrator'])->count();
         $salesCount = User::whereIn('role', ['sales', 'Manager'])->count();
         $totalUsers = User::count();
-        $craftsmanCount = max(0, $totalUsers - $adminCount - $salesCount);
+        $craftsmanCount = max(0, $totalUsers - $superAdminCount - $adminCount - $salesCount);
 
         return Inertia::render('Users/Index', [
             'users' => $staffList->values(),
@@ -333,6 +338,7 @@ class UserController extends Controller
             ],
             'counts' => [
                 'all' => $totalUsers,
+                'superadmin' => $superAdminCount,
                 'admin' => $adminCount,
                 'sales' => $salesCount,
                 'craftsman' => $craftsmanCount,
@@ -356,7 +362,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
-            'role' => 'required|string|in:admin,sales,craftsman',
+            'role' => 'required|string|in:superadmin,admin,sales,craftsman',
             'phone' => 'nullable|string|max:50',
             'salary_type' => 'required|string|in:fixed_monthly,piece_rate,hybrid',
             'base_salary' => 'nullable|numeric|min:0',
@@ -400,7 +406,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|string|in:admin,sales,craftsman',
+            'role' => 'required|string|in:superadmin,admin,sales,craftsman',
             'phone' => 'nullable|string|max:50',
             'salary_type' => 'required|string|in:fixed_monthly,piece_rate,hybrid',
             'base_salary' => 'nullable|numeric|min:0',
@@ -445,7 +451,7 @@ class UserController extends Controller
     {
         $this->ensureStaffColumns();
 
-        if ($user->role === 'admin' && $user->is_active && User::whereIn('role', ['admin', 'Administrator'])->where('is_active', true)->count() <= 1) {
+        if (in_array($user->role, ['superadmin', 'admin']) && $user->is_active && User::whereIn('role', ['superadmin', 'admin', 'Administrator'])->where('is_active', true)->count() <= 1) {
             return redirect()->route('users.index')->with('error', 'Tidak dapat menonaktifkan satu-satunya Administrator aktif.');
         }
 

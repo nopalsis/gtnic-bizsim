@@ -90,15 +90,34 @@ class AuthTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_admin_can_access_all_modules(): void
+    public function test_superadmin_can_access_all_modules(): void
+    {
+        $superadmin = $this->createUser('superadmin');
+
+        $this->actingAs($superadmin)->get(route('dashboard'))->assertStatus(200);
+        $this->actingAs($superadmin)->get(route('sales.index'))->assertStatus(200);
+        $this->actingAs($superadmin)->get(route('inventory.index'))->assertStatus(200);
+        $this->actingAs($superadmin)->get(route('simulator.index'))->assertStatus(200);
+        $this->actingAs($superadmin)->get(route('users.index'))->assertStatus(200);
+    }
+
+    public function test_admin_can_access_input_modules_but_cannot_access_financial_simulator_or_users(): void
     {
         $admin = $this->createUser('admin');
 
+        // Admin can access operational input modules:
         $this->actingAs($admin)->get(route('dashboard'))->assertStatus(200);
         $this->actingAs($admin)->get(route('sales.index'))->assertStatus(200);
         $this->actingAs($admin)->get(route('inventory.index'))->assertStatus(200);
-        $this->actingAs($admin)->get(route('simulator.index'))->assertStatus(200);
-        $this->actingAs($admin)->get(route('users.index'))->assertStatus(200);
+
+        // Admin is forbidden from financial simulator & users/payroll
+        $this->actingAs($admin)->get(route('simulator.index'))
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHas('error');
+
+        $this->actingAs($admin)->get(route('users.index'))
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHas('error');
     }
 
     public function test_sales_cannot_access_admin_only_modules(): void

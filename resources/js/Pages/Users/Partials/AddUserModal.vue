@@ -202,9 +202,10 @@ const submit = () => {
                         v-model="form.role"
                         class="w-full px-3.5 py-2.5 bg-[#f4f4ed] rounded-xl text-xs md:text-sm text-[#0e0f0c] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0e0f0c] border border-transparent focus:border-[#0e0f0c] transition"
                     >
-                        <option value="craftsman">Pengrajin Bengkel (Tukang Pola, Seset, Jahit, Sol & Lasting)</option>
+                        <option value="superadmin">Super Admin / Owner (Akses Penuh Finansial & Omzet)</option>
+                        <option value="admin">Admin Biasa / Operasional (Input Data, Produk & Mutasi - Tanpa Finansial)</option>
                         <option value="sales">Sales Force (Penjualan Grosir, Ritel & Negosiasi Deal)</option>
-                        <option value="admin">Administrator (Pemilik & Manajer Workshop)</option>
+                        <option value="craftsman">Pengrajin Bengkel (Tukang Pola, Seset, Jahit, Sol & Lasting)</option>
                     </select>
                     <p v-if="form.errors.role" class="text-rose-600 text-[11px] mt-1">{{ form.errors.role }}</p>
                 </div>

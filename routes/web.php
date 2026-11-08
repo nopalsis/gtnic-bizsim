@@ -24,45 +24,45 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('dashboard');
     });
 
-    // 1. Executive Dashboard (Accessible to all authenticated staff: Admin, Sales, Craftsman)
+    // 1. Dashboard (Accessible to all authenticated staff: Superadmin, Admin, Sales, Craftsman)
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin,sales,craftsman')
+        ->middleware('role:superadmin,admin,sales,craftsman')
         ->name('dashboard');
 
-    // 2. Sales Intelligence & Deal Price History (Accessible to Admin & Sales Force)
-    Route::middleware('role:admin,sales')->group(function () {
+    // 2. Sales Intelligence & Deal Price History (Accessible to Superadmin, Admin & Sales Force)
+    Route::middleware('role:superadmin,admin,sales')->group(function () {
         Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
         Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
     });
 
     // 3. Inventory & Leather Waste Tracker
-    // Read catalog & stock check: Admin, Sales, Craftsman
+    // Read catalog & stock check: Superadmin, Admin, Sales, Craftsman
     Route::get('/inventory', [InventoryController::class, 'index'])
-        ->middleware('role:admin,sales,craftsman')
+        ->middleware('role:superadmin,admin,sales,craftsman')
         ->name('inventory.index');
 
-    // Production floor operations (Waste log & stock movements): Admin & Craftsman
-    Route::middleware('role:admin,craftsman')->group(function () {
+    // Production floor operations (Waste log & stock movements): Superadmin, Admin & Craftsman
+    Route::middleware('role:superadmin,admin,craftsman')->group(function () {
         Route::post('/inventory/waste', [InventoryController::class, 'recordWaste'])->name('inventory.waste');
         Route::post('/inventory/in', [InventoryController::class, 'recordProductionIn'])->name('inventory.in');
         Route::post('/inventory/mutation', [InventoryController::class, 'recordMutation'])->name('inventory.mutation');
     });
 
-    // Master Product Catalog CRUD: Admin Only
-    Route::middleware('role:admin')->group(function () {
+    // Master Product Catalog CRUD: Superadmin & Admin
+    Route::middleware('role:superadmin,admin')->group(function () {
         Route::post('/inventory/product', [InventoryController::class, 'storeProduct'])->name('inventory.product.store');
         Route::put('/inventory/product/{product}', [InventoryController::class, 'updateProduct'])->name('inventory.product.update');
         Route::delete('/inventory/product/{product}', [InventoryController::class, 'destroyProduct'])->name('inventory.product.destroy');
     });
 
-    // 4. What-If Scenario Simulator (Admin Only)
-    Route::middleware('role:admin')->group(function () {
+    // 4. What-If Scenario Simulator (Superadmin Only - Exposes Profit Projections & Financial Margins)
+    Route::middleware('role:superadmin')->group(function () {
         Route::get('/simulator', [SimulatorController::class, 'index'])->name('simulator.index');
         Route::post('/simulator/settings', [SimulatorController::class, 'updateSettings'])->name('simulator.settings');
     });
 
-    // 5. Team & User Management (Admin Only)
-    Route::middleware('role:admin')->group(function () {
+    // 5. Team & User Management (Superadmin Only - Exposes Staff Salaries & Payroll Settings)
+    Route::middleware('role:superadmin')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');

@@ -224,7 +224,15 @@ const toggleUserStatus = (user) => {
                         <!-- Kolom 2: Peran -->
                         <td class="py-3.5 px-3 whitespace-nowrap">
                             <span
-                                v-if="user.role === 'admin'"
+                                v-if="user.role === 'superadmin'"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0e0f0c] text-white text-[11px] font-bold shadow-xs border border-[#c6ef4e]"
+                            >
+                                <span class="material-symbols-outlined text-xs text-[#c6ef4e]">shield_person</span>
+                                Super Admin
+                            </span>
+
+                            <span
+                                v-else-if="user.role === 'admin'"
                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0e0f0c] text-white text-[11px] font-bold shadow-xs"
                             >
                                 <span class="material-symbols-outlined text-xs text-[#c6ef4e]">admin_panel_settings</span>

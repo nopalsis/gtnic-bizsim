@@ -28,10 +28,10 @@ const errors = ref({});
 const isSubmitting = ref(false);
 
 const roles = [
-    { value: 'Administrator', label: 'Administrator (Akses Penuh)' },
-    { value: 'Manager', label: 'Manager (Supervisi Operasional & Finansial)' },
-    { value: 'Operational Staff', label: 'Operational Staff (Pengrajin, Kasir & Gudang)' },
-    { value: 'Contractor', label: 'Contractor (Tukang Jahit / Sol Lepas)' },
+    { value: 'superadmin', label: 'Super Admin (Akses Penuh Finansial & Omzet)' },
+    { value: 'admin', label: 'Admin Biasa (Input Data & Operasional - Tanpa Finansial)' },
+    { value: 'sales', label: 'Sales Force (Penjualan Grosir, Ritel & Nego Deal)' },
+    { value: 'craftsman', label: 'Pengrajin (Craftsman Bengkel)' },
 ];
 
 const statuses = [

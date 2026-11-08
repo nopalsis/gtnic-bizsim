@@ -44,10 +44,16 @@ class EnsureUserRole
             return $next($request);
         }
 
-        // 4. Verifikasi peran pengguna
+        // 4. Superadmin selalu memiliki otorisasi penuh di seluruh modul sistem
+        if ($user->role === 'superadmin') {
+            return $next($request);
+        }
+
+        // 5. Verifikasi peran pengguna
         if (! in_array($user->role, $roles, true)) {
             $roleNames = [
-                'admin' => 'Administrator',
+                'superadmin' => 'Super Administrator (Owner)',
+                'admin' => 'Admin Operasional',
                 'sales' => 'Sales Force',
                 'craftsman' => 'Pengrajin (Craftsman)',
             ];

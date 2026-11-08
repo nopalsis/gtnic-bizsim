@@ -13,10 +13,10 @@ const page = usePage();
 const user = computed(() => page.props.auth?.user || null);
 
 // Otorisasi Visibilitas Menu Berdasarkan Peran
-const canAccessUsers = computed(() => user.value?.role === 'admin');
-const canAccessSales = computed(() => user.value?.role === 'admin' || user.value?.role === 'sales');
-const canAccessInventory = computed(() => true); // Admin, Sales, Craftsman
-const canAccessSimulator = computed(() => user.value?.role === 'admin');
+const canAccessUsers = computed(() => user.value?.role === 'superadmin');
+const canAccessSales = computed(() => ['superadmin', 'admin', 'sales'].includes(user.value?.role));
+const canAccessInventory = computed(() => true); // Superadmin, Admin, Sales, Craftsman
+const canAccessSimulator = computed(() => user.value?.role === 'superadmin');
 
 const getInitials = (name) => {
     if (!name) return '??';
@@ -136,8 +136,10 @@ const handleLogout = () => {
                 <div
                     :class="[
                         'w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shadow-xs select-none border',
-                        user.role === 'admin'
-                            ? 'bg-[#0e0f0c] text-[#c6ef4e] border-[#c6ef4e]/60'
+                        user.role === 'superadmin'
+                            ? 'bg-[#0e0f0c] text-[#c6ef4e] border-[#c6ef4e]'
+                            : user.role === 'admin'
+                            ? 'bg-[#1a1c18] text-[#c6ef4e] border-[#a2c833]'
                             : user.role === 'sales'
                             ? 'bg-[#c9f250]/40 text-[#c6ef4e] border-[#c6ef4e]/40'
                             : 'bg-[#262822] text-neutral-200 border-neutral-700'
