@@ -95,10 +95,10 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Recent Transactions with Margin Analysis for Super Admin
+        // Recent Transactions with Margin Analysis for Super Admin (25 transaksi terakhir untuk pagination dashboard)
         $recentTransactions = Transaction::with(['transactionItems.product'])
             ->latest('transaction_date')
-            ->take(6)
+            ->take(25)
             ->get()
             ->map(function ($tx) {
                 $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.' '.($it->product->unit ?? 'pasang').')')->implode(', ');

@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import SidebarNav from '@/Components/SidebarNav.vue';
 
 const props = defineProps({
@@ -22,6 +22,8 @@ const props = defineProps({
 const searchQuery = ref('');
 const showNewOrderModal = ref(false);
 const isSubmitting = ref(false);
+const currentPage = ref(1);
+const perPage = ref(10);
 
 // Format Currency
 const formatRupiah = (number) => {
@@ -45,6 +47,35 @@ const filteredTransactions = computed(() => {
             tx.sales_person_name?.toLowerCase().includes(q)
     );
 });
+
+// Reset page ke 1 saat user melakukan pencarian
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
+
+const totalPages = computed(() => {
+    return Math.max(1, Math.ceil(filteredTransactions.value.length / perPage.value));
+});
+
+const paginatedTransactions = computed(() => {
+    const start = (currentPage.value - 1) * perPage.value;
+    return filteredTransactions.value.slice(start, start + perPage.value);
+});
+
+const startItemIndex = computed(() => {
+    if (filteredTransactions.value.length === 0) return 0;
+    return (currentPage.value - 1) * perPage.value + 1;
+});
+
+const endItemIndex = computed(() => {
+    return Math.min(currentPage.value * perPage.value, filteredTransactions.value.length);
+});
+
+const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
+};
 
 // New Order Form State
 const newOrder = ref({
@@ -231,7 +262,7 @@ const submitOrder = () => {
                         </thead>
                         <tbody class="divide-y divide-neutral-100">
                             <tr
-                                v-for="tx in filteredTransactions"
+                                v-for="tx in paginatedTransactions"
                                 :key="tx.id"
                                 class="hover:bg-[#fafbf7] transition-colors"
                             >
@@ -288,6 +319,52 @@ const submitOrder = () => {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Kontrol Navigasi Halaman (Pagination) -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-neutral-100 text-xs">
+                    <div class="text-[#737868] font-medium text-[11px]">
+                        Menampilkan <span class="font-bold text-[#0e0f0c]">{{ startItemIndex }} - {{ endItemIndex }}</span> dari <span class="font-bold text-[#0e0f0c]">{{ filteredTransactions.length }}</span> riwayat penjualan
+                    </div>
+
+                    <div v-if="totalPages > 1" class="flex items-center gap-1.5">
+                        <button
+                            type="button"
+                            @click="goToPage(currentPage - 1)"
+                            :disabled="currentPage === 1"
+                            class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer flex items-center gap-1"
+                        >
+                            <span>←</span>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        <div class="flex items-center gap-1">
+                            <button
+                                v-for="p in totalPages"
+                                :key="'page-' + p"
+                                type="button"
+                                @click="goToPage(p)"
+                                :class="[
+                                    'w-8 h-8 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center',
+                                    currentPage === p
+                                        ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
+                                        : 'text-[#737868] hover:bg-neutral-100'
+                                ]"
+                            >
+                                {{ p }}
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            @click="goToPage(currentPage + 1)"
+                            :disabled="currentPage === totalPages"
+                            class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer flex items-center gap-1"
+                        >
+                            <span>Selanjutnya</span>
+                            <span>→</span>
+                        </button>
+                    </div>
                 </div>
             </section>
         </main>

@@ -21,6 +21,27 @@ const emit = defineEmits(['openLedger']);
 const trendPeriod = ref('7d'); // '7d' (7 Hari Terakhir), 'weekly' (Per 7 Hari / Mingguan), 'all_months' (Semua - Per Bulan)
 const hoveredItem = ref(null);
 
+// Pagination Riwayat Transaksi Penjualan Dashboard
+const txCurrentPage = ref(1);
+const txPerPage = ref(5);
+
+const txTotalPages = computed(() => {
+    const list = props.recentTransactions || [];
+    return Math.max(1, Math.ceil(list.length / txPerPage.value));
+});
+
+const paginatedRecentTransactions = computed(() => {
+    const list = props.recentTransactions || [];
+    const start = (txCurrentPage.value - 1) * txPerPage.value;
+    return list.slice(start, start + txPerPage.value);
+});
+
+const goToTxPage = (page) => {
+    if (page >= 1 && page <= txTotalPages.value) {
+        txCurrentPage.value = page;
+    }
+};
+
 const formatRupiah = (number) => {
     if (number === null || number === undefined) return 'Rp 0';
     return new Intl.NumberFormat('id-ID', {
@@ -517,10 +538,10 @@ const maxTrendCount = computed(() => {
                         </button>
                     </div>
 
-                    <!-- Daftar Pesanan -->
+                    <!-- Daftar Pesanan (Paginated 5 per halaman) -->
                     <div class="space-y-2.5">
                         <div
-                            v-for="tx in (props.recentTransactions || []).slice(0, 5)"
+                            v-for="tx in paginatedRecentTransactions"
                             :key="tx.id"
                             class="flex items-center justify-between p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
                         >
@@ -557,15 +578,57 @@ const maxTrendCount = computed(() => {
                     </div>
                 </div>
 
-                <div class="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[10px] text-[#737868]">
-                    <span>Warna hijau: Diskon aman (≤ 10%). Warna kuning: Diskon grosir tinggi.</span>
-                    <button
-                        type="button"
-                        @click="emit('openLedger')"
-                        class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer"
-                    >
-                        Lihat Semua Transaksi
-                    </button>
+                <!-- Footer Pagination & Tautan Buku Penjualan -->
+                <div class="pt-3 mt-3 border-t border-neutral-100 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#737868] gap-2">
+                    <div class="flex items-center gap-2">
+                        <span>Halaman {{ txCurrentPage }} dari {{ txTotalPages }}</span>
+                        <span class="text-neutral-300">·</span>
+                        <button
+                            type="button"
+                            @click="emit('openLedger')"
+                            class="font-bold text-[#0e0f0c] hover:underline cursor-pointer"
+                        >
+                            Buku Catatan Lengkap
+                        </button>
+                    </div>
+
+                    <!-- Tombol Navigasi Pagination Halaman -->
+                    <div v-if="txTotalPages > 1" class="flex items-center gap-1 self-end sm:self-auto">
+                        <button
+                            type="button"
+                            @click="goToTxPage(txCurrentPage - 1)"
+                            :disabled="txCurrentPage === 1"
+                            class="px-2.5 py-1 rounded-lg border border-[#dce0cd] font-bold text-[10px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
+                        >
+                            ← Prev
+                        </button>
+
+                        <div class="flex items-center gap-1">
+                            <button
+                                v-for="pg in txTotalPages"
+                                :key="'tx-pg-' + pg"
+                                type="button"
+                                @click="goToTxPage(pg)"
+                                :class="[
+                                    'w-6 h-6 rounded-md font-bold text-[10px] flex items-center justify-center transition-all cursor-pointer',
+                                    txCurrentPage === pg
+                                        ? 'bg-[#0e0f0c] text-[#c6ef4e]'
+                                        : 'text-[#737868] hover:bg-neutral-100'
+                                ]"
+                            >
+                                {{ pg }}
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            @click="goToTxPage(txCurrentPage + 1)"
+                            :disabled="txCurrentPage === txTotalPages"
+                            class="px-2.5 py-1 rounded-lg border border-[#dce0cd] font-bold text-[10px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
+                        >
+                            Next →
+                        </button>
+                    </div>
                 </div>
             </div>
 
