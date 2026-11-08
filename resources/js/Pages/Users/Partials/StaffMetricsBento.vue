@@ -62,7 +62,7 @@ const formatRupiah = (number) => {
 
             <div class="mt-2.5 pt-2 border-t border-[#f4f4ed]">
                 <div class="flex items-center justify-between text-[11px]">
-                    <span class="font-body text-[#868b7d]">Est. Payroll:</span>
+                    <span class="font-body text-[#868b7d]">Perkiraan Gaji:</span>
                     <span class="font-headline font-bold text-[#0e0f0c]">
                         {{ formatRupiah(metrics.total_monthly_payroll_est) }}
                     </span>
@@ -86,14 +86,14 @@ const formatRupiah = (number) => {
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <span class="font-label text-[10px] md:text-[11px] font-bold text-[#868b7d] uppercase tracking-wider block">
-                        Sales Force & Deals
+                        Tim Sales & Kasir
                     </span>
                     <div class="flex items-baseline gap-2 mt-0.5">
                         <span class="font-headline text-2xl md:text-[26px] font-black text-[#0e0f0c] leading-tight">
                             {{ metrics.total_sales }}
                         </span>
                         <span class="font-body text-[10px] md:text-[11px] text-[#506600] font-semibold bg-[#c9f250]/40 px-2 py-0.5 rounded-full inline-block">
-                            {{ metrics.total_sales_deals }} Deals Bln Ini
+                            {{ metrics.total_sales_deals }} Penjualan Bulan Ini
                         </span>
                     </div>
                 </div>
@@ -105,13 +105,13 @@ const formatRupiah = (number) => {
 
             <div class="mt-2.5 pt-2 border-t border-[#f4f4ed]">
                 <div class="flex items-center justify-between text-[11px]">
-                    <span class="font-body text-[#868b7d]">Omzet Sales:</span>
+                    <span class="font-body text-[#868b7d]">Penjualan Sales:</span>
                     <span class="font-headline font-bold text-[#0e0f0c]">
                         {{ formatRupiah(metrics.total_sales_revenue) }}
                     </span>
                 </div>
                 <div class="text-[10px] text-[#868b7d] mt-1.5 truncate">
-                    Pesanan ritel & partai grosir berjalan
+                    Penjualan eceran dan pesanan partai grosir
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@ const formatRupiah = (number) => {
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <span class="font-label text-[10px] md:text-[11px] font-bold text-[#868b7d] uppercase tracking-wider block">
-                        Pengrajin & Kapasitas
+                        Tukang Sepatu & Kapasitas
                     </span>
                     <div class="flex items-baseline gap-2 mt-0.5">
                         <span class="font-headline text-2xl md:text-[26px] font-black text-[#0e0f0c] leading-tight">
@@ -140,7 +140,7 @@ const formatRupiah = (number) => {
 
             <div class="mt-2.5 pt-2 border-t border-[#f4f4ed]">
                 <div class="flex items-center justify-between text-[11px] mb-1.5">
-                    <span class="font-body text-[#868b7d]">Beban Kapasitas:</span>
+                    <span class="font-body text-[#868b7d]">Kapasitas Terpakai:</span>
                     <span class="font-headline font-bold text-[#0e0f0c]">
                         {{ metrics.total_craftsmen_pairs }}/{{ metrics.monthly_max_capacity }} psg ({{ metrics.capacity_utilization }}%)
                     </span>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +20,11 @@ class InventoryController extends Controller
     public function index(): Response
     {
         // 1. Katalog Produk & Material dengan status stok dan tipe kategori
-        $rawCategories = ['Bahan Baku Kulit', 'Komponen Sol', 'Bahan Pendukung'];
+        $categoriesList = Category::where('is_active', true)->orderBy('type')->orderBy('name')->get();
+        $rawCategories = $categoriesList->where('type', 'raw')->pluck('name')->toArray();
+        if (empty($rawCategories)) {
+            $rawCategories = ['Bahan Baku Kulit', 'Komponen Sol', 'Bahan Pendukung'];
+        }
 
         $products = Product::orderBy('category')
             ->orderBy('name')
@@ -128,6 +133,12 @@ class InventoryController extends Controller
                 'wasteChangePct' => '-4.2% efisiensi sisa membaik',
             ],
             'advisory' => $advisory,
+            'categories' => $categoriesList->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'type' => $c->type,
+                'prefix_sku' => $c->prefix_sku,
+            ]),
         ]);
     }
 
@@ -142,13 +153,19 @@ class InventoryController extends Controller
             'category' => 'required|string|max:100',
             'unit' => 'required|string|max:30',
             'cost_price' => 'required|numeric|min:0',
-            'base_price' => 'required|numeric|min:0',
+            'base_price' => 'nullable|numeric|min:0',
             'current_stock' => 'required|integer|min:0',
             'min_stock_alert' => 'required|integer|min:0',
         ]);
 
+        $isRaw = Category::where('name', $validated['category'])->where('type', 'raw')->exists()
+            || in_array($validated['category'], ['Bahan Baku Kulit', 'Komponen Sol', 'Bahan Pendukung'], true);
+
+        $validated['base_price'] = $isRaw ? 0.00 : (float) ($validated['base_price'] ?? 0);
+
         if (empty($validated['sku'])) {
-            $prefix = match ($validated['category']) {
+            $foundCat = Category::where('name', $validated['category'])->first();
+            $prefix = $foundCat?->prefix_sku ?: match ($validated['category']) {
                 'Bahan Baku Kulit' => 'RAW-LEA',
                 'Komponen Sol' => 'CMP-SOL',
                 'Bahan Pendukung' => 'SUP-CHM',
@@ -196,9 +213,14 @@ class InventoryController extends Controller
             'category' => 'required|string|max:100',
             'unit' => 'required|string|max:30',
             'cost_price' => 'required|numeric|min:0',
-            'base_price' => 'required|numeric|min:0',
+            'base_price' => 'nullable|numeric|min:0',
             'min_stock_alert' => 'required|integer|min:0',
         ]);
+
+        $isRaw = Category::where('name', $validated['category'])->where('type', 'raw')->exists()
+            || in_array($validated['category'], ['Bahan Baku Kulit', 'Komponen Sol', 'Bahan Pendukung'], true);
+
+        $validated['base_price'] = $isRaw ? 0.00 : (float) ($validated['base_price'] ?? 0);
 
         $product->update($validated);
 

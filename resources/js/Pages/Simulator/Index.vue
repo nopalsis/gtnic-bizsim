@@ -137,7 +137,7 @@ const submitSettings = () => {
 </script>
 
 <template>
-    <Head title="What-If Scenario Simulator · OptimaBiz" />
+    <Head title="Simulasi Usaha & Pesanan · OptimaBiz" />
 
     <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
@@ -150,10 +150,10 @@ const submitSettings = () => {
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">What-If Scenario Simulator</h1>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Simulasi Keputusan Bisnis</span>
+                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">Simulasi Usaha & Pesanan</h1>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Hitung Cepat Dampak Keuntungan</span>
                     </div>
-                    <p class="text-xs text-neutral-500 font-medium mt-1">Uji dampak perubahan harga jual, kapasitas produksi pengrajin, beban tetap, dan efisiensi waste terhadap profitabilitas</p>
+                    <p class="text-xs text-neutral-500 font-medium mt-1">Coba hitung perkiraan untung atau rugi jika menambah pesanan, mengubah harga jual, atau menambah tukang</p>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -162,14 +162,14 @@ const submitSettings = () => {
                         @click="resetSimulation"
                         class="bg-white hover:bg-neutral-50 text-[#0e0f0c] border border-neutral-300 text-xs font-bold px-4 py-2.5 rounded-full transition cursor-pointer shadow-sm"
                     >
-                        Reset Slider
+                        Kembalikan ke Semula
                     </button>
                     <button
                         type="button"
                         @click="showSettingsModal = true"
                         class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-4 py-2.5 rounded-full transition cursor-pointer shadow-sm"
                     >
-                        ⚙️ Atur Biaya Operasional
+                        ⚙️ Atur Biaya & Tukang
                     </button>
                 </div>
             </header>
@@ -177,26 +177,26 @@ const submitSettings = () => {
             <!-- Dynamic Lime Insight Banner -->
             <section class="bg-[#c6ef4e] rounded-[28px] p-6 border border-[#b2db3a] shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-800">Proyeksi Laba Bersih Skenario</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-800">Perkiraan Keuntungan Bersih Baru</span>
                     <div class="text-3xl font-black text-[#0e0f0c] mt-1 tabular-nums">
                         {{ formatRupiah(projectedNetProfit) }}
                     </div>
                     <p class="text-xs text-neutral-800 font-semibold mt-1">
-                        Dampak skenario:
+                        Perubahan untung:
                         <span :class="netProfitDifference >= 0 ? 'text-emerald-950 font-black' : 'text-rose-950 font-black'">
                             {{ netProfitDifference >= 0 ? '+' : '' }}{{ formatRupiah(netProfitDifference) }} ({{ netProfitDifference >= 0 ? '+' : '' }}{{ netProfitPctChange }}%)
                         </span>
-                        dibandingkan baseline riil saat ini.
+                        dibanding kondisi saat ini.
                     </p>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <div class="bg-black/10 px-4 py-2 rounded-2xl border border-black/15 text-right">
-                        <div class="text-[10px] font-bold text-neutral-800 uppercase">Beban Kapasitas</div>
+                        <div class="text-[10px] font-bold text-neutral-800 uppercase">Kapasitas Tukang</div>
                         <div class="text-base font-black text-[#0e0f0c]">{{ projectedCapacityUsage }}%</div>
                     </div>
                     <div class="bg-black/10 px-4 py-2 rounded-2xl border border-black/15 text-right">
-                        <div class="text-[10px] font-bold text-neutral-800 uppercase">Target Impas (BEP)</div>
+                        <div class="text-[10px] font-bold text-neutral-800 uppercase">Batas Balik Modal</div>
                         <div class="text-base font-black text-[#0e0f0c]">{{ formatRupiah(projectedBep) }}</div>
                     </div>
                 </div>
@@ -207,14 +207,14 @@ const submitSettings = () => {
                 <!-- Sliders Panel - Col 5 -->
                 <div class="lg:col-span-5 bg-white rounded-[28px] p-6 border border-[#dce0cd] shadow-sm space-y-5">
                     <div class="border-b border-neutral-100 pb-3">
-                        <h2 class="text-base font-black text-[#0e0f0c]">Parameter Simulasi Interaktif</h2>
-                        <p class="text-xs text-neutral-400">Geser slider untuk melihat dampak proyeksi secara instan</p>
+                        <h2 class="text-base font-black text-[#0e0f0c]">Pengaturan Simulasi</h2>
+                        <p class="text-xs text-neutral-400">Geser tombol pengatur untuk melihat perkiraan hasilnya langsung</p>
                     </div>
 
                     <!-- Slider 1: Penyesuaian Harga Jual -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Penyesuaian Harga Jual (Katalog / Deal)</span>
+                            <span class="text-neutral-700">Naik / Turunkan Harga Jual</span>
                             <span :class="priceAdjustmentPct >= 0 ? 'text-emerald-600 font-black' : 'text-rose-600 font-black'">
                                 {{ priceAdjustmentPct >= 0 ? '+' : '' }}{{ priceAdjustmentPct }}%
                             </span>
@@ -237,7 +237,7 @@ const submitSettings = () => {
                     <!-- Slider 2: Volume Penjualan / Produksi -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Volume Penjualan (Kuantitas Pasang)</span>
+                            <span class="text-neutral-700">Tambah / Kurangi Jumlah Pasang</span>
                             <span :class="volumeAdjustmentPct >= 0 ? 'text-emerald-600 font-black' : 'text-rose-600 font-black'">
                                 {{ volumeAdjustmentPct >= 0 ? '+' : '' }}{{ volumeAdjustmentPct }}% ({{ projectedVolume }} pasang)
                             </span>
@@ -252,7 +252,7 @@ const submitSettings = () => {
                         />
                         <div class="flex justify-between text-[10px] text-neutral-400">
                             <span>-50%</span>
-                            <span>Baseline</span>
+                            <span>Saat Ini</span>
                             <span>+100%</span>
                         </div>
                     </div>
@@ -260,7 +260,7 @@ const submitSettings = () => {
                     <!-- Slider 3: Jumlah Pengrajin Sepatu -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Jumlah Pengrajin Workshop</span>
+                            <span class="text-neutral-700">Jumlah Tukang Sepatu</span>
                             <span class="font-black text-[#0e0f0c]">{{ simEmployeeCount }} Orang</span>
                         </div>
                         <input
@@ -273,7 +273,7 @@ const submitSettings = () => {
                         />
                         <div class="flex justify-between text-[10px] text-neutral-400">
                             <span>1 Orang</span>
-                            <span>Baseline: {{ props.baseline?.employeeCount || 5 }}</span>
+                            <span>Saat ini: {{ props.baseline?.employeeCount || 5 }} orang</span>
                             <span>15 Orang</span>
                         </div>
                     </div>
@@ -281,7 +281,7 @@ const submitSettings = () => {
                     <!-- Slider 4: Efisiensi Waste / Penekanan Cacat Bahan -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Penekanan Reject QC / Waste Kulit</span>
+                            <span class="text-neutral-700">Pengurangan Bahan Kulit Rusak</span>
                             <span class="text-emerald-600 font-black">Hemat {{ simWasteReductionPct }}%</span>
                         </div>
                         <input
@@ -293,9 +293,9 @@ const submitSettings = () => {
                             class="w-full accent-[#0e0f0c] cursor-pointer"
                         />
                         <div class="flex justify-between text-[10px] text-neutral-400">
-                            <span>0% (Tetap)</span>
-                            <span>40% QC Ketat</span>
-                            <span>80% Nyaris Nol</span>
+                            <span>0% (Sama seperti biasa)</span>
+                            <span>Hemat 40%</span>
+                            <span>Hemat 80% (Hampir Nol)</span>
                         </div>
                     </div>
                 </div>
@@ -304,11 +304,11 @@ const submitSettings = () => {
                 <div class="lg:col-span-7 bg-white rounded-[28px] p-6 border border-[#dce0cd] shadow-sm space-y-4">
                     <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Tabel Perbandingan Dampak: Before vs After</h2>
-                            <p class="text-xs text-neutral-400">Analisis metrik finansial real-time</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Perbandingan Sebelum vs Sesudah Simulasi</h2>
+                            <p class="text-xs text-neutral-400">Perkiraan perubahan penjualan, biaya bengkel, dan keuntungan</p>
                         </div>
                         <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#f4f5ee] text-[#0e0f0c]">
-                            Simulasi Aktif
+                            Hasil Hitungan
                         </span>
                     </div>
 
@@ -316,15 +316,15 @@ const submitSettings = () => {
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr class="border-b border-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                                    <th class="py-2.5 px-3">Metrik Finansial</th>
-                                    <th class="py-2.5 px-3 text-right">Kondisi Riil (Before)</th>
-                                    <th class="py-2.5 px-3 text-right">Simulasi (After)</th>
-                                    <th class="py-2.5 px-3 text-right">Perubahan</th>
+                                    <th class="py-2.5 px-3">Keterangan</th>
+                                    <th class="py-2.5 px-3 text-right">Kondisi Sekarang</th>
+                                    <th class="py-2.5 px-3 text-right">Hasil Simulasi</th>
+                                    <th class="py-2.5 px-3 text-right">Selisih</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-100">
                                 <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Volume Terjual</td>
+                                    <td class="py-3 px-3 font-semibold text-neutral-700">Jumlah Sepatu Terjual</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ props.baseline?.totalItemsSold || 0 }} Pasang</td>
                                     <td class="py-3 px-3 text-right font-black text-[#0e0f0c] tabular-nums">{{ projectedVolume }} Pasang</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-600">
@@ -340,7 +340,7 @@ const submitSettings = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Total Omzet Bersih</td>
+                                    <td class="py-3 px-3 font-semibold text-neutral-700">Total Penjualan Bersih</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.netRevenue) }}</td>
                                     <td class="py-3 px-3 text-right font-black text-[#0e0f0c] tabular-nums">{{ formatRupiah(projectedRevenue) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-600">
@@ -348,7 +348,7 @@ const submitSettings = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Total HPP Bahan Kulit</td>
+                                    <td class="py-3 px-3 font-semibold text-neutral-700">Biaya Bahan Kulit & Sol</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.cogs) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-700 tabular-nums">{{ formatRupiah(projectedCogs) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500">
@@ -356,7 +356,7 @@ const submitSettings = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Beban Operasional Tetap (Opex)</td>
+                                    <td class="py-3 px-3 font-semibold text-neutral-700">Gaji Tukang & Sewa Bengkel</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.totalFixedOpex) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-700 tabular-nums">{{ formatRupiah(projectedFixedCost) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500">
@@ -364,7 +364,7 @@ const submitSettings = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Kerugian Waste Material</td>
+                                    <td class="py-3 px-3 font-semibold text-neutral-700">Bahan Rusak / Sisa Kulit</td>
                                     <td class="py-3 px-3 text-right font-bold text-rose-500 tabular-nums">{{ formatRupiah(props.baseline?.wasteCost) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-700 tabular-nums">{{ formatRupiah(projectedWasteCost) }}</td>
                                     <td class="py-3 px-3 text-right font-bold text-emerald-600">
@@ -372,7 +372,7 @@ const submitSettings = () => {
                                     </td>
                                 </tr>
                                 <tr class="bg-[#fafbf7]">
-                                    <td class="py-3 px-3 font-black text-[#0e0f0c]">Laba Bersih (Net Profit)</td>
+                                    <td class="py-3 px-3 font-black text-[#0e0f0c]">Keuntungan Bersih (Laba)</td>
                                     <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.netProfit) }}</td>
                                     <td class="py-3 px-3 text-right font-black text-xl text-[#0e0f0c] tabular-nums">{{ formatRupiah(projectedNetProfit) }}</td>
                                     <td class="py-3 px-3 text-right font-black" :class="netProfitDifference >= 0 ? 'text-emerald-700' : 'text-rose-700'">
@@ -395,8 +395,8 @@ const submitSettings = () => {
             <div class="bg-white rounded-[28px] w-full max-w-lg shadow-2xl border border-[#dce0cd] overflow-hidden">
                 <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
                     <div>
-                        <h3 class="text-xl font-black text-[#0e0f0c]">Pengaturan Baseline Operasional</h3>
-                        <p class="text-xs text-neutral-500 mt-0.5">Konfigurasi kapasitas dan biaya tetap bulanan workshop</p>
+                        <h3 class="text-xl font-black text-[#0e0f0c]">Pengaturan Biaya Bengkel & Kapasitas</h3>
+                        <p class="text-xs text-neutral-500 mt-0.5">Atur jumlah tukang, gaji, biaya sewa, dan kapasitas maksimal sepatu per bulan</p>
                     </div>
                     <button
                         type="button"
@@ -409,7 +409,7 @@ const submitSettings = () => {
 
                 <div class="p-6 space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-neutral-600 mb-1">Nama Bengkel / Workshop</label>
+                        <label class="block text-[11px] font-bold text-neutral-600 mb-1">Nama Bengkel Sepatu</label>
                         <input
                             v-model="settingsForm.workshop_name"
                             type="text"
@@ -418,7 +418,7 @@ const submitSettings = () => {
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Jumlah Pengrajin</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Jumlah Tukang</label>
                             <input
                                 v-model.number="settingsForm.employee_count"
                                 type="number"
@@ -427,7 +427,7 @@ const submitSettings = () => {
                             />
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Gaji per Pengrajin (Rp)</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Gaji per Tukang (Rp)</label>
                             <input
                                 v-model.number="settingsForm.salary_per_employee"
                                 type="number"
@@ -439,7 +439,7 @@ const submitSettings = () => {
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Sewa Bengkel & Listrik (Rp)</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Biaya Sewa & Listrik (Rp)</label>
                             <input
                                 v-model.number="settingsForm.monthly_fixed_cost"
                                 type="number"
@@ -448,7 +448,7 @@ const submitSettings = () => {
                             />
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Kapasitas Maksimal (Pasang/Bln)</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Kapasitas Maksimal (Pasang/Bulan)</label>
                             <input
                                 v-model.number="settingsForm.monthly_max_capacity"
                                 type="number"

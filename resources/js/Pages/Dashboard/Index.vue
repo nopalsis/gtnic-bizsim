@@ -36,18 +36,18 @@ const activeRole = computed(() => {
 
 const pageTitle = computed(() => {
     if (activeRole.value === 'superadmin') {
-        return 'Executive & Financial Dashboard (Super Admin) · OptimaBiz';
+        return 'Super Admin · Laporan & Keuangan · OptimaBiz';
     }
     if (activeRole.value === 'admin') {
-        return 'Admin Operasional · Input & Workflow · OptimaBiz';
+        return 'Admin Toko · Pencatatan Harian · OptimaBiz';
     }
     if (activeRole.value === 'sales') {
-        return 'Sales Performance & Deals · OptimaBiz';
+        return 'Sales & Kasir · Penjualan · OptimaBiz';
     }
     if (activeRole.value === 'craftsman') {
-        return 'Workshop Operations & Production · OptimaBiz';
+        return 'Pengrajin Sepatu · Catatan Kerja · OptimaBiz';
     }
-    return 'Dashboard · OptimaBiz';
+    return 'Halaman Utama · OptimaBiz';
 });
 
 // Modal State for Super Admin Ledger

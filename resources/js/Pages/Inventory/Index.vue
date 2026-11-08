@@ -31,6 +31,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    categories: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 // Modal States
@@ -113,6 +117,7 @@ const confirmDeleteProduct = (product) => {
     <AddEditProductModal
         :show="showAddEditModal"
         :product="editingProduct"
+        :categories="props.categories"
         @close="showAddEditModal = false"
     />
 

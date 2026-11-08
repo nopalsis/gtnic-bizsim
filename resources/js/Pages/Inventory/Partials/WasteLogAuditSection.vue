@@ -43,11 +43,11 @@ const getWasteIcon = (notes) => {
                         <div class="flex items-center gap-1.5 mb-0.5">
                             <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                             <span class="text-[10px] uppercase tracking-wider font-bold text-rose-600">
-                                Log Pencatatan Limbah Terakhir
+                                Catatan Bahan Rusak & Sisa Kulit
                             </span>
                         </div>
                         <h2 class="text-sm md:text-base font-bold text-[#0e0f0c]">
-                            Residu & Kegagalan Pola Potong
+                            Daftar Bahan Rusak Terakhir
                         </h2>
                     </div>
 
@@ -56,7 +56,7 @@ const getWasteIcon = (notes) => {
                         @click="$emit('openWasteModal')"
                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f4ec] border border-[#dce0cd] text-xs font-semibold text-[#0e0f0c] hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all cursor-pointer"
                     >
-                        <span>Buka Form Limbah</span>
+                        <span>+ Catat Bahan Rusak</span>
                         <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
                     </button>
                 </div>
@@ -92,13 +92,13 @@ const getWasteIcon = (notes) => {
                     </div>
 
                     <div v-if="props.recentWasteLogs.length === 0" class="py-6 text-center text-[#737868]">
-                        <p class="text-xs font-medium">Belum ada riwayat limbah yang tercatat bulan ini.</p>
+                        <p class="text-xs font-medium">Belum ada catatan bahan rusak bulan ini.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Panel Kanan: Advisori Optimasi Bahan (AI Material Advisory Card) -->
+        <!-- Panel Kanan: Saran Penghematan Bahan -->
         <div class="lg:col-span-4 bg-[#0e0f0c] text-white rounded-2xl p-4 md:p-5 shadow-xs flex flex-col justify-between relative overflow-hidden">
             <!-- Decorative Glow Ring -->
             <div class="absolute -right-10 -bottom-10 w-36 h-36 rounded-full bg-[#c6ef4e]/20 blur-2xl pointer-events-none"></div>
@@ -107,29 +107,29 @@ const getWasteIcon = (notes) => {
                 <div class="flex items-center gap-2 mb-2">
                     <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
                     <span class="text-[10px] text-[#c6ef4e] uppercase tracking-wider font-bold">
-                        Advisori Optimasi Bahan
+                        Saran Penghematan Bahan
                     </span>
                 </div>
 
                 <h3 class="text-base md:text-lg font-bold text-white mb-1.5 leading-snug">
-                    {{ props.advisory?.title || 'Gunakan Residu Potongan Kulit Nabati untuk Gantungan Kunci & Dompet Kartu' }}
+                    {{ props.advisory?.title || 'Gunakan Sisa Potongan Kulit untuk Gantungan Kunci & Dompet Kartu' }}
                 </h3>
 
                 <p class="text-xs text-[#eaecdf]/80 mb-3 leading-relaxed">
-                    {{ props.advisory?.description || 'Residu sisa potongan lembaran kulit berukuran >10cm² dapat diolah kembali menjadi produk turunan mikro senilai Rp 350.000 dibanding dicatat sebagai kerugian murni.' }}
+                    {{ props.advisory?.description || 'Sisa potongan kulit yang berukuran sedang bisa dibuat menjadi produk kecil seperti dompet kartu atau gantungan kunci agar tidak terbuang sia-sia.' }}
                 </p>
             </div>
 
             <div class="pt-3 flex items-center justify-between border-t border-neutral-800 relative z-10">
                 <span class="text-xs text-[#c6ef4e] font-bold">
-                    {{ props.advisory?.efficiency_gain || 'Efisiensi +18.2%' }}
+                    {{ props.advisory?.efficiency_gain || 'Hemat +18.2%' }}
                 </span>
 
                 <Link
                     :href="props.advisory?.action_url || '/simulator'"
                     class="px-4 py-2 rounded-full bg-[#c6ef4e] text-[#0e0f0c] hover:bg-white text-xs font-bold transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
                 >
-                    <span>{{ props.advisory?.action_label || 'Simulasikan Daur Residu' }}</span>
+                    <span>{{ props.advisory?.action_label || 'Coba di Simulator' }}</span>
                     <span class="material-symbols-outlined text-[15px]">trending_up</span>
                 </Link>
             </div>

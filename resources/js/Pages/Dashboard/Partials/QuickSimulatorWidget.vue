@@ -67,28 +67,28 @@ const projectedCapacityUsage = computed(() => {
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <span class="w-8 h-8 rounded-xl bg-[#0e0f0c] text-[#c6ef4e] flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[18px]">tune</span>
+                        <span class="material-symbols-outlined text-[18px]">calculate</span>
                     </span>
                     <div>
-                        <h3 class="text-sm font-black text-[#0e0f0c]">Quick Simulator Order Partai</h3>
-                        <p class="text-[11px] text-[#737868]">Uji instan penawaran harga & kuantitas pesanan baru</p>
+                        <h3 class="text-sm font-black text-[#0e0f0c]">Hitung Cepat Pesanan Grosir</h3>
+                        <p class="text-[11px] text-[#737868]">Perkiraan tambahan uang dan untung jika ada pesanan partai</p>
                     </div>
                 </div>
                 <Link
                     href="/simulator"
                     class="text-[11px] font-bold text-[#0e0f0c] hover:underline flex items-center gap-1"
                 >
-                    Simulator Lengkap
+                    Kalkulator Lengkap
                     <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </Link>
             </div>
 
-            <!-- Sliders Grid -->
+            <!-- Geser Input Sliders -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <!-- Additional Pairs Slider -->
+                <!-- Tambahan Pasang -->
                 <div class="bg-[#f4f4ed] p-3 rounded-2xl border border-[#e1e5d3]">
                     <div class="flex items-center justify-between text-xs font-bold text-[#0e0f0c] mb-1.5">
-                        <span class="text-[#737868]">Kuantitas Tambahan</span>
+                        <span class="text-[#737868]">Berapa Pasang Tambahan?</span>
                         <span class="px-2 py-0.5 rounded-full bg-white text-[#0e0f0c] border border-[#dce0cd] font-black">
                             +{{ additionalPairs }} Pasang
                         </span>
@@ -108,10 +108,10 @@ const projectedCapacityUsage = computed(() => {
                     </div>
                 </div>
 
-                <!-- Negotiated Discount Slider -->
+                <!-- Diskon Nego -->
                 <div class="bg-[#f4f4ed] p-3 rounded-2xl border border-[#e1e5d3]">
                     <div class="flex items-center justify-between text-xs font-bold text-[#0e0f0c] mb-1.5">
-                        <span class="text-[#737868]">Diskon Tawar (Nego)</span>
+                        <span class="text-[#737868]">Diskon yang Diminta</span>
                         <span
                             :class="[
                                 'px-2 py-0.5 rounded-full border font-black',
@@ -132,29 +132,29 @@ const projectedCapacityUsage = computed(() => {
                         class="w-full accent-[#0e0f0c] cursor-pointer"
                     />
                     <div class="flex justify-between text-[10px] text-[#737868] mt-1 font-medium">
-                        <span>0% (Penuh)</span>
+                        <span>0% (Harga Pas)</span>
                         <span>10% (Aman)</span>
-                        <span>25% (Risiko)</span>
+                        <span>25% (Risiko Rugi)</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Projection Impact Matrix -->
+            <!-- Hasil Perkiraan -->
             <div class="grid grid-cols-3 gap-2.5 pt-2">
                 <div class="bg-[#fafbf7] p-2.5 rounded-xl border border-[#e1e5d3] text-center">
-                    <span class="text-[10px] font-bold text-[#737868] uppercase block">Harga Deal / Psg</span>
+                    <span class="text-[10px] font-bold text-[#737868] uppercase block">Harga Sepakat / Psg</span>
                     <span class="text-xs font-black text-[#0e0f0c] block mt-0.5">
                         {{ formatRupiah(simulatedDealPrice) }}
                     </span>
                 </div>
                 <div class="bg-[#fafbf7] p-2.5 rounded-xl border border-[#e1e5d3] text-center">
-                    <span class="text-[10px] font-bold text-[#737868] uppercase block">Tambahan Omzet</span>
+                    <span class="text-[10px] font-bold text-[#737868] uppercase block">Tambahan Penjualan</span>
                     <span class="text-xs font-black text-emerald-700 block mt-0.5">
                         +{{ formatRupiah(additionalRevenue) }}
                     </span>
                 </div>
                 <div class="bg-[#0e0f0c] p-2.5 rounded-xl text-center text-white">
-                    <span class="text-[10px] font-bold text-[#c6ef4e] uppercase block">Proyeksi Δ Laba</span>
+                    <span class="text-[10px] font-bold text-[#c6ef4e] uppercase block">Perkiraan Tambah Untung</span>
                     <span class="text-xs font-black text-white block mt-0.5">
                         +{{ formatRupiah(additionalProfit) }}
                     </span>
@@ -162,11 +162,11 @@ const projectedCapacityUsage = computed(() => {
             </div>
         </div>
 
-        <!-- Capacity Warning / Status Indicator -->
+        <!-- Indikator Beban Tukang -->
         <div class="mt-4 pt-3 border-t border-[#f0f1eb] flex items-center justify-between text-xs">
             <div class="flex items-center gap-1.5 text-[#737868]">
                 <span class="material-symbols-outlined text-[16px]">precision_manufacturing</span>
-                <span>Beban Kapasitas:</span>
+                <span>Kapasitas Tukang:</span>
                 <span class="font-bold text-[#0e0f0c]">{{ totalProjectedVolume }} / {{ props.baseline?.maxCapacity || 500 }} Pasang</span>
             </div>
             <span
@@ -184,4 +184,3 @@ const projectedCapacityUsage = computed(() => {
         </div>
     </div>
 </template>
-

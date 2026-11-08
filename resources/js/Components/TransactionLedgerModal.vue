@@ -66,8 +66,8 @@ const handleExport = () => {
             <!-- Header -->
             <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
                 <div>
-                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Besar Penjualan Sepatu & Sandal</h3>
-                    <p class="text-xs text-neutral-500 mt-0.5">Daftar riil seluruh transaksi eceran & wholesale dari database</p>
+                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Catatan Penjualan</h3>
+                    <p class="text-xs text-neutral-500 mt-0.5">Daftar lengkap seluruh transaksi penjualan eceran & pesanan grosir</p>
                 </div>
                 <button
                     type="button"
@@ -83,7 +83,7 @@ const handleExport = () => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Cari nomor invoice, nama pelanggan/toko, sales, atau model sepatu..."
+                    placeholder="Cari nomor nota, nama pembeli/toko, sales, atau model sepatu..."
                     class="w-full bg-[#f4f5ee] rounded-xl px-4 py-2.5 text-xs font-semibold border-0 focus:ring-2 focus:ring-[#0e0f0c] outline-none"
                 />
                 <button
