@@ -1,6 +1,4 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
-
 const props = defineProps({
     recentWasteLogs: {
         type: Array,
@@ -34,9 +32,9 @@ const getWasteIcon = (notes) => {
 </script>
 
 <template>
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <!-- Panel Kiri: Residu & Kegagalan Pola Potong (Log Pencatatan Limbah Terakhir) -->
-        <div class="lg:col-span-8 bg-white rounded-2xl p-4 md:p-5 shadow-xs border border-[#dce0cd] flex flex-col justify-between">
+    <section class="w-full">
+        <!-- Log Pencatatan Limbah Terakhir -->
+        <div class="bg-white rounded-2xl p-4 md:p-5 shadow-xs border border-[#dce0cd] flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-[#dce0cd]">
                     <div>
@@ -95,43 +93,6 @@ const getWasteIcon = (notes) => {
                         <p class="text-xs font-medium">Belum ada catatan bahan rusak bulan ini.</p>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Panel Kanan: Saran Penghematan Bahan -->
-        <div class="lg:col-span-4 bg-[#0e0f0c] text-white rounded-2xl p-4 md:p-5 shadow-xs flex flex-col justify-between relative overflow-hidden">
-            <!-- Decorative Glow Ring -->
-            <div class="absolute -right-10 -bottom-10 w-36 h-36 rounded-full bg-[#c6ef4e]/20 blur-2xl pointer-events-none"></div>
-
-            <div class="relative z-10">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
-                    <span class="text-[10px] text-[#c6ef4e] uppercase tracking-wider font-bold">
-                        Saran Penghematan Bahan
-                    </span>
-                </div>
-
-                <h3 class="text-base md:text-lg font-bold text-white mb-1.5 leading-snug">
-                    {{ props.advisory?.title || 'Gunakan Sisa Potongan Kulit untuk Gantungan Kunci & Dompet Kartu' }}
-                </h3>
-
-                <p class="text-xs text-[#eaecdf]/80 mb-3 leading-relaxed">
-                    {{ props.advisory?.description || 'Sisa potongan kulit yang berukuran sedang bisa dibuat menjadi produk kecil seperti dompet kartu atau gantungan kunci agar tidak terbuang sia-sia.' }}
-                </p>
-            </div>
-
-            <div class="pt-3 flex items-center justify-between border-t border-neutral-800 relative z-10">
-                <span class="text-xs text-[#c6ef4e] font-bold">
-                    {{ props.advisory?.efficiency_gain || 'Hemat +18.2%' }}
-                </span>
-
-                <Link
-                    :href="props.advisory?.action_url || '/simulator'"
-                    class="px-4 py-2 rounded-full bg-[#c6ef4e] text-[#0e0f0c] hover:bg-white text-xs font-bold transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
-                >
-                    <span>{{ props.advisory?.action_label || 'Coba di Simulator' }}</span>
-                    <span class="material-symbols-outlined text-[15px]">trending_up</span>
-                </Link>
             </div>
         </div>
     </section>
