@@ -9,6 +9,7 @@ const props = defineProps({
     categorySales: Array,
     costDistribution: Array,
     recentTransactions: Array,
+    topProducts: Array,
     trendHistory: Array,
     healthScore: Object,
     alerts: Array,
@@ -17,7 +18,8 @@ const props = defineProps({
 
 const emit = defineEmits(['openLedger']);
 
-const hoveredTrendPoint = ref(null);
+const trendPeriod = ref('7d'); // '7d' (7 Hari Terakhir), 'weekly' (Per 7 Hari / Mingguan), 'all_months' (Semua - Per Bulan)
+const hoveredItem = ref(null);
 
 const formatRupiah = (number) => {
     if (number === null || number === undefined) return 'Rp 0';
@@ -29,52 +31,98 @@ const formatRupiah = (number) => {
     }).format(number);
 };
 
-// Bézier Chart Computations
-const trendDataPoints = computed(() => {
+// Data Grafik Batang Adaptif (Harian, Per 7 Hari/Mingguan, atau Bulanan untuk Semua)
+const activeChartData = computed(() => {
     if (!props.trendHistory || props.trendHistory.length === 0) return [];
 
-    const items = props.trendHistory;
-    const amounts = items.map((t) => t.amount);
-    const maxVal = Math.max(...amounts, 800000);
-    const minVal = Math.min(...amounts, 0);
-    const range = maxVal - minVal || 1;
+    let rawList = [];
 
-    const width = 500;
-    const height = 140;
-    const topPadding = 20;
-    const bottomPadding = 20;
-    const usableHeight = height - topPadding - bottomPadding;
+    if (trendPeriod.value === 'all_months') {
+        // Parameter BULANAN untuk Semua Penjualan (menghindari bug visual batang berdesakan)
+        const monthsMap = {};
+        props.trendHistory.forEach((item) => {
+            const ym = item.full_date ? item.full_date.substring(0, 7) : '2026-11';
+            if (!monthsMap[ym]) {
+                const parts = ym.split('-');
+                const year = parts[0] || '2026';
+                const monthNum = parseInt(parts[1] || '1', 10);
+                const shortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                const longNames = [
+                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ];
+                monthsMap[ym] = {
+                    key: ym,
+                    date: `${shortNames[monthNum - 1]} ${year}`,
+                    subLabel: 'Bulanan',
+                    full_date: `Bulan ${longNames[monthNum - 1]} ${year}`,
+                    amount: 0,
+                    count: 0,
+                };
+            }
+            monthsMap[ym].amount += item.amount;
+            monthsMap[ym].count += item.count;
+        });
+        rawList = Object.values(monthsMap);
+    } else if (trendPeriod.value === 'weekly') {
+        // Parameter PER 7 HARI (Mingguan)
+        const chunkSize = 7;
+        const recentHistory = props.trendHistory.slice(-28);
+        for (let i = 0; i < recentHistory.length; i += chunkSize) {
+            const chunk = recentHistory.slice(i, i + chunkSize);
+            const startStr = chunk[0].date;
+            const endStr = chunk[chunk.length - 1].date;
+            const weekNum = Math.floor(i / chunkSize) + 1;
+            rawList.push({
+                key: `mgg-${weekNum}`,
+                date: `Mgg ${weekNum}`,
+                subLabel: `${startStr} - ${endStr}`,
+                full_date: `Minggu ke-${weekNum} (${startStr} s/d ${endStr})`,
+                amount: chunk.reduce((sum, c) => sum + c.amount, 0),
+                count: chunk.reduce((sum, c) => sum + c.count, 0),
+            });
+        }
+    } else {
+        // Parameter HARIAN (7 Hari Transaksi Terakhir)
+        rawList = props.trendHistory.slice(-7).map((item) => ({
+            ...item,
+            key: item.full_date || item.date,
+            subLabel: 'Harian',
+        }));
+    }
 
-    return items.map((item, idx) => {
-        const x = Math.round((idx / (items.length - 1 || 1)) * width + 5);
-        const y = Math.round(height - bottomPadding - ((item.amount - minVal) / range) * usableHeight);
+    if (rawList.length === 0) return [];
+
+    const maxAmount = Math.max(...rawList.map((t) => t.amount), 500000);
+    const maxCount = Math.max(...rawList.map((t) => t.count), 5);
+
+    return rawList.map((item) => {
+        const amountRatio = item.amount / maxAmount;
+        const countRatio = item.count / maxCount;
+
         return {
             ...item,
-            x,
-            y,
+            // Batas maksimal 82% agar ujung atas tidak membentur atap grafik
+            amountHeightPct: Math.max(8, Math.min(82, Math.round(amountRatio * 82))),
+            countHeightPct: Math.max(8, Math.min(82, Math.round(countRatio * 82))),
         };
     });
 });
 
-const bezierPathD = computed(() => {
-    const points = trendDataPoints.value;
-    if (points.length < 2) return '';
+const barWidthClass = computed(() => {
+    if (trendPeriod.value === 'all_months') return 'w-6 sm:w-10';
+    if (trendPeriod.value === 'weekly') return 'w-5 sm:w-8';
+    return 'w-3.5 sm:w-5';
+});
 
-    let d = `M ${points[0].x},${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-        const p0 = i > 0 ? points[i - 1] : points[0];
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const p3 = i < points.length - 2 ? points[i + 2] : p2;
+const maxTrendAmount = computed(() => {
+    if (!activeChartData.value || activeChartData.value.length === 0) return 0;
+    return Math.max(...activeChartData.value.map((t) => t.amount), 0);
+});
 
-        const cp1x = p1.x + (p2.x - p0.x) / 6;
-        const cp1y = p1.y + (p2.y - p0.y) / 6;
-        const cp2x = p2.x - (p3.x - p1.x) / 6;
-        const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-        d += ` C ${Math.round(cp1x)},${Math.round(cp1y)} ${Math.round(cp2x)},${Math.round(cp2y)} ${p2.x},${p2.y}`;
-    }
-    return d;
+const maxTrendCount = computed(() => {
+    if (!activeChartData.value || activeChartData.value.length === 0) return 0;
+    return Math.max(...activeChartData.value.map((t) => t.count), 0);
 });
 </script>
 
@@ -91,7 +139,7 @@ const bezierPathD = computed(() => {
                     </span>
                 </div>
                 <p class="text-xs text-[#737868] font-medium mt-1">
-                    Ringkasan uang masuk, keuntungan bersih, bahan terbuang, dan batas produksi bengkel
+                    Ringkasan penjualan, jumlah transaksi, produk terlaris, dan grafik harian bengkel
                 </p>
             </div>
 
@@ -121,48 +169,17 @@ const bezierPathD = computed(() => {
             </div>
         </header>
 
-        <!-- Kotak Saran & Pengingat -->
-        <div class="bg-[#0e0f0c] text-white rounded-[24px] p-4 sm:p-5 border border-[#2a2c24] shadow-sm relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div class="flex items-start gap-3.5">
-                <div class="w-10 h-10 rounded-2xl bg-[#c6ef4e] text-[#0e0f0c] flex items-center justify-center shrink-0 font-bold shadow-md">
-                    <span class="material-symbols-outlined text-[22px]">lightbulb</span>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-[#c6ef4e]">
-                            Saran Hari Ini
-                        </span>
-                        <span class="text-xs text-[#868b7d]">Bulan Berjalan</span>
-                    </div>
-                    <h3 class="text-sm font-bold text-white">
-                        Pengingat Bahan Rusak & Batas Kerja Bengkel
-                    </h3>
-                    <p class="text-xs text-[#dce0cd] mt-0.5 max-w-2xl leading-relaxed">
-                        Kulit dan bahan yang rusak tercatat senilai <span class="font-bold text-[#c6ef4e]">{{ formatRupiah(props.kpis?.wasteCost) }}</span> ({{ props.kpis?.wasteCount || 0 }} pasang gagal sol/cacat). Beban kerja pengrajin saat ini <span class="font-bold text-white">{{ props.capacity?.usagePercent || 0 }}%</span> dari batas maksimal {{ props.capacity?.maxCapacity || 500 }} pasang/bulan.
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto shrink-0">
-                <a
-                    href="/simulator"
-                    class="w-full md:w-auto text-center px-4 py-2 rounded-xl bg-[#c6ef4e] text-[#0e0f0c] font-bold text-xs hover:bg-[#b5e039] transition cursor-pointer"
-                >
-                    Coba Hitung Tambah Pesanan
-                </a>
-            </div>
-        </div>
-
-        <!-- 4 Kartu Ringkasan Utama -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Ringkasan Finansial">
-            <!-- 1. Total Uang Penjualan Bersih -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+        <!-- 4 Kartu Ringkasan Utama: 1. Total Penjualan (Omset), 2. Jumlah Transaksi, 3. Produk Terjual, 4. Rata-rata Omset per Hari -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Ringkasan Utama Dashboard">
+            <!-- 1. Total Penjualan (Omset) -->
+            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Total Penjualan Bersih</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Total Penjualan (Omset)</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Diskon {{ props.kpis?.discountRate || 0 }}%
+                        Bulan Ini
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2">
+                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                     {{ formatRupiah(props.kpis?.netRevenue) }}
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
@@ -170,211 +187,340 @@ const bezierPathD = computed(() => {
                 </div>
             </div>
 
-            <!-- 2. Keuntungan Bersih -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <!-- 2. Jumlah Transaksi -->
+            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Keuntungan Bersih</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Jumlah Transaksi</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
+                        Nota Selesai
+                    </span>
+                </div>
+                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                    {{ props.kpis?.totalTransactions || 0 }} Transaksi
+                </div>
+                <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
+                    Total nota & faktur berhasil diproses
+                </div>
+            </div>
+
+            <!-- 3. Produk Terjual -->
+            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Produk Terjual</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833]">
-                        Laba Bersih
+                        Beban {{ props.capacity?.usagePercent || 0 }}%
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2">
-                    {{ formatRupiah(props.kpis?.netProfit) }}
+                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                    {{ props.kpis?.totalProductsSold || props.capacity?.soldUnits || 0 }} Pasang
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
-                    Sisa bersih setelah bayar bahan, gaji & sewa
+                    Batas maksimal: {{ props.capacity?.maxCapacity || 500 }} pasang/bulan
                 </div>
             </div>
 
-            <!-- 3. Persentase Keuntungan -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <!-- 4. Rata-rata Omset per Hari -->
+            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Persentase Keuntungan</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-[#0e0f0c]">
-                        Laba / Penjualan
+                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Rata-rata Omset per Hari</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        Harian
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2">
-                    {{ props.kpis?.profitMargin || 0 }}%
+                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                    {{ formatRupiah(props.kpis?.dailyAvgRevenue) }}
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
-                    Untung kotor: {{ formatRupiah(props.kpis?.grossProfit) }}
-                </div>
-            </div>
-
-            <!-- 4. Nilai Kulit / Bahan Rusak -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Nilai Bahan Rusak</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                        {{ props.kpis?.wasteCount || 0 }} Pasang Rusak
-                    </span>
-                </div>
-                <div class="text-2xl font-black text-rose-600 mt-2">
-                    {{ formatRupiah(props.kpis?.wasteCost) }}
-                </div>
-                <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
-                    Modal bahan yang terbuang
+                    Dari {{ props.kpis?.activeDaysCount || 1 }} hari transaksi aktif
                 </div>
             </div>
         </section>
 
-        <!-- Grafik Penjualan & Pembagian Pengeluaran -->
+        <!-- Baris 2: 5. Grafik Penjualan (Col 7) & 6. Top Produk Terlaris (Col 5) -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            <!-- Grafik Penjualan vs Batas Kemampuan Produksi (Col 7) -->
+            <!-- 5. Grafik Penjualan (Grafik Batang: Total Omset & Jumlah Transaksi Harian / Per 7 Hari / Bulanan) -->
             <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h2 class="text-base font-black text-[#0e0f0c]">Tren Penjualan & Batas Produksi Bengkel</h2>
-                        <p class="text-[11px] text-[#737868] font-medium">
-                            Garis penjualan dibanding kemampuan maksimal bengkel ({{ props.capacity?.maxCapacity || 500 }} pasang)
-                        </p>
-                    </div>
-                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
-                        Beban Tukang: {{ props.capacity?.usagePercent || 0 }}%
-                    </span>
-                </div>
+                <div>
+                    <!-- Header Grafik & Filter Periode -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e]"></span>
+                                <h2 class="text-base font-black text-[#0e0f0c]">Grafik Penjualan</h2>
+                            </div>
+                            <p class="text-[11px] text-[#737868] font-medium mt-0.5">
+                                {{
+                                    trendPeriod === 'all_months'
+                                        ? 'Perbandingan omset dan transaksi per bulan (Semua Penjualan)'
+                                        : trendPeriod === 'weekly'
+                                        ? 'Perbandingan omset dan transaksi dikelompokkan per 7 hari'
+                                        : 'Perbandingan omset dan transaksi per hari (7 hari terakhir)'
+                                }}
+                            </p>
+                        </div>
 
-                <!-- Grafik Kurva -->
-                <div class="relative w-full h-44 mt-2">
-                    <div class="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[10px] font-bold text-[#737868]">
-                        <span>500rb</span>
-                        <span>250rb</span>
-                        <span>0rb</span>
-                    </div>
-
-                    <div class="ml-9 h-full relative">
-                        <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 510 140">
-                            <!-- Batas Garis Maksimal -->
-                            <line stroke="#f87171" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="510" y1="25" y2="25"></line>
-                            <text x="320" y="20" fill="#dc2626" font-size="9" font-weight="bold">Batas Maksimal: {{ props.capacity?.maxCapacity || 500 }} Pasang</text>
-
-                            <!-- Garis Bantu -->
-                            <line stroke="#f1f3eb" stroke-dasharray="3 3" stroke-width="1.2" x1="0" x2="510" y1="75" y2="75"></line>
-                            <line stroke="#f1f3eb" stroke-width="1.2" x1="0" x2="510" y1="120" y2="120"></line>
-
-                            <!-- Garis Tren -->
-                            <path
-                                :d="bezierPathD"
-                                fill="none"
-                                stroke="#0e0f0c"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                            ></path>
-
-                            <!-- Titik Data -->
-                            <g
-                                v-for="(pt, idx) in trendDataPoints"
-                                :key="'pt-' + idx"
-                                @mouseenter="hoveredTrendPoint = pt"
-                                @mouseleave="hoveredTrendPoint = null"
-                                class="cursor-pointer"
+                        <!-- Filter Pilihan Rentang (Harian, Per 7 Hari, Semua/Per Bulan) -->
+                        <div class="flex items-center gap-1 bg-[#f4f5ee] p-1 rounded-xl border border-[#e1e5d3] self-start sm:self-auto">
+                            <button
+                                type="button"
+                                @click="trendPeriod = '7d'"
+                                :class="[
+                                    'px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer',
+                                    trendPeriod === '7d'
+                                        ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
+                                        : 'text-[#737868] hover:text-[#0e0f0c]'
+                                ]"
                             >
-                                <circle
-                                    :cx="pt.x"
-                                    :cy="pt.y"
-                                    :r="hoveredTrendPoint?.full_date === pt.full_date ? 6 : 3"
-                                    :fill="hoveredTrendPoint?.full_date === pt.full_date ? '#000000' : '#ffffff'"
-                                    stroke="#c6ef4e"
-                                    stroke-width="2.2"
-                                    class="transition-all duration-150"
-                                ></circle>
-                            </g>
-                        </svg>
+                                7 Hari
+                            </button>
+                            <button
+                                type="button"
+                                @click="trendPeriod = 'weekly'"
+                                :class="[
+                                    'px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer',
+                                    trendPeriod === 'weekly'
+                                        ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
+                                        : 'text-[#737868] hover:text-[#0e0f0c]'
+                                ]"
+                            >
+                                Per 7 Hari
+                            </button>
+                            <button
+                                type="button"
+                                @click="trendPeriod = 'all_months'"
+                                :class="[
+                                    'px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1',
+                                    trendPeriod === 'all_months'
+                                        ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
+                                        : 'text-[#737868] hover:text-[#0e0f0c]'
+                                ]"
+                            >
+                                <span>Semua</span>
+                                <span class="text-[9px] opacity-75">(Per Bulan)</span>
+                            </button>
+                        </div>
+                    </div>
 
-                        <!-- Tooltip Balon -->
+                    <!-- Strip Rincian Interaktif (Tidak akan pernah terpotong) -->
+                    <div
+                        v-if="hoveredItem"
+                        class="mb-3 px-3.5 py-2 rounded-xl bg-[#0e0f0c] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs shadow-md border border-neutral-800 transition-all"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#c6ef4e] animate-pulse"></span>
+                            <span class="font-bold text-[#c6ef4e]">{{ hoveredItem.full_date || hoveredItem.date }}</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-[11px] font-semibold">
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-white"></span>
+                                Omset: <strong class="text-white font-black">{{ formatRupiah(hoveredItem.amount) }}</strong>
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
+                                Transaksi: <strong class="text-[#c6ef4e] font-black">{{ hoveredItem.count }} Nota</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Strip Status Standar saat tidak di-hover -->
+                    <div
+                        v-else
+                        class="mb-3 px-3.5 py-2 rounded-xl bg-[#fafbf7] border border-[#e5e9db] text-[#737868] flex items-center justify-between text-xs"
+                    >
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <span class="material-symbols-outlined text-[15px] text-[#0e0f0c]">touch_app</span>
+                            <span>Arahkan kursor atau sentuh batang untuk melihat angka detail</span>
+                        </div>
+                        <div class="text-[11px] font-bold text-[#0e0f0c] hidden sm:block">
+                            Puncak {{ trendPeriod === 'all_months' ? 'Bulanan' : (trendPeriod === 'weekly' ? 'Mingguan' : 'Harian') }}:
+                            {{ formatRupiah(maxTrendAmount) }} ({{ maxTrendCount }} Nota)
+                        </div>
+                    </div>
+
+                    <!-- Area Grafik Batang Ganda -->
+                    <div class="relative w-full h-56 bg-[#fdfdfc] rounded-2xl border border-[#ecefe4] p-3 flex flex-col justify-between">
+                        <!-- Garis Bantu Horizontal di Background -->
+                        <div class="absolute inset-x-3 inset-y-3 flex flex-col justify-between pointer-events-none opacity-40">
+                            <div class="border-b border-dashed border-[#dce0cd] w-full"></div>
+                            <div class="border-b border-dashed border-[#dce0cd] w-full"></div>
+                            <div class="border-b border-[#dce0cd] w-full"></div>
+                        </div>
+
+                        <!-- Kontainer Batang (Responsif, Berjarak Rapi, Bebas Bug Visual) -->
                         <div
-                            v-if="hoveredTrendPoint"
-                            class="absolute -top-3 bg-[#0e0f0c] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-xl border border-neutral-700 pointer-events-none whitespace-nowrap z-20 flex items-center gap-1.5 transition-all"
-                            :style="{ left: `${hoveredTrendPoint.x}px`, transform: 'translateX(-50%)' }"
+                            v-if="activeChartData.length > 0"
+                            class="relative z-10 w-full h-full flex items-end justify-around gap-1 sm:gap-3 pt-2 pb-1"
                         >
-                            <span class="text-[#c6ef4e]">{{ hoveredTrendPoint.date }}:</span>
-                            <span>{{ formatRupiah(hoveredTrendPoint.amount) }}</span>
-                            <span class="text-neutral-400">({{ hoveredTrendPoint.count }} transaksi)</span>
+                            <div
+                                v-for="(item, idx) in activeChartData"
+                                :key="'chart-item-' + idx"
+                                @mouseenter="hoveredItem = item"
+                                @mouseleave="hoveredItem = null"
+                                class="flex-1 max-w-[120px] h-full flex flex-col items-center justify-end group cursor-pointer rounded-xl hover:bg-neutral-100/70 py-1 transition-colors"
+                            >
+                                <!-- 2 Batang Berdampingan: Omset & Transaksi -->
+                                <div class="w-full h-40 flex items-end justify-center gap-1 sm:gap-1.5 pb-1">
+                                    <!-- Batang 1: Total Omset (Hitam) -->
+                                    <div
+                                        :class="[
+                                            'bg-[#0e0f0c] group-hover:bg-neutral-800 rounded-t-sm shadow-xs transition-all duration-300',
+                                            barWidthClass
+                                        ]"
+                                        :style="{ height: `${item.amountHeightPct}%` }"
+                                        :title="`Omset: ${formatRupiah(item.amount)}`"
+                                    ></div>
+
+                                    <!-- Batang 2: Berapa Transaksi (Hijau Lime) -->
+                                    <div
+                                        :class="[
+                                            'bg-[#c6ef4e] group-hover:bg-[#b5e038] border border-[#a2c833] rounded-t-sm shadow-xs transition-all duration-300',
+                                            barWidthClass
+                                        ]"
+                                        :style="{ height: `${item.countHeightPct}%` }"
+                                        :title="`Transaksi: ${item.count} nota`"
+                                    ></div>
+                                </div>
+
+                                <!-- Label Keterangan di Bawah Batang -->
+                                <div class="w-full text-center mt-1">
+                                    <div
+                                        :class="[
+                                            'font-bold text-[#737868] group-hover:text-[#0e0f0c] group-hover:font-black transition-colors truncate px-0.5',
+                                            trendPeriod === 'all_months' ? 'text-[11px] sm:text-xs' : 'text-[10px] sm:text-[11px]'
+                                        ]"
+                                    >
+                                        {{ item.date }}
+                                    </div>
+                                    <div v-if="item.subLabel && trendPeriod === 'weekly'" class="text-[9px] text-[#737868]/80 truncate">
+                                        {{ item.subLabel }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- State Kosong -->
+                        <div v-else class="h-full flex items-center justify-center text-xs text-[#737868] font-medium">
+                            Belum ada riwayat transaksi penjualan.
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between text-[11px] text-[#737868] pt-2 border-t border-neutral-100 mt-2">
-                    <span>Sudah terjual: {{ props.capacity?.soldUnits || 0 }} Pasang</span>
-                    <span class="text-rose-600 font-semibold">Garis merah: Batas maksimal produksi tukang</span>
+                <!-- Footer Keterangan Legenda & Puncak -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#737868] pt-3 border-t border-neutral-100 mt-3 gap-2">
+                    <!-- Legenda 2 Batang -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1.5 font-bold text-[#0e0f0c]">
+                            <span class="w-3 h-3 rounded bg-[#0e0f0c]"></span>
+                            <span>Batang Hitam = Total Omset (Rp)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 font-bold text-[#0e0f0c]">
+                            <span class="w-3 h-3 rounded bg-[#c6ef4e] border border-[#a2c833]"></span>
+                            <span>Batang Hijau = Jumlah Transaksi</span>
+                        </div>
+                    </div>
+
+                    <span class="text-[#0e0f0c] font-bold">
+                        Beban Kapasitas: {{ props.capacity?.soldUnits || 0 }} / {{ props.capacity?.maxCapacity || 500 }} Pasang
+                    </span>
                 </div>
             </div>
 
-            <!-- Pembagian Pengeluaran Bengkel (Col 5) -->
+            <!-- 6. Top Produk Terlaris -->
             <div class="lg:col-span-5 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Pembagian Pengeluaran Bengkel</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Kemana uang modal dan biaya bengkel dipakai</p>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
+                                <h2 class="text-base font-black text-[#0e0f0c]">Top Produk Terlaris</h2>
+                            </div>
+                            <p class="text-[11px] text-[#737868] font-medium mt-0.5">Model sepatu & sandal paling diminati pembeli</p>
                         </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
-                            Biaya Usaha
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833]">
+                            Paling Laku
                         </span>
                     </div>
 
-                    <!-- Batang Rincian Biaya -->
-                    <div class="space-y-3.5 mt-4">
-                        <div v-for="cost in props.costDistribution" :key="cost.category" class="space-y-1">
-                            <div class="flex items-center justify-between text-xs font-bold text-[#0e0f0c]">
-                                <span>{{ cost.category }}</span>
-                                <span>{{ formatRupiah(cost.amount) }} ({{ cost.percentage }}%)</span>
-                            </div>
-                            <div class="w-full bg-[#f4f5ee] h-2.5 rounded-full overflow-hidden">
+                    <!-- List 5 Top Produk -->
+                    <div class="space-y-2.5 mt-2">
+                        <div
+                            v-for="(prod, idx) in (props.topProducts || []).slice(0, 5)"
+                            :key="prod.sku || idx"
+                            class="flex items-center justify-between p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db] hover:border-[#c6ef4e] transition-colors"
+                        >
+                            <div class="flex items-center gap-3 min-w-0 pr-2">
                                 <div
-                                    class="h-full rounded-full transition-all duration-500"
-                                    :class="{
-                                        'bg-[#0e0f0c]': cost.category.includes('Bahan Kulit') || cost.category.includes('HPP'),
-                                        'bg-[#506600]': cost.category.includes('Upah') || cost.category.includes('Tukang'),
-                                        'bg-[#828876]': cost.category.includes('Sewa'),
-                                        'bg-rose-600': cost.category.includes('Rusak') || cost.category.includes('Limbah'),
-                                    }"
-                                    :style="{ width: `${cost.percentage}%` }"
-                                ></div>
+                                    :class="[
+                                        'w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0',
+                                        idx === 0
+                                            ? 'bg-[#c6ef4e] text-[#0e0f0c] shadow-xs'
+                                            : idx === 1
+                                            ? 'bg-[#0e0f0c] text-white'
+                                            : 'bg-[#eeeee7] text-[#737868]'
+                                    ]"
+                                >
+                                    #{{ idx + 1 }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-[#0e0f0c] truncate" :title="prod.name">
+                                        {{ prod.name }}
+                                    </p>
+                                    <span class="text-[10px] text-[#737868]">
+                                        {{ prod.category }} · {{ prod.sku }}
+                                    </span>
+                                </div>
                             </div>
+
+                            <div class="text-right shrink-0">
+                                <span class="text-xs font-black text-[#0e0f0c] block">
+                                    {{ prod.quantity }} {{ prod.unit || 'pasang' }}
+                                </span>
+                                <span class="text-[10px] text-[#506600] font-semibold">
+                                    {{ formatRupiah(prod.sales) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div v-if="!props.topProducts || props.topProducts.length === 0" class="py-8 text-center text-[#737868]">
+                            <p class="text-xs font-medium">Belum ada data penjualan produk.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Ringkasan Bawah -->
-                <div class="pt-4 mt-4 border-t border-neutral-100 flex items-center justify-between text-[11px] text-[#737868]">
-                    <span>Bahan: {{ formatRupiah(props.costDistribution?.[0]?.amount) }}</span>
-                    <span>Bahan Rusak: {{ formatRupiah(props.kpis?.wasteCost) }}</span>
-                    <span>Gaji & Sewa: {{ formatRupiah(props.kpis?.totalFixedOpex) }}</span>
+                <div class="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-[#737868]">
+                    <span>Total model aktif: {{ props.topProducts?.length || 0 }} produk</span>
+                    <a href="/sales" class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer">Lihat Penjualan →</a>
                 </div>
             </div>
         </section>
 
-        <!-- Hitung Cepat & Pesanan Terbaru -->
+        <!-- Baris 3: 7. Riwayat Transaksi Terbaru (Col 7) & Hitung Cepat / Quick Simulator (Col 5) -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            <!-- Hitung Cepat Order Grosir (Col 6) -->
-            <div class="lg:col-span-6 flex flex-col">
-                <QuickSimulatorWidget :baseline="props.quickSimulatorBaseline" />
-            </div>
-
-            <!-- 5 Pesanan Terbaru (Col 6) -->
-            <div class="lg:col-span-6 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <!-- 7. Riwayat Transaksi Terbaru -->
+            <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">5 Pesanan & Penjualan Terbaru</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Catatan pembelian terakhir beserta potongan harga yang disepakati</p>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
+                                <h2 class="text-base font-black text-[#0e0f0c]">Riwayat Transaksi Terbaru</h2>
+                            </div>
+                            <p class="text-[11px] text-[#737868] font-medium mt-0.5">Catatan pesanan dan faktur yang terakhir diproses</p>
                         </div>
                         <button
                             type="button"
                             @click="emit('openLedger')"
-                            class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer"
+                            class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer inline-flex items-center gap-1"
                         >
-                            Lihat Semua →
+                            <span>Buku Penjualan</span>
+                            <span>→</span>
                         </button>
                     </div>
 
                     <!-- Daftar Pesanan -->
                     <div class="space-y-2.5">
                         <div
-                            v-for="tx in props.recentTransactions.slice(0, 5)"
+                            v-for="tx in (props.recentTransactions || []).slice(0, 5)"
                             :key="tx.id"
                             class="flex items-center justify-between p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
                         >
@@ -404,15 +550,30 @@ const bezierPathD = computed(() => {
                                 </span>
                             </div>
                         </div>
+
+                        <div v-if="!props.recentTransactions || props.recentTransactions.length === 0" class="py-8 text-center text-[#737868]">
+                            <p class="text-xs font-medium">Belum ada rekaman transaksi penjualan.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="pt-3 mt-3 border-t border-neutral-100 text-center">
-                    <span class="text-[10px] text-[#737868]">
-                        Warna hijau: Diskon aman (≤ 10%). Warna kuning: Diskon besar, periksa modal bahan.
-                    </span>
+                <div class="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[10px] text-[#737868]">
+                    <span>Warna hijau: Diskon aman (≤ 10%). Warna kuning: Diskon grosir tinggi.</span>
+                    <button
+                        type="button"
+                        @click="emit('openLedger')"
+                        class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer"
+                    >
+                        Lihat Semua Transaksi
+                    </button>
                 </div>
+            </div>
+
+            <!-- Hitung Cepat Order Grosir (Col 5) -->
+            <div class="lg:col-span-5 flex flex-col">
+                <QuickSimulatorWidget :baseline="props.quickSimulatorBaseline" />
             </div>
         </section>
     </div>
 </template>
+

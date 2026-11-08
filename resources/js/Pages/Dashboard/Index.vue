@@ -71,6 +71,7 @@ const showLedgerModal = ref(false);
             :category-sales="props.categorySales"
             :cost-distribution="props.costDistribution"
             :recent-transactions="props.recentTransactions"
+            :top-products="props.topProducts"
             :trend-history="props.trendHistory"
             :health-score="props.healthScore"
             :alerts="props.alerts"

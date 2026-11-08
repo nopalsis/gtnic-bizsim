@@ -64,7 +64,13 @@ class DashboardController extends Controller
         // Break Even Point (BEP) Revenue Calculation
         $bepRevenue = $profitMargin > 0 ? round($totalFixedOpex / ($profitMargin / 100)) : 0.0;
 
+        $totalTransactionsCount = (int) Transaction::count();
         $totalItemsSold = (int) TransactionItem::sum('quantity');
+
+        // Rata-rata omset per hari aktif transaksi
+        $activeDaysCount = (int) Transaction::selectRaw('COUNT(DISTINCT DATE(transaction_date)) as d')->value('d') ?: 1;
+        $dailyAvgRevenue = $activeDaysCount > 0 ? round($netRevenue / $activeDaysCount) : 0.0;
+
         $capacityUsagePercent = $maxCapacity > 0 ? round(($totalItemsSold / $maxCapacity) * 100, 1) : 0.0;
 
         // Category Sales Breakdown
@@ -559,6 +565,10 @@ class DashboardController extends Controller
                 'grossRevenue' => $grossRevenue,
                 'totalDiscount' => $totalDiscount,
                 'discountRate' => $discountRate,
+                'totalTransactions' => $totalTransactionsCount,
+                'totalProductsSold' => $totalItemsSold,
+                'dailyAvgRevenue' => (float) $dailyAvgRevenue,
+                'activeDaysCount' => $activeDaysCount,
                 'netProfit' => $netProfit,
                 'grossProfit' => $grossProfit,
                 'profitMargin' => $profitMargin,
