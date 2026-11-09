@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -10,6 +10,10 @@ const props = defineProps({
     product: {
         type: Object,
         default: null,
+    },
+    categories: {
+        type: Array,
+        default: () => [],
     },
 });
 
@@ -23,10 +27,29 @@ const form = useForm({
     category: 'Bahan Baku Kulit',
     unit: 'sq ft',
     cost_price: 38000,
-    base_price: 45000,
+    base_price: 0,
     current_stock: 50,
     min_stock_alert: 15,
 });
+
+const isRawCategory = computed(() => {
+    const cat = props.categories?.find((c) => c.name === form.category);
+    if (cat) {
+        return cat.type === 'raw';
+    }
+    const rawCategories = ['Bahan Baku Kulit', 'Komponen Sol', 'Bahan Pendukung'];
+    return rawCategories.includes(form.category);
+});
+
+// Otomatis set harga jual menjadi 0 jika memilih kategori bahan baku
+watch(
+    () => form.category,
+    () => {
+        if (isRawCategory.value) {
+            form.base_price = 0;
+        }
+    }
+);
 
 watch(
     () => props.product,
@@ -38,18 +61,24 @@ watch(
             form.category = val.category || 'Bahan Baku Kulit';
             form.unit = val.unit || 'sq ft';
             form.cost_price = val.cost_price || 0;
-            form.base_price = val.base_price || 0;
+            form.base_price = val.category_type === 'raw' ? 0 : (val.base_price || 0);
             form.current_stock = val.current_stock || 0;
             form.min_stock_alert = val.min_stock_alert || 10;
         } else {
             isEditing.value = false;
             form.reset();
+            if (isRawCategory.value) {
+                form.base_price = 0;
+            }
         }
     },
     { immediate: true }
 );
 
 const submit = () => {
+    if (isRawCategory.value) {
+        form.base_price = 0;
+    }
     if (isEditing.value && props.product) {
         form.put(`/inventory/product/${props.product.id}`, {
             onSuccess: () => emit('close'),
@@ -130,14 +159,25 @@ const submit = () => {
                             v-model="form.category"
                             class="w-full px-4 py-2.5 rounded-full bg-[#f2f4ec] text-[#0e0f0c] text-xs md:text-sm border border-[#dce0cd] focus:outline-none cursor-pointer"
                         >
-                            <option value="Bahan Baku Kulit">Bahan Baku Kulit (Lembaran)</option>
-                            <option value="Komponen Sol">Komponen Sol & Hak</option>
-                            <option value="Bahan Pendukung">Bahan Pendukung (Lem / Kimia)</option>
-                            <option value="Sepatu Pria">Sepatu Pria (Produk Jadi)</option>
-                            <option value="Sepatu Wanita">Sepatu Wanita (Produk Jadi)</option>
-                            <option value="Sandal Kulit Pria">Sandal Kulit Pria</option>
-                            <option value="Sandal Kulit Wanita">Sandal Kulit Wanita</option>
-                            <option value="Perawatan & Aksesoris">Perawatan & Aksesoris</option>
+                            <template v-if="props.categories && props.categories.length > 0">
+                                <option
+                                    v-for="cat in props.categories"
+                                    :key="cat.id"
+                                    :value="cat.name"
+                                >
+                                    {{ cat.name }} ({{ cat.type === 'finished' ? 'Produk Jadi' : 'Bahan Baku' }})
+                                </option>
+                            </template>
+                            <template v-else>
+                                <option value="Bahan Baku Kulit">Bahan Baku Kulit (Lembaran)</option>
+                                <option value="Komponen Sol">Komponen Sol & Hak</option>
+                                <option value="Bahan Pendukung">Bahan Pendukung (Lem / Kimia)</option>
+                                <option value="Sepatu Pria">Sepatu Pria (Produk Jadi)</option>
+                                <option value="Sepatu Wanita">Sepatu Wanita (Produk Jadi)</option>
+                                <option value="Sandal Kulit Pria">Sandal Kulit Pria</option>
+                                <option value="Sandal Kulit Wanita">Sandal Kulit Wanita</option>
+                                <option value="Perawatan & Aksesoris">Perawatan & Aksesoris</option>
+                            </template>
                         </select>
                     </div>
                 </div>
@@ -179,7 +219,7 @@ const submit = () => {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-[#0e0f0c] mb-1.5">
-                            Modal HPP per Satuan (Rp) <span class="text-rose-500">*</span>
+                            Harga Beli / Modal HPP (Rp) <span class="text-rose-500">*</span>
                         </label>
                         <input
                             v-model.number="form.cost_price"
@@ -193,9 +233,17 @@ const submit = () => {
 
                     <div>
                         <label class="block text-xs font-semibold text-[#0e0f0c] mb-1.5">
-                            Harga Banderol / Jual (Rp) <span class="text-rose-500">*</span>
+                            Harga Banderol / Jual (Rp) <span v-if="!isRawCategory" class="text-rose-500">*</span>
                         </label>
+                        <div
+                            v-if="isRawCategory"
+                            class="px-4 py-2.5 rounded-full bg-[#eeeee7] border border-[#dce0cd] text-xs text-[#737868] flex items-center justify-between"
+                        >
+                            <span class="italic font-medium">Bahan Baku (Tidak Dijual)</span>
+                            <span class="text-[10px] bg-white px-2 py-0.5 rounded-full font-bold text-[#0e0f0c]">Rp 0</span>
+                        </div>
                         <input
+                            v-else
                             v-model.number="form.base_price"
                             type="number"
                             min="0"
@@ -203,6 +251,9 @@ const submit = () => {
                             placeholder="Contoh: 45000"
                             class="w-full px-4 py-2.5 rounded-full bg-[#f2f4ec] text-[#0e0f0c] text-xs md:text-sm border border-[#dce0cd] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0e0f0c] transition"
                         />
+                        <span v-if="isRawCategory" class="text-[10px] text-[#737868] block mt-1">
+                            Bahan baku & material dipakai internal untuk proses produksi bengkel
+                        </span>
                     </div>
                 </div>
 

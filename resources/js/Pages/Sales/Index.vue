@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import SidebarNav from '@/Components/SidebarNav.vue';
 
 const props = defineProps({
@@ -22,6 +22,8 @@ const props = defineProps({
 const searchQuery = ref('');
 const showNewOrderModal = ref(false);
 const isSubmitting = ref(false);
+const currentPage = ref(1);
+const perPage = ref(10);
 
 // Format Currency
 const formatRupiah = (number) => {
@@ -45,6 +47,35 @@ const filteredTransactions = computed(() => {
             tx.sales_person_name?.toLowerCase().includes(q)
     );
 });
+
+// Reset page ke 1 saat user melakukan pencarian
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
+
+const totalPages = computed(() => {
+    return Math.max(1, Math.ceil(filteredTransactions.value.length / perPage.value));
+});
+
+const paginatedTransactions = computed(() => {
+    const start = (currentPage.value - 1) * perPage.value;
+    return filteredTransactions.value.slice(start, start + perPage.value);
+});
+
+const startItemIndex = computed(() => {
+    if (filteredTransactions.value.length === 0) return 0;
+    return (currentPage.value - 1) * perPage.value + 1;
+});
+
+const endItemIndex = computed(() => {
+    return Math.min(currentPage.value * perPage.value, filteredTransactions.value.length);
+});
+
+const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
+};
 
 // New Order Form State
 const newOrder = ref({
@@ -126,7 +157,7 @@ const submitOrder = () => {
 </script>
 
 <template>
-    <Head title="Sales Intelligence & Negosiasi Deal Price · OptimaBiz" />
+    <Head title="Penjualan & Kasir · OptimaBiz" />
 
     <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
@@ -139,10 +170,10 @@ const submitOrder = () => {
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">Sales Intelligence & Deal Tracker</h1>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Pelacakan Negosiasi Harga</span>
+                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">Penjualan & Kasir</h1>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Catatan Penjualan</span>
                     </div>
-                    <p class="text-xs text-neutral-500 font-medium mt-1">Analisis selisih harga banderol (base price) vs harga kesepakatan riil (deal price)</p>
+                    <p class="text-xs text-neutral-500 font-medium mt-1">Daftar transaksi penjualan eceran dan pesanan partai bengkel</p>
                 </div>
 
                 <button
@@ -151,24 +182,24 @@ const submitOrder = () => {
                     class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-5 py-2.5 rounded-full transition flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                     <span class="text-[#c6ef4e] text-base leading-none">+</span>
-                    <span>Catat Pesanan / Faktur Baru</span>
+                    <span>Catat Pesanan Baru</span>
                 </button>
             </header>
 
             <!-- 4 Metric Cards -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Total Omzet Bersih</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Total Uang Penjualan</span>
                     <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                         {{ formatRupiah(props.metrics?.totalNetRevenue) }}
                     </div>
                     <div class="text-[11px] text-neutral-500 font-medium mt-1">
-                        Dari {{ props.metrics?.totalTransactions || 0 }} rekaman faktur
+                        Dari {{ props.metrics?.totalTransactions || 0 }} nota penjualan
                     </div>
                 </div>
 
                 <div class="bg-[#c6ef4e] rounded-[24px] p-5 border border-[#b2db3a] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-800">Total Potongan Negosiasi</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-800">Total Potongan Harga (Diskon)</span>
                     <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                         {{ formatRupiah(props.metrics?.totalDiscount) }}
                     </div>
@@ -178,22 +209,22 @@ const submitOrder = () => {
                 </div>
 
                 <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Omzet Kotor (Banderol)</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Penjualan Harga Asli</span>
                     <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                         {{ formatRupiah(props.metrics?.totalGrossRevenue) }}
                     </div>
                     <div class="text-[11px] text-neutral-500 font-medium mt-1">
-                        Jika semua terjual harga katalog
+                        Sebelum dipotong diskon
                     </div>
                 </div>
 
                 <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Disiplin Negosiasi</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Status Diskon</span>
                     <div class="text-2xl font-black text-[#0e0f0c] mt-2">
-                        {{ (props.metrics?.avgDiscountPercent || 0) <= 15 ? 'Aman' : 'Perlu Pengawasan' }}
+                        {{ (props.metrics?.avgDiscountPercent || 0) <= 15 ? 'Diskon Wajar (Aman)' : 'Diskon Terlalu Besar' }}
                     </div>
                     <div class="text-[11px] text-neutral-500 font-medium mt-1">
-                        Batas aman grosir &lt; 15%
+                        Batas aman diskon di bawah 15%
                     </div>
                 </div>
             </section>
@@ -202,15 +233,15 @@ const submitOrder = () => {
             <section class="bg-white rounded-[28px] p-6 border border-[#dce0cd] shadow-sm flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
-                        <h2 class="text-base font-black text-[#0e0f0c]">Daftar Riwayat Penjualan & Diskon Kesepakatan</h2>
-                        <p class="text-xs text-neutral-400">Rincian faktur riil sepatu & sandal kulit UMKM</p>
+                        <h2 class="text-base font-black text-[#0e0f0c]">Riwayat Penjualan & Pesanan</h2>
+                        <p class="text-xs text-neutral-400">Catatan transaksi penjualan eceran dan pesanan grosir</p>
                     </div>
 
                     <div class="w-full sm:w-72">
                         <input
                             v-model="searchQuery"
                             type="text"
-                            placeholder="Cari nomor invoice, pelanggan, atau sales..."
+                            placeholder="Cari nomor nota, pembeli, atau nama sales..."
                             class="w-full bg-[#f6f7f7] rounded-full px-4 py-2 text-xs font-semibold border-0 outline-none focus:ring-2 focus:ring-[#0e0f0c]"
                         />
                     </div>
@@ -220,18 +251,18 @@ const submitOrder = () => {
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
                             <tr class="border-b border-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                                <th class="py-3 px-3">Faktur & Tanggal</th>
-                                <th class="py-3 px-3">Pelanggan / Toko</th>
-                                <th class="py-3 px-3">Sales & Pembayaran</th>
-                                <th class="py-3 px-3">Item Pesanan</th>
-                                <th class="py-3 px-3 text-right">Harga Banderol</th>
-                                <th class="py-3 px-3 text-center">Diskon Kesepakatan</th>
-                                <th class="py-3 px-3 text-right">Nilai Faktur Riil</th>
+                                <th class="py-3 px-3">Nomor Nota & Tanggal</th>
+                                <th class="py-3 px-3">Pembeli / Toko</th>
+                                <th class="py-3 px-3">Petugas & Pembayaran</th>
+                                <th class="py-3 px-3">Sepatu yang Dibeli</th>
+                                <th class="py-3 px-3 text-right">Harga Asli</th>
+                                <th class="py-3 px-3 text-center">Diskon</th>
+                                <th class="py-3 px-3 text-right">Total Bayar</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-100">
                             <tr
-                                v-for="tx in filteredTransactions"
+                                v-for="tx in paginatedTransactions"
                                 :key="tx.id"
                                 class="hover:bg-[#fafbf7] transition-colors"
                             >
@@ -274,7 +305,7 @@ const submitOrder = () => {
                                                 : 'bg-amber-50 text-amber-800 border border-amber-200'
                                         ]"
                                     >
-                                        {{ tx.discount_percent === 0 ? 'Harga Normal' : `Diskon ${tx.discount_percent}% (${formatRupiah(tx.total_discount)})` }}
+                                        {{ tx.discount_percent === 0 ? 'Harga Pas' : `Diskon ${tx.discount_percent}% (-${formatRupiah(tx.total_discount)})` }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-3 text-right font-black text-[#0e0f0c]">
@@ -283,11 +314,57 @@ const submitOrder = () => {
                             </tr>
                             <tr v-if="filteredTransactions.length === 0">
                                 <td colspan="7" class="text-center py-8 text-neutral-400">
-                                    Tidak ada data transaksi yang cocok.
+                                    Belum ada catatan penjualan yang cocok.
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Kontrol Navigasi Halaman (Pagination) -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-neutral-100 text-xs">
+                    <div class="text-[#737868] font-medium text-[11px]">
+                        Menampilkan <span class="font-bold text-[#0e0f0c]">{{ startItemIndex }} - {{ endItemIndex }}</span> dari <span class="font-bold text-[#0e0f0c]">{{ filteredTransactions.length }}</span> riwayat penjualan
+                    </div>
+
+                    <div v-if="totalPages > 1" class="flex items-center gap-1.5">
+                        <button
+                            type="button"
+                            @click="goToPage(currentPage - 1)"
+                            :disabled="currentPage === 1"
+                            class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer flex items-center gap-1"
+                        >
+                            <span>←</span>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        <div class="flex items-center gap-1">
+                            <button
+                                v-for="p in totalPages"
+                                :key="'page-' + p"
+                                type="button"
+                                @click="goToPage(p)"
+                                :class="[
+                                    'w-8 h-8 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center',
+                                    currentPage === p
+                                        ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
+                                        : 'text-[#737868] hover:bg-neutral-100'
+                                ]"
+                            >
+                                {{ p }}
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            @click="goToPage(currentPage + 1)"
+                            :disabled="currentPage === totalPages"
+                            class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer flex items-center gap-1"
+                        >
+                            <span>Selanjutnya</span>
+                            <span>→</span>
+                        </button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -302,7 +379,7 @@ const submitOrder = () => {
                 <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
                     <div>
                         <h3 class="text-xl font-black text-[#0e0f0c]">Catat Pesanan Sepatu / Sandal</h3>
-                        <p class="text-xs text-neutral-500 mt-0.5">Input transaksi baru dengan negosiasi harga kesepakatan riil</p>
+                        <p class="text-xs text-neutral-500 mt-0.5">Catat pesanan baru eceran atau grosir dengan harga yang disepakati</p>
                     </div>
                     <button
                         type="button"
@@ -316,7 +393,7 @@ const submitOrder = () => {
                 <div class="p-6 overflow-y-auto space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Nama Pelanggan / Toko Rekanan *</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Nama Pembeli / Toko *</label>
                             <input
                                 v-model="newOrder.customer_name"
                                 type="text"
@@ -325,7 +402,7 @@ const submitOrder = () => {
                             />
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Sales Person *</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Petugas / Sales *</label>
                             <select
                                 v-model="newOrder.sales_person_name"
                                 class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
@@ -337,7 +414,7 @@ const submitOrder = () => {
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Metode Pembayaran *</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Cara Bayar *</label>
                             <select
                                 v-model="newOrder.payment_method"
                                 class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
@@ -350,11 +427,11 @@ const submitOrder = () => {
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Catatan Tambahan</label>
+                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Catatan Pesanan</label>
                             <input
                                 v-model="newOrder.notes"
                                 type="text"
-                                placeholder="Catatan negosiasi / instruksi kirim"
+                                placeholder="Catatan khusus atau pengiriman"
                                 class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
                             />
                         </div>
@@ -363,13 +440,13 @@ const submitOrder = () => {
                     <!-- Item Rows -->
                     <div class="border-t border-neutral-100 pt-4">
                         <div class="flex items-center justify-between mb-2">
-                            <h4 class="text-xs font-black text-[#0e0f0c]">Item Produk & Negosiasi Deal Price</h4>
+                            <h4 class="text-xs font-black text-[#0e0f0c]">Daftar Sepatu yang Dipesan</h4>
                             <button
                                 type="button"
                                 @click="addItemRow"
                                 class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer"
                             >
-                                + Tambah Model
+                                + Tambah Sepatu
                             </button>
                         </div>
 
@@ -381,24 +458,24 @@ const submitOrder = () => {
                             >
                                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
                                     <div class="sm:col-span-6">
-                                        <label class="text-[10px] font-bold text-neutral-500">Pilih Model Produk</label>
+                                        <label class="text-[10px] font-bold text-neutral-500">Pilih Model Sepatu</label>
                                         <select
                                             v-model="item.product_id"
                                             @change="onProductSelect(idx, item.product_id)"
                                             class="w-full bg-white rounded-lg px-2.5 py-1.5 text-xs font-semibold border border-neutral-200 outline-none"
                                         >
-                                            <option value="" disabled>-- Pilih Produk --</option>
+                                            <option value="" disabled>-- Pilih Model --</option>
                                             <option
                                                 v-for="p in props.availableProducts"
                                                 :key="p.id"
                                                 :value="p.id"
                                             >
-                                                {{ p.sku }} - {{ p.name }} (Stok: {{ p.current_stock }})
+                                                {{ p.sku }} - {{ p.name }} (Sisa: {{ p.current_stock }})
                                             </option>
                                         </select>
                                     </div>
                                     <div class="sm:col-span-2">
-                                        <label class="text-[10px] font-bold text-neutral-500">Jumlah (Qty)</label>
+                                        <label class="text-[10px] font-bold text-neutral-500">Jumlah (Pasang)</label>
                                         <input
                                             v-model.number="item.quantity"
                                             type="number"
@@ -407,7 +484,7 @@ const submitOrder = () => {
                                         />
                                     </div>
                                     <div class="sm:col-span-3">
-                                        <label class="text-[10px] font-bold text-neutral-500">Deal Price (Riil)</label>
+                                        <label class="text-[10px] font-bold text-neutral-500">Harga Sepakat / Psg</label>
                                         <input
                                             v-model.number="item.deal_price"
                                             type="number"
@@ -426,9 +503,9 @@ const submitOrder = () => {
                                     </div>
                                 </div>
                                 <div v-if="item.base_price > 0" class="text-[10px] flex items-center justify-between text-neutral-500 pt-1 border-t border-neutral-100">
-                                    <span>Banderol: {{ formatRupiah(item.base_price) }} (HPP: {{ formatRupiah(item.cost_price) }})</span>
+                                    <span>Harga Asli: {{ formatRupiah(item.base_price) }} (Modal: {{ formatRupiah(item.cost_price) }})</span>
                                     <span :class="item.deal_price < item.cost_price ? 'text-rose-600 font-bold' : 'text-emerald-700'">
-                                        {{ item.deal_price < item.cost_price ? '⚠️ Di bawah HPP!' : 'Subtotal: ' + formatRupiah(item.deal_price * item.quantity) }}
+                                        {{ item.deal_price < item.cost_price ? '⚠️ Di bawah modal bahan!' : 'Subtotal: ' + formatRupiah(item.deal_price * item.quantity) }}
                                     </span>
                                 </div>
                             </div>
@@ -438,8 +515,8 @@ const submitOrder = () => {
                     <!-- Summary & Submit -->
                     <div class="bg-[#f6f7f7] rounded-2xl p-4 flex items-center justify-between">
                         <div>
-                            <div class="text-[11px] text-neutral-500">Banderol: {{ formatRupiah(computedGross) }} | Diskon: {{ formatRupiah(computedDiscount) }}</div>
-                            <div class="text-sm font-black text-[#0e0f0c]">Total Bersih: {{ formatRupiah(computedNet) }}</div>
+                            <div class="text-[11px] text-neutral-500">Harga Asli: {{ formatRupiah(computedGross) }} | Diskon: {{ formatRupiah(computedDiscount) }}</div>
+                            <div class="text-sm font-black text-[#0e0f0c]">Total yang Harus Dibayar: {{ formatRupiah(computedNet) }}</div>
                         </div>
                         <button
                             type="button"
@@ -447,7 +524,7 @@ const submitOrder = () => {
                             :disabled="isSubmitting"
                             class="bg-[#0e0f0c] hover:bg-neutral-800 text-white font-bold text-xs px-5 py-2.5 rounded-full transition cursor-pointer"
                         >
-                            {{ isSubmitting ? 'Menyimpan...' : 'Simpan Faktur Penjualan' }}
+                            {{ isSubmitting ? 'Menyimpan...' : 'Simpan Pesanan' }}
                         </button>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
@@ -63,9 +64,15 @@ class SalesController extends Controller
             ? round(($totalNegotiatedDiscount / $totalGrossRevenue) * 100, 1)
             : 0.0;
 
-        // 3. Produk aktif untuk opsi input transaksi kasir / pesanan baru
+        // 3. Produk aktif untuk opsi input transaksi kasir / pesanan baru (hanya produk jadi siap jual)
+        $rawCategories = Category::where('type', 'raw')->pluck('name')->toArray();
+        if (empty($rawCategories)) {
+            $rawCategories = ['Bahan Baku Kulit', 'Komponen Sol', 'Bahan Pendukung'];
+        }
+
         $availableProducts = Product::where('is_active', true)
             ->where('current_stock', '>', 0)
+            ->whereNotIn('category', $rawCategories)
             ->orderBy('category')
             ->orderBy('name')
             ->get(['id', 'sku', 'name', 'category', 'unit', 'base_price', 'cost_price', 'current_stock']);

@@ -18,19 +18,19 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Masuk ke Sistem · OptimaBiz" />
+    <Head title="Masuk · OptimaBiz" />
 
     <div class="min-h-screen min-h-[100dvh] w-full bg-[#eaecdf] flex items-center justify-center px-3.5 py-6 sm:p-6 md:p-8 font-sans relative overflow-x-hidden">
-        <!-- Ambient Background Aesthetic Grid & Accents -->
+        <!-- Latar Belakang -->
         <div class="absolute inset-0 bg-grid-ambient pointer-events-none opacity-40"></div>
         <div class="absolute -top-32 -left-32 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-[#c6ef4e]/15 blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-32 -right-32 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-[#0e0f0c]/10 blur-3xl pointer-events-none"></div>
 
-        <!-- Main Login Card Container -->
+        <!-- Kartu Login -->
         <div class="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-8 md:p-9 shadow-lg border border-[#dce0cd] relative z-10 my-auto">
-            <!-- Brand Logo & Header -->
+            <!-- Logo & Judul -->
             <div class="text-center mb-6 sm:mb-8">
-                <!-- Brand Icon -->
+                <!-- Ikon Logo -->
                 <div class="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#0e0f0c] shadow-md mb-2.5 sm:mb-3 group transition-transform hover:scale-105 active:scale-95">
                     <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" viewBox="0 0 44 44">
                         <circle cx="22" cy="22" r="18" stroke="#22241e" stroke-linecap="round" stroke-width="4.5"></circle>
@@ -39,24 +39,24 @@ const submit = () => {
                     </svg>
                 </div>
 
-                <!-- Tagline Badge -->
+                <!-- Label Sederhana -->
                 <div class="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 px-2">
                     <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#c6ef4e] shrink-0"></span>
-                    <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#737868] truncate">
-                        Sales Intelligence & Decision Support
+                    <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#737868]">
+                        Bengkel Sepatu & Sandal Kulit
                     </span>
                 </div>
 
-                <!-- Title -->
+                <!-- Judul Utama -->
                 <h1 class="text-xl sm:text-2xl md:text-[26px] font-extrabold text-[#0e0f0c] tracking-tight">
-                    OptimaBiz Portal
+                    Masuk ke Sistem
                 </h1>
                 <p class="text-[11px] sm:text-xs text-[#737868] mt-1 sm:mt-1.5 max-w-xs mx-auto leading-relaxed">
-                    Silakan masukkan email dan kata sandi akun Anda untuk mengakses sistem
+                    Masukkan email dan kata sandi Anda untuk mulai bekerja
                 </p>
             </div>
 
-            <!-- Error Banner -->
+            <!-- Pesan Peringatan / Salah Sandi -->
             <div
                 v-if="form.errors.email || form.errors.password"
                 class="mb-4 sm:mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5 animate-in fade-in duration-200"
@@ -65,9 +65,9 @@ const submit = () => {
                 <span class="font-medium leading-relaxed">{{ form.errors.email || form.errors.password }}</span>
             </div>
 
-            <!-- Login Form -->
+            <!-- Form Isian -->
             <form @submit.prevent="submit" class="space-y-4">
-                <!-- Email Input -->
+                <!-- Kolom Email -->
                 <div>
                     <label class="block text-xs font-semibold text-[#0e0f0c] mb-1.5">
                         Alamat Email
@@ -85,13 +85,13 @@ const submit = () => {
                             autocapitalize="none"
                             autocorrect="off"
                             spellcheck="false"
-                            placeholder="nama@optimabiz.id"
+                            placeholder="nama@email.com"
                             class="w-full pl-10 pr-4 py-3 sm:py-2.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] placeholder:text-[#868b7d] text-base sm:text-sm border border-[#dce0cd] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0e0f0c]/20 focus:border-[#0e0f0c] transition"
                         />
                     </div>
                 </div>
 
-                <!-- Password Input -->
+                <!-- Kolom Kata Sandi -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-xs font-semibold text-[#0e0f0c]">
@@ -108,7 +108,7 @@ const submit = () => {
                             :type="showPassword ? 'text' : 'password'"
                             required
                             autocomplete="current-password"
-                            placeholder="Masukkan kata sandi"
+                            placeholder="Ketik kata sandi"
                             class="w-full pl-10 pr-11 py-3 sm:py-2.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] placeholder:text-[#868b7d] text-base sm:text-sm border border-[#dce0cd] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0e0f0c]/20 focus:border-[#0e0f0c] transition"
                         />
                         <button
@@ -125,7 +125,7 @@ const submit = () => {
                     </div>
                 </div>
 
-                <!-- Remember Me & Assistance (Responsive row/stack) -->
+                <!-- Ingat Saya & Lupa Sandi -->
                 <div class="flex flex-row items-center justify-between text-xs pt-1 gap-2">
                     <label class="flex items-center gap-2 cursor-pointer select-none text-[#0e0f0c] min-h-[32px]">
                         <input
@@ -133,15 +133,15 @@ const submit = () => {
                             type="checkbox"
                             class="w-4 h-4 rounded text-[#0e0f0c] focus:ring-0 border-[#dce0cd] cursor-pointer"
                         />
-                        <span class="text-[#3a3d34] text-[11px] sm:text-xs">Ingat sesi saya</span>
+                        <span class="text-[#3a3d34] text-[11px] sm:text-xs">Ingat saya</span>
                     </label>
 
                     <span class="text-[10px] sm:text-[11px] text-[#737868] text-right whitespace-nowrap">
-                        Lupa sandi? Hubungi Admin
+                        Lupa sandi? Hubungi admin
                     </span>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Tombol Masuk -->
                 <div class="pt-2">
                     <button
                         type="submit"
@@ -154,15 +154,15 @@ const submit = () => {
                         <span v-else class="material-symbols-outlined text-[18px] text-[#c6ef4e] group-hover:translate-x-0.5 transition-transform">
                             login
                         </span>
-                        <span>{{ form.processing ? 'Memverifikasi Kredensial...' : 'Masuk ke Sistem' }}</span>
+                        <span>{{ form.processing ? 'Memeriksa...' : 'Masuk' }}</span>
                     </button>
                 </div>
             </form>
 
-            <!-- Footer Note -->
+            <!-- Keterangan Bawah -->
             <div class="mt-6 sm:mt-8 pt-4 border-t border-[#f0f1eb] text-center">
                 <p class="text-[10px] sm:text-[11px] text-[#737868] leading-relaxed">
-                    Sistem Manajemen & Kontrol Operasional Bengkel Sepatu Kulit
+                    Aplikasi Pencatatan & Pengelolaan Usaha Bengkel Sepatu Kulit
                 </p>
             </div>
         </div>

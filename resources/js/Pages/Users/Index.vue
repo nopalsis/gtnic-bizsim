@@ -93,7 +93,7 @@ const executeDelete = () => {
 </script>
 
 <template>
-    <Head title="Team & Staff Management · OptimaBiz" />
+    <Head title="Karyawan & Gaji · OptimaBiz" />
 
     <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
@@ -105,10 +105,10 @@ const executeDelete = () => {
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 class="font-headline text-2xl md:text-[28px] font-extrabold text-[#0e0f0c] tracking-tight">
-                        Team & Staff
+                        Karyawan & Tukang
                     </h1>
                     <p class="font-body text-xs md:text-sm text-[#4c4546] mt-0.5">
-                        Manajemen tim bengkel sepatu kulit, konfigurasi payroll fleksibel, dan pelacakan performa bulanan.
+                        Kelola data staf toko dan tukang sepatu, atur gaji tetap atau upah borongan.
                     </p>
                 </div>
 
@@ -119,10 +119,10 @@ const executeDelete = () => {
                         href="/users/export"
                         download
                         class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-[#0e0f0c] shadow-xs hover:bg-[#e3e3dc] transition-all cursor-pointer font-label text-xs font-semibold border border-[#e1e5d3]"
-                        title="Unduh rekap data staf & payroll CSV"
+                        title="Unduh rekap data karyawan & gaji"
                     >
                         <span class="material-symbols-outlined text-base">file_download</span>
-                        <span>Export CSV</span>
+                        <span>Unduh Data (CSV)</span>
                     </a>
 
                     <!-- + Add New Staff Button -->
@@ -132,7 +132,7 @@ const executeDelete = () => {
                         class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#0e0f0c] text-white hover:bg-[#20221c] shadow-md transition-all cursor-pointer font-label text-xs font-bold"
                     >
                         <span class="material-symbols-outlined text-base text-[#c6ef4e]">person_add</span>
-                        <span>+ Add New Staff</span>
+                        <span>+ Tambah Karyawan</span>
                     </button>
                 </div>
             </div>
