@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue';
-import QuickSimulatorWidget from './QuickSimulatorWidget.vue';
 
 const props = defineProps({
     workshopName: String,
@@ -515,10 +514,10 @@ const maxTrendCount = computed(() => {
             </div>
         </section>
 
-        <!-- Baris 3: 7. Riwayat Transaksi Terbaru (Col 7) & Hitung Cepat / Quick Simulator (Col 5) -->
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Baris 3: 7. Riwayat Transaksi Terbaru (Full Width) -->
+        <section class="w-full">
             <!-- 7. Riwayat Transaksi Terbaru -->
-            <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -543,25 +542,26 @@ const maxTrendCount = computed(() => {
                         <div
                             v-for="tx in paginatedRecentTransactions"
                             :key="tx.id"
-                            class="flex items-center justify-between p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
+                            class="flex items-center justify-between p-3.5 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
                         >
-                            <div class="min-w-0 flex-1 mr-3">
-                                <div class="flex items-center gap-1.5 flex-wrap">
+                            <div class="min-w-0 flex-1 mr-4">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="text-xs font-black text-[#0e0f0c]">{{ tx.invoice_number }}</span>
-                                    <span class="text-[11px] font-bold text-neutral-700">· {{ tx.customer_name }}</span>
-                                    <span class="text-[10px] text-[#737868]">({{ tx.sales_person }})</span>
+                                    <span class="text-xs font-bold text-neutral-800">· {{ tx.customer_name }}</span>
+                                    <span class="text-[11px] text-[#737868]">({{ tx.sales_person }})</span>
+                                    <span class="text-[10px] text-neutral-400">· {{ tx.date }}</span>
                                 </div>
-                                <div class="text-[11px] text-[#737868] truncate mt-0.5" :title="tx.items">
+                                <div class="text-xs text-[#737868] truncate mt-0.5" :title="tx.items">
                                     {{ tx.items }}
                                 </div>
                             </div>
                             <div class="text-right flex-shrink-0">
-                                <div class="text-xs font-black text-[#0e0f0c]">
+                                <div class="text-xs sm:text-sm font-black text-[#0e0f0c]">
                                     {{ formatRupiah(tx.net_amount) }}
                                 </div>
                                 <span
                                     :class="[
-                                        'text-[9px] font-bold px-1.5 py-0.5 rounded-full inline-block mt-0.5',
+                                        'text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5',
                                         tx.discount_percent <= 10.0
                                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                             : 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -630,11 +630,6 @@ const maxTrendCount = computed(() => {
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Hitung Cepat Order Grosir (Col 5) -->
-            <div class="lg:col-span-5 flex flex-col">
-                <QuickSimulatorWidget :baseline="props.quickSimulatorBaseline" />
             </div>
         </section>
     </div>
