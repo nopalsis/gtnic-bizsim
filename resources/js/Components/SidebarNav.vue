@@ -125,7 +125,7 @@ const handleLogout = () => {
                 <span class="sr-only">Kategori Produk</span>
             </Link>
 
-            <!-- 5. Simulasi Pesanan & Usaha -->
+            <!-- 5. Profit Leakage & Margin Guardian -->
             <Link
                 v-if="canAccessSimulator"
                 href="/simulator"
@@ -133,12 +133,12 @@ const handleLogout = () => {
                     'w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer relative group',
                     active === 'simulator' ? 'bg-[#262822] text-[#c6ef4e] shadow-inner' : 'text-[#828876] hover:text-white hover:bg-[#1a1c17]'
                 ]"
-                title="Simulasi Pesanan & Usaha"
+                title="Profit Leakage & Margin Guardian (Pusat Audit Margin)"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
-                <span class="sr-only">Simulasi</span>
+                <span class="sr-only">Audit Margin</span>
             </Link>
         </nav>
 

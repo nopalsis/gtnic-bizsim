@@ -1,9 +1,46 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import SidebarNav from '@/Components/SidebarNav.vue';
+import LeakageSummaryCards from './Partials/LeakageSummaryCards.vue';
+import ProductAuditTable from './Partials/ProductAuditTable.vue';
+import ProductHppModal from './Partials/ProductHppModal.vue';
+import ActionableInsights from './Partials/ActionableInsights.vue';
+import SettingsModal from './Partials/SettingsModal.vue';
 
 const props = defineProps({
+    systemName: {
+        type: String,
+        default: 'Profit Leakage & Margin Guardian',
+    },
+    systemTagline: {
+        type: String,
+        default: 'Pusat Audit Kebocoran Laba & Pemandu Keputusan',
+    },
+    period: {
+        type: String,
+        default: '30_days',
+    },
+    periodOptions: {
+        type: Array,
+        default: () => [],
+    },
+    workshopInfo: {
+        type: Object,
+        default: () => ({}),
+    },
+    leakageCards: {
+        type: Object,
+        required: true,
+    },
+    productAudits: {
+        type: Array,
+        required: true,
+    },
+    actionableInsights: {
+        type: Array,
+        required: true,
+    },
     baseline: {
         type: Object,
         default: () => ({}),
@@ -12,471 +49,202 @@ const props = defineProps({
 
 // UI State
 const showSettingsModal = ref(false);
-const isSaving = ref(false);
+const selectedProduct = ref(null);
+const showHppModal = ref(false);
 
-// Slider Simulation State
-const priceAdjustmentPct = ref(0); // -30% to +30%
-const volumeAdjustmentPct = ref(0); // -50% to +100%
-const simEmployeeCount = ref(props.baseline?.employeeCount || 5);
-const simSalaryPerEmployee = ref(props.baseline?.salaryPerEmployee || 3200000);
-const simMonthlyFixedCost = ref(props.baseline?.monthlyFixedCost || 6500000);
-const simWasteReductionPct = ref(0); // 0% to 80%
+// Toast Notification State
+const toastMessage = ref('');
+const showToast = ref(false);
+let toastTimer = null;
 
-// Format Currency
-const formatRupiah = (number) => {
-    if (number === null || number === undefined) return 'Rp 0';
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(number);
+const triggerToast = (msg) => {
+    toastMessage.value = msg;
+    showToast.value = true;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        showToast.value = false;
+    }, 3500);
 };
 
-// Reset to baseline
-const resetSimulation = () => {
-    priceAdjustmentPct.value = 0;
-    volumeAdjustmentPct.value = 0;
-    simEmployeeCount.value = props.baseline?.employeeCount || 5;
-    simSalaryPerEmployee.value = props.baseline?.salaryPerEmployee || 3200000;
-    simMonthlyFixedCost.value = props.baseline?.monthlyFixedCost || 6500000;
-    simWasteReductionPct.value = 0;
+// Filter Periode Audit Change
+const onPeriodChange = (newPeriod) => {
+    router.get(
+        '/simulator',
+        { period: newPeriod },
+        { preserveState: false, preserveScroll: true }
+    );
 };
 
-// Simulation Math Projections
-const projectedVolume = computed(() => {
-    const baseVol = props.baseline?.totalItemsSold || 0;
-    return Math.round(baseVol * (1 + volumeAdjustmentPct.value / 100));
-});
+// Open HPP Modal for a Product
+const handleSelectProduct = (product) => {
+    selectedProduct.value = product;
+    showHppModal.value = true;
+};
 
-const projectedPricePerUnit = computed(() => {
-    const basePrice = props.baseline?.avgPricePerUnit || 450000;
-    return Math.round(basePrice * (1 + priceAdjustmentPct.value / 100));
-});
+// Action Executed Feedback
+const handleActionExecuted = (payload) => {
+    triggerToast(payload.message);
+};
 
-const projectedRevenue = computed(() => {
-    return projectedVolume.value * projectedPricePerUnit.value;
-});
-
-const projectedCogs = computed(() => {
-    const costPerUnit = props.baseline?.avgCostPerUnit || 220000;
-    return projectedVolume.value * costPerUnit;
-});
-
-const projectedGrossProfit = computed(() => {
-    return projectedRevenue.value - projectedCogs.value;
-});
-
-const projectedGrossMargin = computed(() => {
-    return projectedRevenue.value > 0
-        ? roundVal((projectedGrossProfit.value / projectedRevenue.value) * 100, 1)
-        : 0;
-});
-
-const projectedFixedCost = computed(() => {
-    const salary = simEmployeeCount.value * simSalaryPerEmployee.value;
-    return salary + simMonthlyFixedCost.value;
-});
-
-const projectedWasteCost = computed(() => {
-    const baseWaste = props.baseline?.wasteCost || 0;
-    const factor = Math.max(0, 1 - (simWasteReductionPct.value / 100));
-    return Math.round(baseWaste * factor);
-});
-
-const projectedNetProfit = computed(() => {
-    return projectedGrossProfit.value - (projectedFixedCost.value + projectedWasteCost.value);
-});
-
-const projectedBep = computed(() => {
-    return projectedGrossMargin.value > 0
-        ? Math.round(projectedFixedCost.value / (projectedGrossMargin.value / 100))
-        : 0;
-});
-
-const projectedCapacityUsage = computed(() => {
-    const maxCap = props.baseline?.monthlyMaxCapacity || 500;
-    return maxCap > 0 ? roundVal((projectedVolume.value / maxCap) * 100, 1) : 0;
-});
-
-const netProfitDifference = computed(() => {
-    return projectedNetProfit.value - (props.baseline?.netProfit || 0);
-});
-
-const netProfitPctChange = computed(() => {
-    const baseNet = props.baseline?.netProfit || 1;
-    return baseNet !== 0 ? roundVal((netProfitDifference.value / Math.abs(baseNet)) * 100, 1) : 0;
-});
-
-function roundVal(val, dec = 1) {
-    const factor = Math.pow(10, dec);
-    return Math.round(val * factor) / factor;
-}
-
-// Settings Update Form State
-const settingsForm = ref({
-    workshop_name: props.baseline?.workshopName || 'OptimaBiz Leathercraft & Shoes',
-    employee_count: props.baseline?.employeeCount || 5,
-    salary_per_employee: props.baseline?.salaryPerEmployee || 3200000,
-    monthly_fixed_cost: props.baseline?.monthlyFixedCost || 6500000,
-    monthly_max_capacity: props.baseline?.monthlyMaxCapacity || 500,
-});
-
-const submitSettings = () => {
-    isSaving.value = true;
-    router.post('/simulator/settings', settingsForm.value, {
-        onSuccess: () => {
-            showSettingsModal.value = false;
-            isSaving.value = false;
-        },
-        onError: () => {
-            isSaving.value = false;
-        },
-    });
+// Apply Action from HPP Modal
+const handleApplyActionFromModal = (product) => {
+    triggerToast(`Rekomendasi untuk "${product.name}" telah disiapkan di Panel Tindakan Konkret!`);
 };
 </script>
 
 <template>
-    <Head title="Simulasi Usaha & Pesanan · OptimaBiz" />
+    <Head title="Profit Leakage & Margin Guardian · OptimaBiz" />
 
     <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
         <SidebarNav active="simulator" />
 
-        <!-- Main Content -->
+        <!-- Main Content Area -->
         <main class="flex-1 flex flex-col gap-5 min-w-0">
-            <!-- Header Section -->
-            <header class="bg-white/80 backdrop-blur-md rounded-[24px] p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <!-- Header Bar (Executive Bento Header) -->
+            <header class="bg-white rounded-[28px] border border-[#dce0cd] p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">Simulasi Usaha & Pesanan</h1>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Hitung Cepat Dampak Keuntungan</span>
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0e0f0c] text-[#c6ef4e] text-xs font-black uppercase tracking-wider">
+                            <span>🛡️</span> Auditor Internal Otomatis
+                        </span>
+                        <span class="text-xs text-neutral-400">·</span>
+                        <span class="text-xs font-bold text-[#4d5240]">
+                            👞 {{ props.workshopInfo?.name || 'OptimaBiz Leathercraft & Shoes' }}
+                        </span>
                     </div>
-                    <p class="text-xs text-neutral-500 font-medium mt-1">Coba hitung perkiraan untung atau rugi jika menambah pesanan, mengubah harga jual, atau menambah tukang</p>
+
+                    <h1 class="text-2xl sm:text-3xl font-black text-[#0e0f0c] tracking-tight">
+                        {{ props.systemName }}
+                    </h1>
+                    <p class="text-xs sm:text-sm text-[#737868] mt-0.5 font-medium">
+                        {{ props.systemTagline }} — Membedah kebocoran laba riil dari catatan transaksi, meja potong kulit, dan gaji pengrajin.
+                    </p>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="resetSimulation"
-                        class="bg-white hover:bg-neutral-50 text-[#0e0f0c] border border-neutral-300 text-xs font-bold px-4 py-2.5 rounded-full transition cursor-pointer shadow-sm"
-                    >
-                        Kembalikan ke Semula
-                    </button>
+                <!-- Controls: Periode Audit & Pengaturan Bengkel -->
+                <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                    <!-- Dropdown Periode Audit -->
+                    <div class="relative">
+                        <label for="periodAuditSelect" class="sr-only">Periode Audit</label>
+                        <select
+                            id="periodAuditSelect"
+                            :value="props.period"
+                            @change="onPeriodChange($event.target.value)"
+                            class="bg-[#fafbf7] text-[#0e0f0c] border border-[#dce0cd] rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-[#8fae26] cursor-pointer appearance-none pr-9 shadow-2xs"
+                        >
+                            <option
+                                v-for="opt in props.periodOptions"
+                                :key="opt.id"
+                                :value="opt.id"
+                            >
+                                {{ opt.label }}
+                            </option>
+                        </select>
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 text-xs">
+                            ▼
+                        </div>
+                    </div>
+
+                    <!-- Tombol Pengaturan Kapasitas & Beban Bengkel -->
                     <button
                         type="button"
                         @click="showSettingsModal = true"
-                        class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-4 py-2.5 rounded-full transition cursor-pointer shadow-sm"
+                        title="Atur standar gaji tukang, sewa workshop, dan kapasitas produksi fisik"
+                        class="p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border border-[#dce0cd] bg-[#fafbf7] hover:bg-white text-[#0e0f0c] text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all shadow-2xs shrink-0"
                     >
-                        ⚙️ Atur Biaya & Tukang
+                        <svg class="w-4 h-4 text-[#737868]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="hidden sm:inline">Kapasitas Bengkel</span>
                     </button>
                 </div>
             </header>
 
-            <!-- Dynamic Lime Insight Banner -->
-            <section class="bg-[#c6ef4e] rounded-[28px] p-6 border border-[#b2db3a] shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-800">Perkiraan Keuntungan Bersih Baru</span>
-                    <div class="text-3xl font-black text-[#0e0f0c] mt-1 tabular-nums">
-                        {{ formatRupiah(projectedNetProfit) }}
-                    </div>
-                    <p class="text-xs text-neutral-800 font-semibold mt-1">
-                        Perubahan untung:
-                        <span :class="netProfitDifference >= 0 ? 'text-emerald-950 font-black' : 'text-rose-950 font-black'">
-                            {{ netProfitDifference >= 0 ? '+' : '' }}{{ formatRupiah(netProfitDifference) }} ({{ netProfitDifference >= 0 ? '+' : '' }}{{ netProfitPctChange }}%)
-                        </span>
-                        dibanding kondisi saat ini.
-                    </p>
+            <!-- 1. Baris Atas: 3 Kartu Deteksi Kebocoran Kas (Leakage Summary Cards) -->
+            <LeakageSummaryCards
+                :cards="props.leakageCards"
+            />
+
+            <!-- Bento Grid: Baris Bawah (Panel Kiri & Panel Kanan) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                <!-- 2. Panel Kiri: Tabel Audit Produk ("Mana Model yang Bocor?") (Col 7) -->
+                <div class="lg:col-span-7">
+                    <ProductAuditTable
+                        :products="props.productAudits"
+                        :selected-product-id="selectedProduct?.id || null"
+                        @select-product="handleSelectProduct"
+                    />
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="bg-black/10 px-4 py-2 rounded-2xl border border-black/15 text-right">
-                        <div class="text-[10px] font-bold text-neutral-800 uppercase">Kapasitas Tukang</div>
-                        <div class="text-base font-black text-[#0e0f0c]">{{ projectedCapacityUsage }}%</div>
-                    </div>
-                    <div class="bg-black/10 px-4 py-2 rounded-2xl border border-black/15 text-right">
-                        <div class="text-[10px] font-bold text-neutral-800 uppercase">Batas Balik Modal</div>
-                        <div class="text-base font-black text-[#0e0f0c]">{{ formatRupiah(projectedBep) }}</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2 Columns: Sliders on Left, Before vs After on Right -->
-            <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                <!-- Sliders Panel - Col 5 -->
-                <div class="lg:col-span-5 bg-white rounded-[28px] p-6 border border-[#dce0cd] shadow-sm space-y-5">
-                    <div class="border-b border-neutral-100 pb-3">
-                        <h2 class="text-base font-black text-[#0e0f0c]">Pengaturan Simulasi</h2>
-                        <p class="text-xs text-neutral-400">Geser tombol pengatur untuk melihat perkiraan hasilnya langsung</p>
-                    </div>
-
-                    <!-- Slider 1: Penyesuaian Harga Jual -->
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Naik / Turunkan Harga Jual</span>
-                            <span :class="priceAdjustmentPct >= 0 ? 'text-emerald-600 font-black' : 'text-rose-600 font-black'">
-                                {{ priceAdjustmentPct >= 0 ? '+' : '' }}{{ priceAdjustmentPct }}%
-                            </span>
-                        </div>
-                        <input
-                            v-model.number="priceAdjustmentPct"
-                            type="range"
-                            min="-30"
-                            max="30"
-                            step="1"
-                            class="w-full accent-[#0e0f0c] cursor-pointer"
-                        />
-                        <div class="flex justify-between text-[10px] text-neutral-400">
-                            <span>-30%</span>
-                            <span>Normal (0%)</span>
-                            <span>+30%</span>
-                        </div>
-                    </div>
-
-                    <!-- Slider 2: Volume Penjualan / Produksi -->
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Tambah / Kurangi Jumlah Pasang</span>
-                            <span :class="volumeAdjustmentPct >= 0 ? 'text-emerald-600 font-black' : 'text-rose-600 font-black'">
-                                {{ volumeAdjustmentPct >= 0 ? '+' : '' }}{{ volumeAdjustmentPct }}% ({{ projectedVolume }} pasang)
-                            </span>
-                        </div>
-                        <input
-                            v-model.number="volumeAdjustmentPct"
-                            type="range"
-                            min="-50"
-                            max="100"
-                            step="5"
-                            class="w-full accent-[#0e0f0c] cursor-pointer"
-                        />
-                        <div class="flex justify-between text-[10px] text-neutral-400">
-                            <span>-50%</span>
-                            <span>Saat Ini</span>
-                            <span>+100%</span>
-                        </div>
-                    </div>
-
-                    <!-- Slider 3: Jumlah Pengrajin Sepatu -->
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Jumlah Tukang Sepatu</span>
-                            <span class="font-black text-[#0e0f0c]">{{ simEmployeeCount }} Orang</span>
-                        </div>
-                        <input
-                            v-model.number="simEmployeeCount"
-                            type="range"
-                            min="1"
-                            max="15"
-                            step="1"
-                            class="w-full accent-[#0e0f0c] cursor-pointer"
-                        />
-                        <div class="flex justify-between text-[10px] text-neutral-400">
-                            <span>1 Orang</span>
-                            <span>Saat ini: {{ props.baseline?.employeeCount || 5 }} orang</span>
-                            <span>15 Orang</span>
-                        </div>
-                    </div>
-
-                    <!-- Slider 4: Efisiensi Waste / Penekanan Cacat Bahan -->
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-neutral-700">Pengurangan Bahan Kulit Rusak</span>
-                            <span class="text-emerald-600 font-black">Hemat {{ simWasteReductionPct }}%</span>
-                        </div>
-                        <input
-                            v-model.number="simWasteReductionPct"
-                            type="range"
-                            min="0"
-                            max="80"
-                            step="5"
-                            class="w-full accent-[#0e0f0c] cursor-pointer"
-                        />
-                        <div class="flex justify-between text-[10px] text-neutral-400">
-                            <span>0% (Sama seperti biasa)</span>
-                            <span>Hemat 40%</span>
-                            <span>Hemat 80% (Hampir Nol)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Before vs After Table Panel - Col 7 -->
-                <div class="lg:col-span-7 bg-white rounded-[28px] p-6 border border-[#dce0cd] shadow-sm space-y-4">
-                    <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
-                        <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Perbandingan Sebelum vs Sesudah Simulasi</h2>
-                            <p class="text-xs text-neutral-400">Perkiraan perubahan penjualan, biaya bengkel, dan keuntungan</p>
-                        </div>
-                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#f4f5ee] text-[#0e0f0c]">
-                            Hasil Hitungan
-                        </span>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="border-b border-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                                    <th class="py-2.5 px-3">Keterangan</th>
-                                    <th class="py-2.5 px-3 text-right">Kondisi Sekarang</th>
-                                    <th class="py-2.5 px-3 text-right">Hasil Simulasi</th>
-                                    <th class="py-2.5 px-3 text-right">Selisih</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-neutral-100">
-                                <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Jumlah Sepatu Terjual</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ props.baseline?.totalItemsSold || 0 }} Pasang</td>
-                                    <td class="py-3 px-3 text-right font-black text-[#0e0f0c] tabular-nums">{{ projectedVolume }} Pasang</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-600">
-                                        {{ projectedVolume - (props.baseline?.totalItemsSold || 0) >= 0 ? '+' : '' }}{{ projectedVolume - (props.baseline?.totalItemsSold || 0) }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Rata-rata Harga / Pasang</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.avgPricePerUnit) }}</td>
-                                    <td class="py-3 px-3 text-right font-black text-[#0e0f0c] tabular-nums">{{ formatRupiah(projectedPricePerUnit) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-600">
-                                        {{ priceAdjustmentPct >= 0 ? '+' : '' }}{{ priceAdjustmentPct }}%
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Total Penjualan Bersih</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.netRevenue) }}</td>
-                                    <td class="py-3 px-3 text-right font-black text-[#0e0f0c] tabular-nums">{{ formatRupiah(projectedRevenue) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-600">
-                                        {{ projectedRevenue - (props.baseline?.netRevenue || 0) >= 0 ? '+' : '' }}{{ formatRupiah(projectedRevenue - (props.baseline?.netRevenue || 0)) }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Biaya Bahan Kulit & Sol</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.cogs) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-700 tabular-nums">{{ formatRupiah(projectedCogs) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500">
-                                        {{ projectedCogs - (props.baseline?.cogs || 0) >= 0 ? '+' : '' }}{{ formatRupiah(projectedCogs - (props.baseline?.cogs || 0)) }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Gaji Tukang & Sewa Bengkel</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.totalFixedOpex) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-700 tabular-nums">{{ formatRupiah(projectedFixedCost) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500">
-                                        {{ projectedFixedCost - (props.baseline?.totalFixedOpex || 0) >= 0 ? '+' : '' }}{{ formatRupiah(projectedFixedCost - (props.baseline?.totalFixedOpex || 0)) }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3 px-3 font-semibold text-neutral-700">Bahan Rusak / Sisa Kulit</td>
-                                    <td class="py-3 px-3 text-right font-bold text-rose-500 tabular-nums">{{ formatRupiah(props.baseline?.wasteCost) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-700 tabular-nums">{{ formatRupiah(projectedWasteCost) }}</td>
-                                    <td class="py-3 px-3 text-right font-bold text-emerald-600">
-                                        -{{ formatRupiah((props.baseline?.wasteCost || 0) - projectedWasteCost) }}
-                                    </td>
-                                </tr>
-                                <tr class="bg-[#fafbf7]">
-                                    <td class="py-3 px-3 font-black text-[#0e0f0c]">Keuntungan Bersih (Laba)</td>
-                                    <td class="py-3 px-3 text-right font-bold text-neutral-500 tabular-nums">{{ formatRupiah(props.baseline?.netProfit) }}</td>
-                                    <td class="py-3 px-3 text-right font-black text-xl text-[#0e0f0c] tabular-nums">{{ formatRupiah(projectedNetProfit) }}</td>
-                                    <td class="py-3 px-3 text-right font-black" :class="netProfitDifference >= 0 ? 'text-emerald-700' : 'text-rose-700'">
-                                        {{ netProfitDifference >= 0 ? '+' : '' }}{{ formatRupiah(netProfitDifference) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Settings Modal -->
-        <div
-            v-if="showSettingsModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0e0f0c]/60 backdrop-blur-sm"
-            @click.self="showSettingsModal = false"
-        >
-            <div class="bg-white rounded-[28px] w-full max-w-lg shadow-2xl border border-[#dce0cd] overflow-hidden">
-                <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
-                    <div>
-                        <h3 class="text-xl font-black text-[#0e0f0c]">Pengaturan Biaya Bengkel & Kapasitas</h3>
-                        <p class="text-xs text-neutral-500 mt-0.5">Atur jumlah tukang, gaji, biaya sewa, dan kapasitas maksimal sepatu per bulan</p>
-                    </div>
-                    <button
-                        type="button"
-                        @click="showSettingsModal = false"
-                        class="w-9 h-9 rounded-full bg-neutral-200 hover:bg-neutral-300 flex items-center justify-center text-neutral-700 cursor-pointer font-bold"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <div class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-neutral-600 mb-1">Nama Bengkel Sepatu</label>
-                        <input
-                            v-model="settingsForm.workshop_name"
-                            type="text"
-                            class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
-                        />
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Jumlah Tukang</label>
-                            <input
-                                v-model.number="settingsForm.employee_count"
-                                type="number"
-                                min="1"
-                                class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Gaji per Tukang (Rp)</label>
-                            <input
-                                v-model.number="settingsForm.salary_per_employee"
-                                type="number"
-                                step="100000"
-                                class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Biaya Sewa & Listrik (Rp)</label>
-                            <input
-                                v-model.number="settingsForm.monthly_fixed_cost"
-                                type="number"
-                                step="100000"
-                                class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-neutral-600 mb-1">Kapasitas Maksimal (Pasang/Bulan)</label>
-                            <input
-                                v-model.number="settingsForm.monthly_max_capacity"
-                                type="number"
-                                min="10"
-                                class="w-full bg-[#f6f7f7] rounded-xl px-3.5 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-[#0e0f0c]"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="showSettingsModal = false"
-                            class="px-4 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="button"
-                            @click="submitSettings"
-                            :disabled="isSaving"
-                            class="bg-[#0e0f0c] hover:bg-neutral-800 text-white font-bold text-xs px-5 py-2.5 rounded-full transition cursor-pointer shadow-sm"
-                        >
-                            {{ isSaving ? 'Menyimpan...' : 'Simpan Pengaturan' }}
-                        </button>
-                    </div>
+                <!-- 3. Panel Kanan: Kotak Tindakan Konkret (Actionable Insights) (Col 5) -->
+                <div class="lg:col-span-5">
+                    <ActionableInsights
+                        :insights="props.actionableInsights"
+                        @action-executed="handleActionExecuted"
+                    />
                 </div>
             </div>
-        </div>
+
+            <!-- Footer Informatif: Prinsip Auditor Lapangan -->
+            <footer class="bg-white/80 backdrop-blur-xs rounded-2xl border border-[#dce0cd] px-5 py-3.5 text-xs text-[#737868] flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="font-bold text-[#0e0f0c] flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#8fae26]"></span>
+                        Prinsip Audit OptimaBiz:
+                    </span>
+                    <span>1. Bukan Ramalan Abstrak (berdasarkan catatan transaksi riil)</span>
+                    <span class="text-neutral-300">·</span>
+                    <span>2. Terintegrasi Tanpa Input Rumit</span>
+                    <span class="text-neutral-300">·</span>
+                    <span>3. Bahasa Operasional Bengkel Lapangan</span>
+                </div>
+
+                <div class="text-[11px] text-[#4d5240] font-semibold">
+                    Staf Aktif: {{ props.workshopInfo?.employeeCount || 5 }} Tukang | Kapasitas: {{ props.workshopInfo?.monthlyMaxCapacity || 500 }} psg/bln
+                </div>
+            </footer>
+        </main>
+
+        <!-- Product HPP Breakdown Modal (Muncul saat baris produk diklik) -->
+        <ProductHppModal
+            :show="showHppModal"
+            :product="selectedProduct"
+            @close="showHppModal = false"
+            @apply-action="handleApplyActionFromModal"
+        />
+
+        <!-- Settings Modal (Atur Tukang, Gaji, Beban Tetap, Kapasitas) -->
+        <SettingsModal
+            :show="showSettingsModal"
+            :baseline="props.baseline"
+            @close="showSettingsModal = false"
+        />
+
+        <!-- Floating Toast Notification -->
+        <transition
+            enter-active-class="transform ease-out duration-300 transition"
+            enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+            enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="showToast"
+                class="fixed bottom-5 right-5 z-50 bg-[#0e0f0c] text-white px-4 py-3 rounded-2xl shadow-2xl border border-[#c6ef4e] flex items-center gap-3 max-w-md text-xs font-bold"
+            >
+                <span class="text-base text-[#c6ef4e]">✨</span>
+                <span>{{ toastMessage }}</span>
+                <button
+                    type="button"
+                    @click="showToast = false"
+                    class="ml-auto text-neutral-400 hover:text-white cursor-pointer"
+                >
+                    ✕
+                </button>
+            </div>
+        </transition>
     </div>
 </template>
