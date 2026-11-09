@@ -155,8 +155,8 @@ const toggleCategoryStatus = (category) => {
         </div>
 
         <!-- Table Content -->
-        <div class="overflow-x-auto -mx-4 md:-mx-6 px-4 md:px-6">
-            <table class="w-full text-left align-middle border-collapse text-xs">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full min-w-[550px] text-left align-middle border-collapse text-xs">
                 <thead>
                     <tr class="uppercase tracking-wider text-[#737868] border-b border-[#dce0cd] font-semibold text-[11px] select-none">
                         <th class="py-2.5 px-3">Nama Kategori & Awalan SKU</th>

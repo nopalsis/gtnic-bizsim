@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-hidden max-w-full">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
@@ -16,7 +16,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased bg-[#eaecdf] text-[#0e0f0c] min-h-screen">
+    <body class="font-sans antialiased bg-[#eaecdf] text-[#0e0f0c] min-h-screen overflow-x-hidden max-w-full w-full">
         @inertia
     </body>
 </html>

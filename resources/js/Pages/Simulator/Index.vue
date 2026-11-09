@@ -15,15 +15,15 @@ const props = defineProps({
     },
     systemTagline: {
         type: String,
-        default: 'Audit Kebocoran Laba & Pemandu Keputusan',
+        default: 'Profit Leakage & Margin Guardian',
     },
     pageTitle: {
         type: String,
-        default: 'Audit Kebocoran Laba',
+        default: 'Profit Leakage & Margin Guardian',
     },
     pageSubtitle: {
         type: String,
-        default: 'Pantau laba yang hilang akibat diskon berlebih, limbah kulit, dan stok mandek.',
+        default: 'Audit kebocoran laba dan pandu keputusan untuk mengembalikan laba yang hilang akibat diskon berlebih, limbah kulit, dan stok mandek.',
     },
     period: {
         type: String,
@@ -130,39 +130,39 @@ const handleApplyActionFromModal = (product) => {
 <template>
     <Head title="Profit Leakage & Margin Guardian · OptimaBiz" />
 
-    <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
+    <div class="min-h-screen w-full max-w-full overflow-x-hidden bg-[#eaecdf] p-2.5 md:p-5 pb-24 md:pb-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
         <SidebarNav active="simulator" />
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col gap-5 min-w-0">
+        <main class="flex-1 flex flex-col gap-5 min-w-0 max-w-full">
             <!-- Header Bar -->
-            <header class="bg-white rounded-[28px] border border-[#dce0cd] p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
+            <header class="bg-white rounded-2xl sm:rounded-[28px] border border-[#dce0cd] p-3.5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                <div class="min-w-0">
                     <div class="flex items-center gap-2 mb-1">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#f4f6ee] text-[#4d5240] text-xs font-bold border border-[#eaecdf]">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#f4f6ee] text-[#4d5240] text-[11px] sm:text-xs font-bold border border-[#eaecdf]">
                             👞 {{ props.workshopInfo?.name || 'OptimaBiz Workshop' }}
                         </span>
                     </div>
 
-                    <h1 class="text-2xl sm:text-3xl font-black text-[#0e0f0c] tracking-tight">
+                    <h1 class="text-lg sm:text-2xl font-black text-[#0e0f0c] tracking-tight">
                         {{ props.pageTitle }}
                     </h1>
-                    <p class="text-xs sm:text-sm text-[#737868] mt-1 font-medium">
+                    <p class="text-xs sm:text-sm text-[#737868] mt-0.5 font-medium leading-snug">
                         {{ props.pageSubtitle }}
                     </p>
                 </div>
 
                 <!-- Controls: Periode Audit & Rekomendasi Tindakan -->
-                <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                <div class="flex items-center gap-2 sm:gap-2.5 w-full md:w-auto">
                     <!-- Dropdown Periode Audit -->
-                    <div class="relative">
+                    <div class="relative flex-1 sm:flex-initial">
                         <label for="periodAuditSelect" class="sr-only">Periode Audit</label>
                         <select
                             id="periodAuditSelect"
                             :value="props.period"
                             @change="onPeriodChange($event.target.value)"
-                            class="bg-[#fafbf7] text-[#0e0f0c] border border-[#dce0cd] rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-[#8fae26] cursor-pointer appearance-none pr-9 shadow-2xs"
+                            class="w-full bg-[#fafbf7] text-[#0e0f0c] border border-[#dce0cd] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-[#8fae26] cursor-pointer appearance-none pr-8 sm:pr-9 shadow-2xs"
                         >
                             <option
                                 v-for="opt in props.periodOptions"
@@ -181,9 +181,9 @@ const handleApplyActionFromModal = (product) => {
                     <button
                         type="button"
                         @click="showActionsModal = true"
-                        class="px-4 py-2.5 rounded-2xl bg-[#0e0f0c] text-[#c6ef4e] hover:bg-[#2d4000] text-xs sm:text-sm font-black flex items-center gap-2 cursor-pointer transition-all shadow-xs shrink-0"
+                        class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-[#0e0f0c] text-[#c6ef4e] hover:bg-[#2d4000] text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-all shadow-xs shrink-0 flex-1 sm:flex-initial"
                     >
-                        <span>⚡ Rekomendasi Tindakan</span>
+                        <span>⚡ Tindakan</span>
                         <span class="px-1.5 py-0.2 rounded-full bg-[#c6ef4e] text-[#0e0f0c] text-[10px] font-black">
                             {{ props.actionableInsights.length }}
                         </span>
@@ -259,7 +259,7 @@ const handleApplyActionFromModal = (product) => {
         >
             <div
                 v-if="showToast"
-                class="fixed bottom-5 right-5 z-50 bg-[#0e0f0c] text-white px-4 py-3 rounded-2xl shadow-2xl border border-[#c6ef4e] flex items-center gap-3 max-w-md text-xs font-bold"
+                class="fixed bottom-20 md:bottom-5 right-3 md:right-5 z-50 bg-[#0e0f0c] text-white px-4 py-3 rounded-2xl shadow-2xl border border-[#c6ef4e] flex items-center gap-3 max-w-[calc(100vw-1.5rem)] sm:max-w-md text-xs font-bold"
             >
                 <span class="text-base text-[#c6ef4e]">✨</span>
                 <span>{{ toastMessage }}</span>

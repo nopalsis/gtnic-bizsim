@@ -79,12 +79,12 @@ const confirmDeleteProduct = (product) => {
 <template>
     <Head title="Inventory & Materials · OptimaBiz" />
 
-    <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
+    <div class="min-h-screen w-full max-w-full overflow-x-hidden bg-[#eaecdf] p-2.5 md:p-5 pb-24 md:pb-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
         <SidebarNav active="inventory" />
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col gap-5 min-w-0">
+        <main class="flex-1 flex flex-col gap-5 min-w-0 max-w-full">
             <!-- Header Row -->
             <InventoryHeader
                 @open-add-modal="openAddModal"

@@ -178,8 +178,8 @@ const toggleUserStatus = (user) => {
         </div>
 
         <!-- Staff Table -->
-        <div class="overflow-x-auto -mx-5 md:-mx-6 px-5 md:px-6 mt-2">
-            <table class="w-full text-left align-middle border-collapse">
+        <div class="overflow-x-auto w-full mt-2">
+            <table class="w-full min-w-[640px] text-left align-middle border-collapse">
                 <thead>
                     <tr class="bg-[#f4f4ed]/80 text-[#4c4546] rounded-2xl select-none text-xs font-semibold">
                         <th class="py-3 px-4 rounded-l-2xl">Nama & Email</th>

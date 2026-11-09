@@ -159,72 +159,72 @@ const submitOrder = () => {
 <template>
     <Head title="Penjualan & Kasir · OptimaBiz" />
 
-    <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
+    <div class="min-h-screen w-full max-w-full overflow-x-hidden bg-[#eaecdf] p-2.5 md:p-5 pb-24 md:pb-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
         <SidebarNav active="sales" />
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col gap-5 min-w-0">
+        <main class="flex-1 flex flex-col gap-5 min-w-0 max-w-full">
             <!-- Header Section -->
-            <header class="bg-white/80 backdrop-blur-md rounded-[24px] p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                        <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">Penjualan & Kasir</h1>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">Catatan Penjualan</span>
+            <header class="bg-white/80 backdrop-blur-md rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833] shrink-0"></span>
+                        <h1 class="text-lg sm:text-xl font-black text-[#0e0f0c] tracking-tight truncate">Penjualan & Kasir</h1>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 shrink-0">Riwayat Transaksi</span>
                     </div>
-                    <p class="text-xs text-neutral-500 font-medium mt-1">Daftar transaksi penjualan eceran dan pesanan partai bengkel</p>
+                    <p class="text-xs text-neutral-500 font-medium mt-1 leading-snug">Daftar transaksi penjualan eceran dan pesanan partai bengkel</p>
                 </div>
 
                 <button
                     type="button"
                     @click="showNewOrderModal = true"
-                    class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-5 py-2.5 rounded-full transition flex items-center gap-2 shadow-sm cursor-pointer"
+                    class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-full transition flex items-center justify-center gap-2 shadow-sm cursor-pointer w-full sm:w-auto shrink-0"
                 >
-                    <span class="text-[#c6ef4e] text-base leading-none">+</span>
+                    <span class="text-[#c6ef4e] text-base leading-none font-black">+</span>
                     <span>Catat Pesanan Baru</span>
                 </button>
             </header>
 
             <!-- 4 Metric Cards -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Total Uang Penjualan</span>
-                    <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Total Uang Penjualan</span>
+                    <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                         {{ formatRupiah(props.metrics?.totalNetRevenue) }}
                     </div>
-                    <div class="text-[11px] text-neutral-500 font-medium mt-1">
+                    <div class="text-[11px] text-neutral-500 font-medium mt-1 truncate">
                         Dari {{ props.metrics?.totalTransactions || 0 }} nota penjualan
                     </div>
                 </div>
 
-                <div class="bg-[#c6ef4e] rounded-[24px] p-5 border border-[#b2db3a] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-800">Total Potongan Harga (Diskon)</span>
-                    <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                <div class="bg-[#c6ef4e] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#b2db3a] shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-800">Total Diskon</span>
+                    <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                         {{ formatRupiah(props.metrics?.totalDiscount) }}
                     </div>
-                    <div class="text-[11px] text-neutral-800 font-semibold mt-1">
+                    <div class="text-[11px] text-neutral-800 font-semibold mt-1 truncate">
                         Rata-rata diskon {{ props.metrics?.avgDiscountPercent || 0 }}%
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Penjualan Harga Asli</span>
-                    <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                <div class="bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Penjualan Harga Asli</span>
+                    <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                         {{ formatRupiah(props.metrics?.totalGrossRevenue) }}
                     </div>
-                    <div class="text-[11px] text-neutral-500 font-medium mt-1">
-                        Sebelum dipotong diskon
+                    <div class="text-[11px] text-neutral-500 font-medium mt-1 truncate">
+                        Sebelum diskon
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Status Diskon</span>
-                    <div class="text-2xl font-black text-[#0e0f0c] mt-2">
-                        {{ (props.metrics?.avgDiscountPercent || 0) <= 15 ? 'Diskon Wajar (Aman)' : 'Diskon Terlalu Besar' }}
+                <div class="bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Status Diskon</span>
+                    <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2">
+                        {{ (props.metrics?.avgDiscountPercent || 0) <= 15 ? 'Wajar (Aman)' : 'Terlalu Besar' }}
                     </div>
-                    <div class="text-[11px] text-neutral-500 font-medium mt-1">
-                        Batas aman diskon di bawah 15%
+                    <div class="text-[11px] text-neutral-500 font-medium mt-1 truncate">
+                        Batas aman diskon &le; 15%
                     </div>
                 </div>
             </section>
@@ -247,8 +247,8 @@ const submitOrder = () => {
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full min-w-[720px] text-left text-xs border-collapse">
                         <thead>
                             <tr class="border-b border-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                                 <th class="py-3 px-3">Nomor Nota & Tanggal</th>

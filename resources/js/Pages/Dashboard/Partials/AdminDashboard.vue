@@ -147,32 +147,32 @@ const maxTrendCount = computed(() => {
 </script>
 
 <template>
-    <div class="flex-1 flex flex-col gap-5 min-w-0">
+    <div class="flex-1 flex flex-col gap-5 min-w-0 max-w-full">
         <!-- Header Utama -->
-        <header class="bg-white/90 backdrop-blur-md rounded-[24px] p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                    <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">{{ props.workshopName || 'OptimaBiz Leathercraft' }}</h1>
-                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#0e0f0c] text-[#c6ef4e] border border-[#c6ef4e]/40 shadow-xs">
-                        Super Admin · Laporan & Keuangan
+        <header class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833] shrink-0"></span>
+                    <h1 class="text-lg sm:text-xl font-black text-[#0e0f0c] tracking-tight truncate">{{ props.workshopName || 'OptimaBiz Leathercraft' }}</h1>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0e0f0c] text-[#c6ef4e] border border-[#c6ef4e]/40 shadow-xs shrink-0">
+                        Super Admin
                     </span>
                 </div>
-                <p class="text-xs text-[#737868] font-medium mt-1">
-                    Ringkasan penjualan, jumlah transaksi, produk terlaris, dan grafik harian bengkel
+                <p class="text-xs text-[#737868] font-medium mt-1 leading-snug">
+                    Ringkasan penjualan, transaksi, produk terlaris, dan grafik harian bengkel
                 </p>
             </div>
 
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
                 <!-- Status Kondisi Usaha -->
-                <div class="flex items-center gap-2 bg-[#f4f5ee] px-3.5 py-1.5 rounded-2xl border border-[#e1e5d3]">
+                <div class="flex items-center gap-2 bg-[#f4f5ee] px-2.5 sm:px-3.5 py-1.5 rounded-xl sm:rounded-2xl border border-[#e1e5d3]">
                     <div class="text-right">
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-[#737868]">Kondisi Usaha</div>
-                        <div class="text-xs font-black text-[#0e0f0c]">
+                        <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#737868] leading-tight">Kondisi Usaha</div>
+                        <div class="text-[11px] sm:text-xs font-black text-[#0e0f0c] leading-tight">
                             {{ props.healthScore?.grade || 'A-' }} · {{ props.healthScore?.score || 88 }} Poin
                         </div>
                     </div>
-                    <div class="w-7 h-7 rounded-full bg-[#0e0f0c] text-[#c6ef4e] font-black text-xs flex items-center justify-center">
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#0e0f0c] text-[#c6ef4e] font-black text-xs flex items-center justify-center shrink-0">
                         {{ props.healthScore?.grade?.charAt(0) || 'A' }}
                     </div>
                 </div>
@@ -181,7 +181,7 @@ const maxTrendCount = computed(() => {
                 <button
                     type="button"
                     @click="emit('openLedger')"
-                    class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-4 py-2.5 rounded-2xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap shrink-0"
                 >
                     <span class="material-symbols-outlined text-[16px] text-[#c6ef4e]">menu_book</span>
                     <span>Buku Penjualan</span>
@@ -190,16 +190,16 @@ const maxTrendCount = computed(() => {
         </header>
 
         <!-- 4 Kartu Ringkasan Utama: 1. Total Penjualan (Omset), 2. Jumlah Transaksi, 3. Produk Terjual, 4. Rata-rata Omset per Hari -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Ringkasan Utama Dashboard">
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" aria-label="Ringkasan Utama Dashboard">
             <!-- 1. Total Penjualan (Omset) -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Total Penjualan (Omset)</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">Total Penjualan</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                         Bulan Ini
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                     {{ formatRupiah(props.kpis?.netRevenue) }}
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
@@ -208,50 +208,50 @@ const maxTrendCount = computed(() => {
             </div>
 
             <!-- 2. Jumlah Transaksi -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Jumlah Transaksi</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">Jumlah Transaksi</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3] shrink-0">
                         Nota Selesai
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                     {{ props.kpis?.totalTransactions || 0 }} Transaksi
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
-                    Total nota & faktur berhasil diproses
+                    Total nota diproses
                 </div>
             </div>
 
             <!-- 3. Produk Terjual -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Produk Terjual</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833]">
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">Produk Terjual</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833] shrink-0">
                         Beban {{ props.capacity?.usagePercent || 0 }}%
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                     {{ props.kpis?.totalProductsSold || props.capacity?.soldUnits || 0 }} Pasang
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
-                    Batas maksimal: {{ props.capacity?.maxCapacity || 500 }} pasang/bulan
+                    Batas: {{ props.capacity?.maxCapacity || 500 }} pasang/bln
                 </div>
             </div>
 
             <!-- 4. Rata-rata Omset per Hari -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">Rata-rata Omset per Hari</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between hover:border-[#c6ef4e] transition-all">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">Rata-rata per Hari</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
                         Harian
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
+                <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                     {{ formatRupiah(props.kpis?.dailyAvgRevenue) }}
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
-                    Dari {{ props.kpis?.activeDaysCount || 1 }} hari transaksi aktif
+                    Dari {{ props.kpis?.activeDaysCount || 1 }} hari aktif
                 </div>
             </div>
         </section>
@@ -259,33 +259,33 @@ const maxTrendCount = computed(() => {
         <!-- Baris 2: 5. Grafik Penjualan (Col 7) & 6. Top Produk Terlaris (Col 5) -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             <!-- 5. Grafik Penjualan (Grafik Batang: Total Omset & Jumlah Transaksi Harian / Per 7 Hari / Bulanan) -->
-            <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <!-- Header Grafik & Filter Periode -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                         <div>
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e]"></span>
-                                <h2 class="text-base font-black text-[#0e0f0c]">Grafik Penjualan</h2>
+                                <h2 class="text-sm sm:text-base font-black text-[#0e0f0c]">Grafik Penjualan</h2>
                             </div>
                             <p class="text-[11px] text-[#737868] font-medium mt-0.5">
                                 {{
                                     trendPeriod === 'all_months'
-                                        ? 'Perbandingan omset dan transaksi per bulan (Semua Penjualan)'
+                                        ? 'Perbandingan omset dan transaksi per bulan'
                                         : trendPeriod === 'weekly'
-                                        ? 'Perbandingan omset dan transaksi dikelompokkan per 7 hari'
+                                        ? 'Perbandingan omset dan transaksi per 7 hari'
                                         : 'Perbandingan omset dan transaksi per hari (7 hari terakhir)'
                                 }}
                             </p>
                         </div>
 
                         <!-- Filter Pilihan Rentang (Harian, Per 7 Hari, Semua/Per Bulan) -->
-                        <div class="flex items-center gap-1 bg-[#f4f5ee] p-1 rounded-xl border border-[#e1e5d3] self-start sm:self-auto">
+                        <div class="flex items-center gap-1 bg-[#f4f5ee] p-1 rounded-xl border border-[#e1e5d3] self-stretch sm:self-auto justify-between sm:justify-start">
                             <button
                                 type="button"
                                 @click="trendPeriod = '7d'"
                                 :class="[
-                                    'px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer',
+                                    'flex-1 sm:flex-initial px-2 sm:px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer text-center',
                                     trendPeriod === '7d'
                                         ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
                                         : 'text-[#737868] hover:text-[#0e0f0c]'
@@ -297,7 +297,7 @@ const maxTrendCount = computed(() => {
                                 type="button"
                                 @click="trendPeriod = 'weekly'"
                                 :class="[
-                                    'px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer',
+                                    'flex-1 sm:flex-initial px-2 sm:px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer text-center',
                                     trendPeriod === 'weekly'
                                         ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
                                         : 'text-[#737868] hover:text-[#0e0f0c]'
@@ -309,14 +309,14 @@ const maxTrendCount = computed(() => {
                                 type="button"
                                 @click="trendPeriod = 'all_months'"
                                 :class="[
-                                    'px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1',
+                                    'flex-1 sm:flex-initial px-2 sm:px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 text-center',
                                     trendPeriod === 'all_months'
                                         ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
                                         : 'text-[#737868] hover:text-[#0e0f0c]'
                                 ]"
                             >
                                 <span>Semua</span>
-                                <span class="text-[9px] opacity-75">(Per Bulan)</span>
+                                <span class="text-[9px] opacity-75 hidden sm:inline">(Per Bulan)</span>
                             </button>
                         </div>
                     </div>
@@ -330,13 +330,13 @@ const maxTrendCount = computed(() => {
                             <span class="w-2 h-2 rounded-full bg-[#c6ef4e] animate-pulse"></span>
                             <span class="font-bold text-[#c6ef4e]">{{ hoveredItem.full_date || hoveredItem.date }}</span>
                         </div>
-                        <div class="flex items-center gap-4 text-[11px] font-semibold">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] font-semibold">
                             <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-white"></span>
+                                <span class="w-2 h-2 rounded-full bg-white shrink-0"></span>
                                 Omset: <strong class="text-white font-black">{{ formatRupiah(hoveredItem.amount) }}</strong>
                             </span>
                             <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
+                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e] shrink-0"></span>
                                 Transaksi: <strong class="text-[#c6ef4e] font-black">{{ hoveredItem.count }} Nota</strong>
                             </span>
                         </div>
@@ -428,14 +428,14 @@ const maxTrendCount = computed(() => {
                 <!-- Footer Keterangan Legenda & Puncak -->
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#737868] pt-3 border-t border-neutral-100 mt-3 gap-2">
                     <!-- Legenda 2 Batang -->
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-4">
                         <div class="flex items-center gap-1.5 font-bold text-[#0e0f0c]">
-                            <span class="w-3 h-3 rounded bg-[#0e0f0c]"></span>
-                            <span>Batang Hitam = Total Omset (Rp)</span>
+                            <span class="w-2.5 h-2.5 rounded bg-[#0e0f0c] shrink-0"></span>
+                            <span>Hitam: Omset</span>
                         </div>
                         <div class="flex items-center gap-1.5 font-bold text-[#0e0f0c]">
-                            <span class="w-3 h-3 rounded bg-[#c6ef4e] border border-[#a2c833]"></span>
-                            <span>Batang Hijau = Jumlah Transaksi</span>
+                            <span class="w-2.5 h-2.5 rounded bg-[#c6ef4e] border border-[#a2c833] shrink-0"></span>
+                            <span>Hijau: Transaksi</span>
                         </div>
                     </div>
 
@@ -446,32 +446,32 @@ const maxTrendCount = computed(() => {
             </div>
 
             <!-- 6. Top Produk Terlaris -->
-            <div class="lg:col-span-5 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <div class="flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
-                                <h2 class="text-base font-black text-[#0e0f0c]">Top Produk Terlaris</h2>
+                                <h2 class="text-sm sm:text-base font-black text-[#0e0f0c]">Top Produk Terlaris</h2>
                             </div>
-                            <p class="text-[11px] text-[#737868] font-medium mt-0.5">Model sepatu & sandal paling diminati pembeli</p>
+                            <p class="text-[11px] text-[#737868] font-medium mt-0.5">Model sepatu paling diminati</p>
                         </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833]">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833] shrink-0">
                             Paling Laku
                         </span>
                     </div>
 
                     <!-- List 5 Top Produk -->
-                    <div class="space-y-2.5 mt-2">
+                    <div class="space-y-2 mt-2">
                         <div
                             v-for="(prod, idx) in (props.topProducts || []).slice(0, 5)"
                             :key="prod.sku || idx"
-                            class="flex items-center justify-between p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db] hover:border-[#c6ef4e] transition-colors"
+                            class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db] hover:border-[#c6ef4e] transition-colors"
                         >
-                            <div class="flex items-center gap-3 min-w-0 pr-2">
+                            <div class="flex items-center gap-2.5 min-w-0 pr-2">
                                 <div
                                     :class="[
-                                        'w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0',
+                                        'w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-black text-[11px] sm:text-xs shrink-0',
                                         idx === 0
                                             ? 'bg-[#c6ef4e] text-[#0e0f0c] shadow-xs'
                                             : idx === 1
@@ -486,14 +486,14 @@ const maxTrendCount = computed(() => {
                                         {{ prod.name }}
                                     </p>
                                     <span class="text-[10px] text-[#737868]">
-                                        {{ prod.category }} · {{ prod.sku }}
+                                        {{ prod.category }}
                                     </span>
                                 </div>
                             </div>
 
                             <div class="text-right shrink-0">
                                 <span class="text-xs font-black text-[#0e0f0c] block">
-                                    {{ prod.quantity }} {{ prod.unit || 'pasang' }}
+                                    {{ prod.quantity }} {{ prod.unit || 'psg' }}
                                 </span>
                                 <span class="text-[10px] text-[#506600] font-semibold">
                                     {{ formatRupiah(prod.sales) }}
@@ -501,14 +501,14 @@ const maxTrendCount = computed(() => {
                             </div>
                         </div>
 
-                        <div v-if="!props.topProducts || props.topProducts.length === 0" class="py-8 text-center text-[#737868]">
+                        <div v-if="!props.topProducts || props.topProducts.length === 0" class="py-6 text-center text-[#737868]">
                             <p class="text-xs font-medium">Belum ada data penjualan produk.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-[#737868]">
-                    <span>Total model aktif: {{ props.topProducts?.length || 0 }} produk</span>
+                    <span>Total model: {{ props.topProducts?.length || 0 }} produk</span>
                     <a href="/sales" class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer">Lihat Penjualan →</a>
                 </div>
             </div>
@@ -517,20 +517,20 @@ const maxTrendCount = computed(() => {
         <!-- Baris 3: 7. Riwayat Transaksi Terbaru (Full Width) -->
         <section class="w-full">
             <!-- 7. Riwayat Transaksi Terbaru -->
-            <div class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <div class="bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-between mb-3 sm:mb-4">
                         <div>
                             <div class="flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
-                                <h2 class="text-base font-black text-[#0e0f0c]">Riwayat Transaksi Terbaru</h2>
+                                <h2 class="text-sm sm:text-base font-black text-[#0e0f0c]">Riwayat Transaksi Terbaru</h2>
                             </div>
                             <p class="text-[11px] text-[#737868] font-medium mt-0.5">Catatan pesanan dan faktur yang terakhir diproses</p>
                         </div>
                         <button
                             type="button"
                             @click="emit('openLedger')"
-                            class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer inline-flex items-center gap-1"
+                            class="text-xs font-bold text-[#0e0f0c] hover:underline cursor-pointer inline-flex items-center gap-1 shrink-0"
                         >
                             <span>Buku Penjualan</span>
                             <span>→</span>
@@ -538,20 +538,19 @@ const maxTrendCount = computed(() => {
                     </div>
 
                     <!-- Daftar Pesanan (Paginated 5 per halaman) -->
-                    <div class="space-y-2.5">
+                    <div class="space-y-2">
                         <div
                             v-for="tx in paginatedRecentTransactions"
                             :key="tx.id"
-                            class="flex items-center justify-between p-3.5 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
+                            class="flex items-center justify-between p-2.5 sm:p-3.5 rounded-xl bg-[#fafbf7] border border-[#e5e9db]"
                         >
-                            <div class="min-w-0 flex-1 mr-4">
-                                <div class="flex items-center gap-2 flex-wrap">
+                            <div class="min-w-0 flex-1 mr-3">
+                                <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="text-xs font-black text-[#0e0f0c]">{{ tx.invoice_number }}</span>
                                     <span class="text-xs font-bold text-neutral-800">· {{ tx.customer_name }}</span>
-                                    <span class="text-[11px] text-[#737868]">({{ tx.sales_person }})</span>
                                     <span class="text-[10px] text-neutral-400">· {{ tx.date }}</span>
                                 </div>
-                                <div class="text-xs text-[#737868] truncate mt-0.5" :title="tx.items">
+                                <div class="text-[11px] text-[#737868] truncate mt-0.5" :title="tx.items">
                                     {{ tx.items }}
                                 </div>
                             </div>
@@ -561,13 +560,13 @@ const maxTrendCount = computed(() => {
                                 </div>
                                 <span
                                     :class="[
-                                        'text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5',
+                                        'text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5',
                                         tx.discount_percent <= 10.0
                                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                             : 'bg-amber-50 text-amber-700 border border-amber-200'
                                     ]"
                                 >
-                                    {{ tx.discount_percent > 0 ? `Diskon -${tx.discount_percent}%` : 'Harga Pas' }}
+                                    {{ tx.discount_percent > 0 ? `-${tx.discount_percent}%` : 'Pas' }}
                                 </span>
                             </div>
                         </div>
