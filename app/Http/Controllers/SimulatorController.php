@@ -552,9 +552,9 @@ class SimulatorController extends Controller
 
         return Inertia::render('Simulator/Index', [
             'systemName' => 'Profit Leakage & Margin Guardian',
-            'systemTagline' => 'Audit Kebocoran Laba & Pemandu Keputusan',
-            'pageTitle' => 'Audit Kebocoran Laba',
-            'pageSubtitle' => 'Pantau laba yang hilang akibat diskon berlebih, limbah kulit, dan stok mandek.',
+            'systemTagline' => 'Profit Leakage & Margin Guardian',
+            'pageTitle' => 'Profit Leakage & Margin Guardian',
+            'pageSubtitle' => 'Audit kebocoran laba dan pandu keputusan untuk mengembalikan laba yang hilang akibat diskon berlebih, limbah kulit, dan stok mandek.',
             'period' => $period,
             'periodLabel' => $periodLabel,
             'periodOptions' => [

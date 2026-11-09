@@ -129,8 +129,8 @@ const handleExport = () => {
             </div>
 
             <!-- Table Body -->
-            <div class="p-6 overflow-y-auto flex-1">
-                <table class="w-full text-left border-collapse text-xs">
+            <div class="p-4 sm:p-6 overflow-y-auto overflow-x-auto w-full flex-1">
+                <table class="w-full min-w-[620px] text-left border-collapse text-xs">
                     <thead>
                         <tr class="border-b border-neutral-200 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                             <th class="py-2.5 px-3">Faktur & Tanggal</th>

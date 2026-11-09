@@ -95,43 +95,43 @@ const executeDelete = () => {
 <template>
     <Head title="Karyawan & Gaji · OptimaBiz" />
 
-    <div class="min-h-screen w-full bg-[#eaecdf] p-2 md:p-5 flex flex-col md:flex-row gap-5 font-sans">
+    <div class="min-h-screen w-full max-w-full overflow-x-hidden bg-[#eaecdf] p-2.5 md:p-5 pb-24 md:pb-5 flex flex-col md:flex-row gap-5 font-sans">
         <!-- Sidebar Navigation Rail -->
         <SidebarNav active="users" />
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col gap-4 md:gap-5 min-w-0">
+        <main class="flex-1 flex flex-col gap-4 md:gap-5 min-w-0 max-w-full">
             <!-- Top Header Section -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 class="font-headline text-2xl md:text-[28px] font-extrabold text-[#0e0f0c] tracking-tight">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
+                <div class="min-w-0">
+                    <h1 class="text-lg sm:text-2xl font-black text-[#0e0f0c] tracking-tight truncate">
                         Karyawan & Tukang
                     </h1>
-                    <p class="font-body text-xs md:text-sm text-[#4c4546] mt-0.5">
-                        Kelola data staf toko dan tukang sepatu, atur gaji tetap atau upah borongan.
+                    <p class="text-xs text-[#737868] mt-0.5 font-medium leading-snug">
+                        Kelola staf toko dan tukang sepatu, atur gaji tetap atau upah borongan
                     </p>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <!-- Export CSV Button -->
                     <a
                         href="/users/export"
                         download
-                        class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-[#0e0f0c] shadow-xs hover:bg-[#e3e3dc] transition-all cursor-pointer font-label text-xs font-semibold border border-[#e1e5d3]"
+                        class="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl sm:rounded-full bg-white text-[#0e0f0c] shadow-xs hover:bg-[#e3e3dc] transition-all cursor-pointer text-xs font-semibold border border-[#e1e5d3] flex-1 sm:flex-initial"
                         title="Unduh rekap data karyawan & gaji"
                     >
-                        <span class="material-symbols-outlined text-base">file_download</span>
-                        <span>Unduh Data (CSV)</span>
+                        <span class="material-symbols-outlined text-[16px]">file_download</span>
+                        <span>Unduh CSV</span>
                     </a>
 
                     <!-- + Add New Staff Button -->
                     <button
                         type="button"
                         @click="showAddModal = true"
-                        class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#0e0f0c] text-white hover:bg-[#20221c] shadow-md transition-all cursor-pointer font-label text-xs font-bold"
+                        class="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl sm:rounded-full bg-[#0e0f0c] text-white hover:bg-[#20221c] shadow-md transition-all cursor-pointer text-xs font-bold flex-1 sm:flex-initial whitespace-nowrap"
                     >
-                        <span class="material-symbols-outlined text-base text-[#c6ef4e]">person_add</span>
+                        <span class="material-symbols-outlined text-[16px] text-[#c6ef4e]">person_add</span>
                         <span>+ Tambah Karyawan</span>
                     </button>
                 </div>

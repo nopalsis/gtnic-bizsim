@@ -193,8 +193,8 @@ const statusCount = computed(() => {
         </div>
 
         <!-- Table Container -->
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full min-w-[620px] text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-[#fafbf7] text-[#737868] border-b border-[#eaecdf] font-bold uppercase tracking-wider text-[11px]">
                         <th class="py-3 px-4">Model Sepatu / Sandal</th>

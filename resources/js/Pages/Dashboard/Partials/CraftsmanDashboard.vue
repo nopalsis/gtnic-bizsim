@@ -44,102 +44,102 @@ const formatRupiah = (number) => {
 </script>
 
 <template>
-    <div class="flex-1 flex flex-col gap-5 min-w-0 font-sans">
+    <div class="flex-1 flex flex-col gap-5 min-w-0 max-w-full font-sans">
         <!-- Craftsman Header Section -->
-        <header class="bg-white/90 backdrop-blur-md rounded-[24px] p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833]"></span>
-                    <h1 class="text-xl font-black text-[#0e0f0c] tracking-tight">
+        <header class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#c6ef4e] border border-[#a2c833] shrink-0"></span>
+                    <h1 class="text-lg sm:text-xl font-black text-[#0e0f0c] tracking-tight truncate">
                         {{ props.workshopName || 'OptimaBiz Workshop' }}
                     </h1>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0e0f0c] text-[#c6ef4e]">
-                        Halaman Kerja Pengrajin Sepatu
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0e0f0c] text-[#c6ef4e] shrink-0">
+                        Pengrajin Sepatu
                     </span>
                 </div>
-                <p class="text-xs text-[#737868] font-medium mt-1">
-                    Lihat jumlah pasang sepatu yang sudah jadi, perkiraan upah kerja, dan catat sisa kulit
+                <p class="text-xs text-[#737868] font-medium mt-1 leading-snug">
+                    Lihat jumlah sepatu jadi, perkiraan upah kerja, dan catat sisa kulit
                 </p>
             </div>
 
             <!-- Tombol Pintas Aksi: + Tambah Sepatu Selesai & ! Catat Sisa Kulit -->
-            <div class="flex items-center gap-2.5 w-full sm:w-auto">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
                 <Link
                     href="/inventory"
-                    class="flex-1 sm:flex-none bg-[#0e0f0c] hover:bg-[#20221c] text-white text-xs font-bold px-4 py-2.5 rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm group cursor-pointer"
+                    class="flex-1 sm:flex-none bg-[#0e0f0c] hover:bg-[#20221c] text-white text-xs font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm group cursor-pointer whitespace-nowrap"
                 >
-                    <span class="material-symbols-outlined text-[17px] text-[#c6ef4e]">inventory_2</span>
-                    <span>+ Tambah Sepatu Selesai</span>
+                    <span class="material-symbols-outlined text-[16px] text-[#c6ef4e]">inventory_2</span>
+                    <span>+ Sepatu Jadi</span>
                 </Link>
 
                 <Link
                     href="/inventory"
-                    class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2.5 rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                    class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap"
                 >
-                    <span class="material-symbols-outlined text-[17px]">delete_sweep</span>
-                    <span>! Catat Sisa Kulit / Rusak</span>
+                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                    <span>! Sisa Kulit</span>
                 </Link>
             </div>
         </header>
 
         <!-- 3 Metrik Utama (Atas) -->
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="Metrik Utama Craftsman">
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4" aria-label="Metrik Utama Craftsman">
             <!-- 1. Pasang Sepatu/Sandal Diselesaikan -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Sepatu Jadi Bulan Ini
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">
+                        Sepatu Jadi
                     </span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Bulan Berjalan
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                        Bulan Ini
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2">
+                <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2">
                     {{ props.craftsmanData?.completedProductionUnits || 0 }} Pasang
                 </div>
-                <div class="text-[11px] text-[#737868] font-medium mt-1">
+                <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
                     Sudah selesai dijahit & disol
                 </div>
             </div>
 
             <!-- 2. Estimasi Gaji / Upah Bulan Ini -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Perkiraan Upah Saya
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">
+                        Perkiraan Upah
                     </span>
-                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] border border-[#dce0cd]">
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] border border-[#dce0cd] shrink-0">
                         {{ props.craftsmanData?.estimatedSalary?.salaryTypeLabel || 'Gaji Pokok' }}
                     </span>
                 </div>
-                <div class="text-2xl font-black text-[#0e0f0c] mt-2">
+                <div class="text-xl sm:text-2xl font-black text-[#0e0f0c] mt-2 tabular-nums">
                     {{ formatRupiah(props.craftsmanData?.estimatedSalary?.totalEstimatedSalary) }}
                 </div>
-                <div class="text-[11px] text-[#737868] font-medium mt-1">
+                <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
                     <span v-if="props.craftsmanData?.estimatedSalary?.pieceEarnings > 0">
                         Termasuk borongan: {{ formatRupiah(props.craftsmanData?.estimatedSalary?.pieceEarnings) }}
                     </span>
                     <span v-else>
-                        Nominal gaji pokok bulanan aktif
+                        Nominal gaji pokok bulanan
                     </span>
                 </div>
             </div>
 
             <!-- 3. Total Log Limbah Dilaporkan -->
-            <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Bahan Rusak / Sisa Kulit
+            <div class="bg-white rounded-2xl sm:rounded-[22px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#737868] truncate">
+                        Sisa Kulit / Cacat
                     </span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                        {{ props.craftsmanData?.wasteMetrics?.totalLogs || 0 }} Catatan
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                        {{ props.craftsmanData?.wasteMetrics?.totalLogs || 0 }} Log
                     </span>
                 </div>
-                <div class="text-2xl font-black text-rose-600 mt-2">
+                <div class="text-xl sm:text-2xl font-black text-rose-600 mt-2">
                     {{ props.craftsmanData?.wasteMetrics?.totalUnits || 0 }} Unit / Feet
                 </div>
-                <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Sisa potongan kulit atau gagal rekat
+                <div class="text-[11px] text-[#737868] font-medium mt-1 truncate">
+                    Sisa potongan kulit / rusak
                 </div>
             </div>
         </section>
@@ -147,16 +147,16 @@ const formatRupiah = (number) => {
         <!-- Visualisasi: Target Produksi Bengkel + Bahan yang Mau Habis -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             <!-- Meteran Kapasitas Bengkel (Capacity Load Bar) - Col 7 -->
-            <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Target Produksi Bengkel Bulan Ini</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Berapa pasang sepatu yang sanggup dikerjakan pengrajin bengkel</p>
+                            <h2 class="text-sm sm:text-base font-black text-[#0e0f0c]">Target Produksi Bengkel</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Kapasitas kerja pengrajin bulan ini</p>
                         </div>
                         <span
                             :class="[
-                                'text-[11px] font-bold px-2.5 py-1 rounded-full border',
+                                'text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0',
                                 (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90
                                     ? 'bg-rose-50 text-rose-700 border-rose-200'
                                     : (props.craftsmanData?.capacityLoad?.percentage || 0) >= 75
@@ -164,19 +164,19 @@ const formatRupiah = (number) => {
                                     : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             ]"
                         >
-                            {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Hampir Penuh' : ((props.craftsmanData?.capacityLoad?.percentage || 0) >= 75 ? 'Mulai Ramai' : 'Lancar & Terkendali') }}
+                            {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Hampir Penuh' : ((props.craftsmanData?.capacityLoad?.percentage || 0) >= 75 ? 'Mulai Ramai' : 'Lancar') }}
                         </span>
                     </div>
 
                     <!-- Progress Bar & Capacity Visualizer -->
-                    <div class="mt-6 mb-4">
-                        <div class="flex items-center justify-between text-xs font-bold text-[#0e0f0c] mb-2">
-                            <span>Sudah Selesai: {{ props.craftsmanData?.capacityLoad?.producedUnits || 0 }} Pasang</span>
-                            <span>Target Maksimal: {{ props.craftsmanData?.capacityLoad?.maxCapacity || 500 }} Pasang</span>
+                    <div class="mt-4 mb-3">
+                        <div class="flex items-center justify-between text-xs font-bold text-[#0e0f0c] mb-1.5">
+                            <span>Selesai: {{ props.craftsmanData?.capacityLoad?.producedUnits || 0 }} Pasang</span>
+                            <span>Maksimal: {{ props.craftsmanData?.capacityLoad?.maxCapacity || 500 }} Pasang</span>
                         </div>
-                        <div class="w-full bg-[#f4f4ed] h-5 rounded-full overflow-hidden p-1 border border-[#e1e5d3]">
+                        <div class="w-full bg-[#f4f4ed] h-4 rounded-full overflow-hidden p-0.5 border border-[#e1e5d3]">
                             <div
-                                class="h-full rounded-full transition-all duration-700 flex items-center justify-end pr-2 text-[10px] font-bold text-white shadow-xs"
+                                class="h-full rounded-full transition-all duration-700 flex items-center justify-end pr-1.5 text-[9px] font-bold text-white shadow-xs"
                                 :class="[
                                     (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90
                                         ? 'bg-rose-600'
@@ -191,37 +191,37 @@ const formatRupiah = (number) => {
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                        <div class="p-3 bg-[#fafbf7] rounded-xl border border-[#e1e5d3] text-center">
-                            <span class="text-[10px] font-bold text-[#737868] uppercase block">Sisa Kuota Bengkel</span>
-                            <span class="text-sm font-black text-[#0e0f0c] block mt-0.5">
-                                {{ props.craftsmanData?.capacityLoad?.remaining || 0 }} Pasang Lagi
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <div class="p-2.5 bg-[#fafbf7] rounded-xl border border-[#e1e5d3] text-center">
+                            <span class="text-[9px] sm:text-[10px] font-bold text-[#737868] uppercase block">Sisa Kuota Bengkel</span>
+                            <span class="text-xs sm:text-sm font-black text-[#0e0f0c] block mt-0.5">
+                                {{ props.craftsmanData?.capacityLoad?.remaining || 0 }} Pasang
                             </span>
                         </div>
-                        <div class="p-3 bg-[#fafbf7] rounded-xl border border-[#e1e5d3] text-center">
-                            <span class="text-[10px] font-bold text-[#737868] uppercase block">Kondisi Kerja</span>
-                            <span class="text-sm font-black text-emerald-700 block mt-0.5">
-                                {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Perlu Tambah Waktu' : 'Kerja Normal' }}
+                        <div class="p-2.5 bg-[#fafbf7] rounded-xl border border-[#e1e5d3] text-center">
+                            <span class="text-[9px] sm:text-[10px] font-bold text-[#737868] uppercase block">Kondisi Kerja</span>
+                            <span class="text-xs sm:text-sm font-black text-emerald-700 block mt-0.5">
+                                {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Lembur' : 'Normal' }}
                             </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-[#737868]">
-                    <span>Jaga ketelitian pengeleman oven & jahit agar sepatu kuat dan rapi</span>
-                    <span class="font-bold text-[#0e0f0c]">Bengkel Sepatu & Sandal</span>
+                    <span>Jaga kerapian jahit & sol sepatu</span>
+                    <span class="font-bold text-[#0e0f0c]">Bengkel Sepatu</span>
                 </div>
             </div>
 
             <!-- Daftar Bahan Baku Menipis - Col 5 -->
-            <div class="lg:col-span-5 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Bahan yang Mau Habis</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Bahan kulit, sol, dan lem yang perlu segera dibeli</p>
+                            <h2 class="text-sm sm:text-base font-black text-[#0e0f0c]">Bahan Mau Habis</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Bahan kulit, sol, & lem segera dibeli</p>
                         </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
                             Perlu Beli
                         </span>
                     </div>
@@ -265,39 +265,39 @@ const formatRupiah = (number) => {
                 </div>
 
                 <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px]">
-                    <span class="text-[#737868]">Beri tahu admin untuk memesan kulit baru</span>
+                    <span class="text-[#737868]">Pesan kulit ke admin</span>
                     <Link href="/inventory" class="font-bold text-[#0e0f0c] hover:underline">
-                        Lihat Stok Bahan →
+                        Lihat Stok →
                     </Link>
                 </div>
             </div>
         </section>
 
         <!-- Aksi & Widget: Riwayat Pengerjaan & Limbah Terakhir -->
-        <section class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
-            <div class="flex items-center justify-between mb-4">
+        <section class="bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border border-[#dce0cd] shadow-sm">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
                 <div>
-                    <h2 class="text-base font-black text-[#0e0f0c]">Catatan Kerja Terakhir</h2>
-                    <p class="text-[11px] text-[#737868] font-medium">Daftar sepatu yang baru selesai dibuat atau catatan bahan yang rusak</p>
+                    <h2 class="text-sm sm:text-base font-black text-[#0e0f0c]">Catatan Kerja Terakhir</h2>
+                    <p class="text-[11px] text-[#737868] font-medium">Sepatu yang baru selesai dibuat atau catatan bahan rusak</p>
                 </div>
                 <Link
                     href="/inventory"
-                    class="text-xs font-bold text-[#0e0f0c] hover:underline flex items-center gap-1"
+                    class="text-xs font-bold text-[#0e0f0c] hover:underline flex items-center gap-1 shrink-0"
                 >
-                    Lihat Catatan Lengkap
+                    <span>Catatan Lengkap</span>
                     <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </Link>
             </div>
 
             <!-- Workshop Log Entries -->
-            <div class="space-y-2.5">
+            <div class="space-y-2">
                 <div
                     v-for="log in props.craftsmanData?.recentWorkshopLogs"
                     :key="log.id"
-                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db] gap-2"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[#fafbf7] border border-[#e5e9db] gap-2"
                 >
                     <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             <span
                                 :class="[
                                     'text-[9px] font-bold px-2 py-0.5 rounded-full uppercase',
@@ -306,7 +306,7 @@ const formatRupiah = (number) => {
                                         : 'bg-rose-50 text-rose-700 border border-rose-200'
                                 ]"
                             >
-                                {{ log.type === 'in' ? 'Sepatu Selesai' : 'Bahan Rusak' }}
+                                {{ log.type === 'in' ? 'Selesai' : 'Rusak' }}
                             </span>
                             <span class="text-xs font-bold text-[#0e0f0c]">{{ log.product_name }}</span>
                             <span class="text-[10px] text-[#737868]">({{ log.product_sku }})</span>
@@ -316,10 +316,10 @@ const formatRupiah = (number) => {
                         </div>
                     </div>
 
-                    <div class="text-left sm:text-right shrink-0">
+                    <div class="text-left sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1">
                         <div
                             :class="[
-                                'text-sm font-black',
+                                'text-xs sm:text-sm font-black',
                                 log.type === 'in' ? 'text-emerald-700' : 'text-rose-600'
                             ]"
                         >
