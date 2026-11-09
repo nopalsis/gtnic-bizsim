@@ -51,7 +51,7 @@ const trendBars = computed(() => {
 </script>
 
 <template>
-    <div class="flex-1 flex flex-col gap-5 min-w-0">
+    <div class="flex-1 flex flex-col gap-5 min-w-0 font-sans">
         <!-- Sales Header Section -->
         <header class="bg-white/90 backdrop-blur-md rounded-[24px] p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
             <div>
@@ -61,11 +61,11 @@ const trendBars = computed(() => {
                         {{ props.workshopName || 'OptimaBiz Leathercraft' }}
                     </h1>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0e0f0c] text-[#c6ef4e]">
-                        Sales Performance & Deal View
+                        Halaman Kerja Sales & Kasir
                     </span>
                 </div>
                 <p class="text-xs text-[#737868] font-medium mt-1">
-                    Pusat pencapaian penjualan pribadi, negosiasi harga deal, & kemudahan input pesanan kasir
+                    Lihat hasil penjualan Anda, cek sisa stok sepatu, dan catat nota pesanan baru
                 </p>
             </div>
 
@@ -78,7 +78,7 @@ const trendBars = computed(() => {
                     <span class="material-symbols-outlined text-[18px] text-[#c6ef4e] group-hover:scale-110 transition-transform">
                         add_circle
                     </span>
-                    <span>+ Catat Transaksi Baru</span>
+                    <span>+ Catat Pesanan Baru</span>
                 </Link>
             </div>
         </header>
@@ -89,7 +89,7 @@ const trendBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Total Omzet Penjualan Saya
+                        Hasil Penjualan Saya
                     </span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Bulan Berjalan
@@ -99,7 +99,7 @@ const trendBars = computed(() => {
                     {{ formatRupiah(props.salesData?.myNetRevenue) }}
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Nilai realisasi transaksi berhasil ditutup
+                    Total pesanan yang Anda layani
                 </div>
             </div>
 
@@ -107,7 +107,7 @@ const trendBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Transaksi Selesai
+                        Total Nota Selesai
                     </span>
                     <div class="flex items-center gap-1.5">
                         <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#f4f4ed] text-[#0e0f0c] border border-[#dce0cd]">
@@ -122,7 +122,7 @@ const trendBars = computed(() => {
                     {{ props.salesData?.completedTransactions?.total || 0 }} Nota
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Total nota & faktur penjualan diproses
+                    Banyaknya nota belanja yang Anda proses
                 </div>
             </div>
 
@@ -130,7 +130,7 @@ const trendBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Rata-rata Diskon Nego
+                        Rata-rata Diskon Diberikan
                     </span>
                     <span
                         :class="[
@@ -140,30 +140,30 @@ const trendBars = computed(() => {
                                 : 'bg-amber-50 text-amber-700 border-amber-200'
                         ]"
                     >
-                        {{ (props.salesData?.myAvgDiscount || 0) <= 10.0 ? 'Disiplin Aman' : 'Nego Tinggi' }}
+                        {{ (props.salesData?.myAvgDiscount || 0) <= 10.0 ? 'Diskon Wajar' : 'Diskon Terlalu Besar' }}
                     </span>
                 </div>
                 <div class="text-2xl font-black text-[#0e0f0c] mt-2">
                     {{ props.salesData?.myAvgDiscount || 0 }}%
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Toleransi diskon tawar-menawar harga deal
+                    Rata-rata potongan harga yang disepakati
                 </div>
             </div>
         </section>
 
-        <!-- Visualisasi & Analisis: Grafik Pencapaian Harian + Status Stok Terlaris -->
+        <!-- Visualisasi: Grafik Pencapaian Harian + Status Stok Terlaris -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             <!-- Grafik Pencapaian Penjualan Harian/Mingguan (Col 7) -->
             <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Tren Pencapaian Penjualan Pribadi</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Aktivitas akumulasi transaksi Anda sepanjang bulan berjalan</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Grafik Penjualan Saya per Hari</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Catatan uang penjualan yang Anda buat sepanjang bulan ini</p>
                         </div>
                         <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
-                            {{ trendBars.length }} Periode Terdata
+                            {{ trendBars.length }} Periode
                         </span>
                     </div>
 
@@ -176,7 +176,7 @@ const trendBars = computed(() => {
                         >
                             <!-- Tooltip on Hover -->
                             <div class="opacity-0 group-hover:opacity-100 absolute -top-10 bg-[#0e0f0c] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg pointer-events-none transition-all whitespace-nowrap z-20 shadow-md">
-                                {{ bar.date }}: {{ formatRupiah(bar.amount) }} ({{ bar.count }} tx)
+                                {{ bar.date }}: {{ formatRupiah(bar.amount) }} ({{ bar.count }} nota)
                             </div>
                             <div
                                 class="w-full max-w-[36px] bg-[#0e0f0c] group-hover:bg-[#c6ef4e] rounded-t-lg transition-all"
@@ -190,7 +190,7 @@ const trendBars = computed(() => {
                 </div>
 
                 <div class="flex items-center justify-between text-[11px] text-[#737868] pt-3">
-                    <span>Arahkan kursor ke batang untuk melihat detail per hari</span>
+                    <span>Arahkan kursor ke batang untuk melihat jumlah rupiah per hari</span>
                     <span class="font-bold text-[#0e0f0c]">
                         Total: {{ formatRupiah(props.salesData?.myNetRevenue) }}
                     </span>
@@ -202,11 +202,11 @@ const trendBars = computed(() => {
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Stok 5 Produk Terlaris</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Pantau ketersediaan sebelum konfirmasi order</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Stok 5 Sepatu Paling Laku</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Cek dulu stoknya sebelum menjanjikan ke pembeli</p>
                         </div>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c]">
-                            Ready Stock
+                            Paling Dicari
                         </span>
                     </div>
 
@@ -236,7 +236,7 @@ const trendBars = computed(() => {
                                             : 'bg-rose-50 text-rose-700 border border-rose-200'
                                     ]"
                                 >
-                                    {{ item.status }} ({{ item.current_stock }} {{ item.unit }})
+                                    {{ item.status === 'Ready' ? 'Stok Ada' : (item.status === 'Stok Menipis' ? 'Tinggal Sedikit' : 'Stok Kosong') }} ({{ item.current_stock }} {{ item.unit }})
                                 </span>
                             </div>
                         </div>
@@ -244,9 +244,9 @@ const trendBars = computed(() => {
                 </div>
 
                 <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px]">
-                    <span class="text-[#737868]">Produk stok menipis segera koordinasikan ke workshop</span>
+                    <span class="text-[#737868]">Sepatu yang hampir habis segera beri tahu bengkel</span>
                     <Link href="/inventory" class="font-bold text-[#0e0f0c] hover:underline">
-                        Cek Katalog →
+                        Lihat Semua Stok →
                     </Link>
                 </div>
             </div>
@@ -256,14 +256,14 @@ const trendBars = computed(() => {
         <section class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-base font-black text-[#0e0f0c]">Daftar Transaksi Terbaru Anda</h2>
-                    <p class="text-[11px] text-[#737868] font-medium">5 Transaksi terakhir yang Anda layani beserta status pembayaran & diskon nego</p>
+                    <h2 class="text-base font-black text-[#0e0f0c]">5 Pesanan Terakhir yang Saya Layani</h2>
+                    <p class="text-[11px] text-[#737868] font-medium">Rincian nota, nama pembeli, dan potongan harga yang Anda buat</p>
                 </div>
                 <Link
                     href="/sales"
                     class="text-xs font-bold text-[#0e0f0c] hover:underline flex items-center gap-1"
                 >
-                    Buka Modul Penjualan
+                    Buka Halaman Penjualan
                     <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </Link>
             </div>
@@ -278,7 +278,7 @@ const trendBars = computed(() => {
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="text-xs font-black text-[#0e0f0c]">{{ tx.invoice_number }}</span>
                             <span class="text-[11px] font-bold text-[#0e0f0c]">· {{ tx.customer_name }}</span>
-                            <span class="text-[10px] text-[#737868]">via {{ tx.payment_method }}</span>
+                            <span class="text-[10px] text-[#737868]">Bayar via {{ tx.payment_method }}</span>
                             <span
                                 :class="[
                                     'text-[9px] font-bold px-1.5 py-0.5 rounded-full',
@@ -287,7 +287,7 @@ const trendBars = computed(() => {
                                         : 'bg-amber-50 text-amber-700'
                                 ]"
                             >
-                                {{ tx.status }}
+                                {{ tx.discount_percent > 0 ? `Diskon ${tx.discount_percent}%` : 'Harga Pas' }}
                             </span>
                         </div>
                         <div class="text-[11px] text-[#737868] truncate mt-1">
@@ -309,10 +309,9 @@ const trendBars = computed(() => {
                     v-if="!props.salesData?.recentTransactions || props.salesData.recentTransactions.length === 0"
                     class="p-6 text-center text-[#737868] text-xs"
                 >
-                    Belum ada riwayat transaksi tercatat untuk akun sales ini.
+                    Belum ada riwayat pesanan yang tercatat untuk akun Anda.
                 </div>
             </div>
         </section>
     </div>
 </template>
-

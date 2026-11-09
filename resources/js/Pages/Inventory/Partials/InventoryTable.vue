@@ -122,11 +122,11 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
                 <div class="flex items-center gap-2 mb-0.5">
                     <span class="w-2 h-2 rounded-full bg-[#c6ef4e]"></span>
                     <h2 class="text-base md:text-lg font-bold text-[#0e0f0c]">
-                        Daftar Stok Inventaris & Bahan Baku
+                        Daftar Stok Sepatu & Bahan
                     </h2>
                 </div>
                 <p class="text-xs text-[#737868]">
-                    Data inventaris real-time, status kuantitas fisik, dan kontrol harga HPP bengkel
+                    Catatan jumlah stok barang, harga modal, dan status ketersediaan
                 </p>
             </div>
 
@@ -231,9 +231,9 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
             <table class="w-full text-left align-middle border-collapse text-xs">
                 <thead>
                     <tr class="uppercase tracking-wider text-[#737868] border-b border-[#dce0cd] font-semibold text-[11px] select-none">
-                        <th class="py-2.5 px-3">Nama & Kategori</th>
-                        <th class="py-2.5 px-3">Modal (HPP) & Harga</th>
-                        <th class="py-2.5 px-3">Stok Saat Ini</th>
+                        <th class="py-2.5 px-3">Nama & Model</th>
+                        <th class="py-2.5 px-3">Harga Modal & Jual</th>
+                        <th class="py-2.5 px-3">Stok Sekarang</th>
                         <th class="py-2.5 px-3">Batas Minimum</th>
                         <th class="py-2.5 px-3 text-right">Aksi</th>
                     </tr>
@@ -279,8 +279,11 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
                                     {{ formatRupiah(prod.cost_price) }}
                                     <span class="text-[10px] font-normal text-[#737868]">/ {{ prod.unit }}</span>
                                 </span>
-                                <span class="text-[10px] text-[#737868]">
+                                <span v-if="prod.category_type === 'finished'" class="text-[10px] text-[#737868]">
                                     Jual: {{ formatRupiah(prod.base_price) }}
+                                </span>
+                                <span v-else class="text-[10px] text-[#737868] italic font-medium">
+                                    Bahan Baku (Tidak Dijual)
                                 </span>
                             </div>
                         </td>
@@ -303,7 +306,7 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
                                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-semibold ml-1.5"
                                 >
                                     <span class="material-symbols-outlined text-[12px]">warning</span>
-                                    Sisa {{ prod.current_stock }} - Kritis!
+                                    Sisa {{ prod.current_stock }} (Hampir Habis)
                                 </span>
 
                                 <span
@@ -311,7 +314,7 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
                                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#3b4d00] text-[10px] font-semibold ml-1.5"
                                 >
                                     <span class="w-1.5 h-1.5 rounded-full bg-[#506600]"></span>
-                                    Stok Aman
+                                    Stok Cukup (Aman)
                                 </span>
                             </div>
                         </td>

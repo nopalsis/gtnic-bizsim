@@ -44,7 +44,7 @@ const formatRupiah = (number) => {
 </script>
 
 <template>
-    <div class="flex-1 flex flex-col gap-5 min-w-0">
+    <div class="flex-1 flex flex-col gap-5 min-w-0 font-sans">
         <!-- Craftsman Header Section -->
         <header class="bg-white/90 backdrop-blur-md rounded-[24px] p-5 border border-[#dce0cd] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
             <div>
@@ -54,22 +54,22 @@ const formatRupiah = (number) => {
                         {{ props.workshopName || 'OptimaBiz Workshop' }}
                     </h1>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0e0f0c] text-[#c6ef4e]">
-                        Workshop Operations & Task View
+                        Halaman Kerja Pengrajin Sepatu
                     </span>
                 </div>
                 <p class="text-xs text-[#737868] font-medium mt-1">
-                    Kontrol kuantitas fisik sepatu & sandal, estimasi upah pengerjaan, dan pencatatan limbah bahan
+                    Lihat jumlah pasang sepatu yang sudah jadi, perkiraan upah kerja, dan catat sisa kulit
                 </p>
             </div>
 
-            <!-- Tombol Pintas Aksi: + Input Stok Jadi & ! Laporkan Limbah -->
+            <!-- Tombol Pintas Aksi: + Tambah Sepatu Selesai & ! Catat Sisa Kulit -->
             <div class="flex items-center gap-2.5 w-full sm:w-auto">
                 <Link
                     href="/inventory"
                     class="flex-1 sm:flex-none bg-[#0e0f0c] hover:bg-[#20221c] text-white text-xs font-bold px-4 py-2.5 rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm group cursor-pointer"
                 >
                     <span class="material-symbols-outlined text-[17px] text-[#c6ef4e]">inventory_2</span>
-                    <span>+ Input Stok Jadi</span>
+                    <span>+ Tambah Sepatu Selesai</span>
                 </Link>
 
                 <Link
@@ -77,7 +77,7 @@ const formatRupiah = (number) => {
                     class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2.5 rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                 >
                     <span class="material-symbols-outlined text-[17px]">delete_sweep</span>
-                    <span>! Catat Limbah</span>
+                    <span>! Catat Sisa Kulit / Rusak</span>
                 </Link>
             </div>
         </header>
@@ -88,7 +88,7 @@ const formatRupiah = (number) => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Sepatu / Sandal Selesai
+                        Sepatu Jadi Bulan Ini
                     </span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Bulan Berjalan
@@ -98,7 +98,7 @@ const formatRupiah = (number) => {
                     {{ props.craftsmanData?.completedProductionUnits || 0 }} Pasang
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Total unit lolos QC & masuk rak jadi
+                    Sudah selesai dijahit & disol
                 </div>
             </div>
 
@@ -106,7 +106,7 @@ const formatRupiah = (number) => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Estimasi Payout Upah
+                        Perkiraan Upah Saya
                     </span>
                     <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] border border-[#dce0cd]">
                         {{ props.craftsmanData?.estimatedSalary?.salaryTypeLabel || 'Gaji Pokok' }}
@@ -129,30 +129,30 @@ const formatRupiah = (number) => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Limbah & Reject Tercatat
+                        Bahan Rusak / Sisa Kulit
                     </span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                        {{ props.craftsmanData?.wasteMetrics?.totalLogs || 0 }} Log Tercatat
+                        {{ props.craftsmanData?.wasteMetrics?.totalLogs || 0 }} Catatan
                     </span>
                 </div>
                 <div class="text-2xl font-black text-rose-600 mt-2">
                     {{ props.craftsmanData?.wasteMetrics?.totalUnits || 0 }} Unit / Feet
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Sisa potongan kulit offcut & cacat sol
+                    Sisa potongan kulit atau gagal rekat
                 </div>
             </div>
         </section>
 
-        <!-- Visualisasi & Analisis: Meteran Kapasitas Bengkel + Daftar Bahan Baku Menipis -->
+        <!-- Visualisasi: Target Produksi Bengkel + Bahan yang Mau Habis -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             <!-- Meteran Kapasitas Bengkel (Capacity Load Bar) - Col 7 -->
             <div class="lg:col-span-7 bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Meteran Kapasitas Bengkel</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Beban pengerjaan fisik pengrajin vs batas maksimal bulanan</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Target Produksi Bengkel Bulan Ini</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Berapa pasang sepatu yang sanggup dikerjakan pengrajin bengkel</p>
                         </div>
                         <span
                             :class="[
@@ -164,15 +164,15 @@ const formatRupiah = (number) => {
                                     : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             ]"
                         >
-                            {{ props.craftsmanData?.capacityLoad?.status }}
+                            {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Hampir Penuh' : ((props.craftsmanData?.capacityLoad?.percentage || 0) >= 75 ? 'Mulai Ramai' : 'Lancar & Terkendali') }}
                         </span>
                     </div>
 
                     <!-- Progress Bar & Capacity Visualizer -->
                     <div class="mt-6 mb-4">
                         <div class="flex items-center justify-between text-xs font-bold text-[#0e0f0c] mb-2">
-                            <span>Produksi Berjalan: {{ props.craftsmanData?.capacityLoad?.producedUnits || 0 }} Pasang</span>
-                            <span>Target Max: {{ props.craftsmanData?.capacityLoad?.maxCapacity || 500 }} Pasang</span>
+                            <span>Sudah Selesai: {{ props.craftsmanData?.capacityLoad?.producedUnits || 0 }} Pasang</span>
+                            <span>Target Maksimal: {{ props.craftsmanData?.capacityLoad?.maxCapacity || 500 }} Pasang</span>
                         </div>
                         <div class="w-full bg-[#f4f4ed] h-5 rounded-full overflow-hidden p-1 border border-[#e1e5d3]">
                             <div
@@ -193,23 +193,23 @@ const formatRupiah = (number) => {
 
                     <div class="grid grid-cols-2 gap-3 pt-2">
                         <div class="p-3 bg-[#fafbf7] rounded-xl border border-[#e1e5d3] text-center">
-                            <span class="text-[10px] font-bold text-[#737868] uppercase block">Sisa Slot Kapasitas</span>
+                            <span class="text-[10px] font-bold text-[#737868] uppercase block">Sisa Kuota Bengkel</span>
                             <span class="text-sm font-black text-[#0e0f0c] block mt-0.5">
                                 {{ props.craftsmanData?.capacityLoad?.remaining || 0 }} Pasang Lagi
                             </span>
                         </div>
                         <div class="p-3 bg-[#fafbf7] rounded-xl border border-[#e1e5d3] text-center">
-                            <span class="text-[10px] font-bold text-[#737868] uppercase block">Status Beban Kerja</span>
+                            <span class="text-[10px] font-bold text-[#737868] uppercase block">Kondisi Kerja</span>
                             <span class="text-sm font-black text-emerald-700 block mt-0.5">
-                                {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Lembur Diperlukan' : 'Ritme Normal' }}
+                                {{ (props.craftsmanData?.capacityLoad?.percentage || 0) >= 90 ? 'Perlu Tambah Waktu' : 'Kerja Normal' }}
                             </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-[#737868]">
-                    <span>Beban dijaga agar pengeleman oven & jahit upper tidak terburu-buru</span>
-                    <span class="font-bold text-[#0e0f0c]">Workshop Sepatu & Sandal</span>
+                    <span>Jaga ketelitian pengeleman oven & jahit agar sepatu kuat dan rapi</span>
+                    <span class="font-bold text-[#0e0f0c]">Bengkel Sepatu & Sandal</span>
                 </div>
             </div>
 
@@ -218,11 +218,11 @@ const formatRupiah = (number) => {
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Daftar Bahan Baku Menipis</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Peringatan material kulit & sol yang perlu restock</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Bahan yang Mau Habis</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Bahan kulit, sol, dan lem yang perlu segera dibeli</p>
                         </div>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                            Prioritas Gudang
+                            Perlu Beli
                         </span>
                     </div>
 
@@ -259,13 +259,13 @@ const formatRupiah = (number) => {
                             v-if="!props.craftsmanData?.lowStockRawMaterials || props.craftsmanData.lowStockRawMaterials.length === 0"
                             class="p-4 text-center text-xs text-[#737868]"
                         >
-                            Seluruh stok bahan mentah dalam batas aman.
+                            Semua persediaan bahan masih cukup.
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px]">
-                    <span class="text-[#737868]">Koordinasikan pengadaan kulit lembaran</span>
+                    <span class="text-[#737868]">Beri tahu admin untuk memesan kulit baru</span>
                     <Link href="/inventory" class="font-bold text-[#0e0f0c] hover:underline">
                         Lihat Stok Bahan →
                     </Link>
@@ -277,14 +277,14 @@ const formatRupiah = (number) => {
         <section class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-base font-black text-[#0e0f0c]">Riwayat Pengerjaan & Limbah Terakhir</h2>
-                    <p class="text-[11px] text-[#737868] font-medium">Log pergerakan fisik barang masuk produksi dan reject waste bengkel</p>
+                    <h2 class="text-base font-black text-[#0e0f0c]">Catatan Kerja Terakhir</h2>
+                    <p class="text-[11px] text-[#737868] font-medium">Daftar sepatu yang baru selesai dibuat atau catatan bahan yang rusak</p>
                 </div>
                 <Link
                     href="/inventory"
                     class="text-xs font-bold text-[#0e0f0c] hover:underline flex items-center gap-1"
                 >
-                    Log Gudang Lengkap
+                    Lihat Catatan Lengkap
                     <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </Link>
             </div>
@@ -306,7 +306,7 @@ const formatRupiah = (number) => {
                                         : 'bg-rose-50 text-rose-700 border border-rose-200'
                                 ]"
                             >
-                                {{ log.type === 'in' ? 'Produksi Masuk' : 'Reject / Limbah' }}
+                                {{ log.type === 'in' ? 'Sepatu Selesai' : 'Bahan Rusak' }}
                             </span>
                             <span class="text-xs font-bold text-[#0e0f0c]">{{ log.product_name }}</span>
                             <span class="text-[10px] text-[#737868]">({{ log.product_sku }})</span>
@@ -335,10 +335,9 @@ const formatRupiah = (number) => {
                     v-if="!props.craftsmanData?.recentWorkshopLogs || props.craftsmanData.recentWorkshopLogs.length === 0"
                     class="p-6 text-center text-[#737868] text-xs"
                 >
-                    Belum ada log produksi atau limbah tercatat.
+                    Belum ada catatan sepatu jadi atau bahan rusak.
                 </div>
             </div>
         </section>
     </div>
 </template>
-

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\SalesController;
@@ -53,6 +54,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/product', [InventoryController::class, 'storeProduct'])->name('inventory.product.store');
         Route::put('/inventory/product/{product}', [InventoryController::class, 'updateProduct'])->name('inventory.product.update');
         Route::delete('/inventory/product/{product}', [InventoryController::class, 'destroyProduct'])->name('inventory.product.destroy');
+
+        // Master Product Categories CRUD
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::patch('/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     });
 
     // 4. What-If Scenario Simulator (Superadmin Only - Exposes Profit Projections & Financial Margins)

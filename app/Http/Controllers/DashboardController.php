@@ -64,7 +64,13 @@ class DashboardController extends Controller
         // Break Even Point (BEP) Revenue Calculation
         $bepRevenue = $profitMargin > 0 ? round($totalFixedOpex / ($profitMargin / 100)) : 0.0;
 
+        $totalTransactionsCount = (int) Transaction::count();
         $totalItemsSold = (int) TransactionItem::sum('quantity');
+
+        // Rata-rata omset per hari aktif transaksi
+        $activeDaysCount = (int) Transaction::selectRaw('COUNT(DISTINCT DATE(transaction_date)) as d')->value('d') ?: 1;
+        $dailyAvgRevenue = $activeDaysCount > 0 ? round($netRevenue / $activeDaysCount) : 0.0;
+
         $capacityUsagePercent = $maxCapacity > 0 ? round(($totalItemsSold / $maxCapacity) * 100, 1) : 0.0;
 
         // Category Sales Breakdown
@@ -89,10 +95,10 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Recent Transactions with Margin Analysis for Super Admin
+        // Recent Transactions with Margin Analysis for Super Admin (25 transaksi terakhir untuk pagination dashboard)
         $recentTransactions = Transaction::with(['transactionItems.product'])
             ->latest('transaction_date')
-            ->take(6)
+            ->take(25)
             ->get()
             ->map(function ($tx) {
                 $itemNames = $tx->transactionItems->map(fn ($it) => ($it->product->name ?? 'Produk').' (x'.$it->quantity.' '.($it->product->unit ?? 'pasang').')')->implode(', ');
@@ -120,22 +126,22 @@ class DashboardController extends Controller
         $totalExpenses = $cogs + $totalSalary + $fixedCost + $wasteCost;
         $costDistribution = [
             [
-                'category' => 'HPP Bahan Kulit & Sol (COGS)',
+                'category' => 'Bahan Kulit & Sol',
                 'amount' => $cogs,
                 'percentage' => $totalExpenses > 0 ? round(($cogs / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Upah Pengrajin Sepatu',
+                'category' => 'Upah Tukang Sepatu',
                 'amount' => $totalSalary,
                 'percentage' => $totalExpenses > 0 ? round(($totalSalary / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Sewa Bengkel Workshop & Listrik',
+                'category' => 'Sewa Bengkel & Listrik',
                 'amount' => $fixedCost,
                 'percentage' => $totalExpenses > 0 ? round(($fixedCost / $totalExpenses) * 100, 1) : 0.0,
             ],
             [
-                'category' => 'Kerugian Limbah & Reject Kulit (Waste)',
+                'category' => 'Bahan Rusak / Sisa Kulit',
                 'amount' => $wasteCost,
                 'percentage' => $totalExpenses > 0 ? round(($wasteCost / $totalExpenses) * 100, 1) : 0.0,
             ],
@@ -151,29 +157,29 @@ class DashboardController extends Controller
         if (! empty($lowStockProducts)) {
             $alerts[] = [
                 'type' => 'warning',
-                'title' => 'Stok Model Sepatu/Sandal Menipis',
-                'message' => 'Produk '.implode(', ', array_slice($lowStockProducts, 0, 3)).' sudah menyentuh batas minimum stok alert. Jadwalkan antrian produksi workshop.',
+                'title' => 'Stok Sepatu & Sandal Mau Habis',
+                'message' => 'Produk '.implode(', ', array_slice($lowStockProducts, 0, 3)).' sudah hampir habis. Segera jadwalkan pembuatan sepatu baru.',
             ];
         }
 
         if ($wasteCost > 0) {
             $alerts[] = [
                 'type' => 'risk',
-                'title' => 'Peringatan Reject QC & Kerugian Bahan',
-                'message' => 'Terjadi kerugian bahan senilai Rp '.number_format($wasteCost, 0, ',', '.').' ('.$wasteCount.' pasang/pcs reject lasting, cacat lem sol, atau kerusakan kulit). Evaluasi proses penarikan upper dan suhu oven lem.',
+                'title' => 'Peringatan Bahan Kulit Rusak',
+                'message' => 'Ada bahan rusak/cacat senilai Rp '.number_format($wasteCost, 0, ',', '.').' ('.$wasteCount.' pasang/potongan kulit). Periksa kembali kerapian pengeleman dan pemotongan kulit.',
             ];
         }
 
         $alerts[] = [
             'type' => 'negotiation',
-            'title' => 'Disiplin Margin Negosiasi (Deal Price)',
-            'message' => 'Rata-rata diskon negosiasi pesanan grosir tercatat '.$discountRate.'% dengan margin kotor '.$profitMargin.'%. Pertahankan toleransi diskon grosir di bawah 15% untuk menjaga laba pengrajin.',
+            'title' => 'Pengingat Potongan Harga (Diskon)',
+            'message' => 'Rata-rata diskon pesanan yang diberikan adalah '.$discountRate.'%. Sebaiknya diskon dijaga di bawah 15% agar keuntungan bengkel tetap aman.',
         ];
 
         $alerts[] = [
             'type' => 'target',
-            'title' => 'Target Impas (BEP) Produksi Workshop',
-            'message' => 'Untuk menutup upah pengrajin dan sewa bengkel (Rp '.number_format($totalFixedOpex, 0, ',', '.').'/bulan), target omzet minimum impas adalah Rp '.number_format($bepRevenue, 0, ',', '.').'.',
+            'title' => 'Target Penjualan untuk Balik Modal',
+            'message' => 'Untuk menutup gaji tukang dan sewa bengkel (Rp '.number_format($totalFixedOpex, 0, ',', '.').'/bulan), penjualan minimal agar tidak rugi adalah Rp '.number_format($bepRevenue, 0, ',', '.').'.',
         ];
 
         // All Transactions for Ledger (Super Admin Only)
@@ -246,9 +252,9 @@ class DashboardController extends Controller
             default => 'C',
         };
         $healthStatus = match (true) {
-            $healthScoreValue >= 85 => 'Stabilitas Finansial Workshop Sangat Sehat',
-            $healthScoreValue >= 70 => 'Kinerja Produksi & Penjualan Terjaga',
-            default => 'Perlu Evaluasi Waste Reject & Diskon Negosiasi',
+            $healthScoreValue >= 85 => 'Kondisi Keuangan Bengkel Sangat Baik',
+            $healthScoreValue >= 70 => 'Penjualan & Produksi Berjalan Lancar',
+            default => 'Perlu Perhatian: Kurangi Bahan Rusak & Diskon',
         };
 
         // Staff Performance Metrics
@@ -559,6 +565,10 @@ class DashboardController extends Controller
                 'grossRevenue' => $grossRevenue,
                 'totalDiscount' => $totalDiscount,
                 'discountRate' => $discountRate,
+                'totalTransactions' => $totalTransactionsCount,
+                'totalProductsSold' => $totalItemsSold,
+                'dailyAvgRevenue' => (float) $dailyAvgRevenue,
+                'activeDaysCount' => $activeDaysCount,
                 'netProfit' => $netProfit,
                 'grossProfit' => $grossProfit,
                 'profitMargin' => $profitMargin,

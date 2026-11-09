@@ -60,4 +60,12 @@ class Product extends Model
     {
         return $this->hasMany(StockMovement::class);
     }
+
+    /**
+     * Get the category that the product belongs to.
+     */
+    public function categoryModel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category', 'name');
+    }
 }

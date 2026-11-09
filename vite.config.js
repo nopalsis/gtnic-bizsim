@@ -26,11 +26,11 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        host: '0.0.0.0',
+        host: 'localhost',
         cors: true,
-        hmr: {
-            host: '172.20.10.10',
-        },
+        // hmr: {
+        //     host: '172.20.10.10',
+        // },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

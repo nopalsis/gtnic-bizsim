@@ -32,7 +32,7 @@ const emit = defineEmits(['selectRole']);
                     : 'bg-white text-[#4c4546] hover:text-[#0e0f0c] border border-[#e1e5d3] font-medium'
             ]"
         >
-            <span>Semua Role</span>
+            <span>Semua Karyawan</span>
             <span
                 :class="[
                     'text-[11px] px-2 py-0.5 rounded-full font-bold',
@@ -79,7 +79,7 @@ const emit = defineEmits(['selectRole']);
             ]"
         >
             <span class="material-symbols-outlined text-xs" :class="activeRole === 'admin' ? 'text-[#c6ef4e]' : 'text-neutral-500'">admin_panel_settings</span>
-            <span>Admins</span>
+            <span>Admin Toko</span>
             <span
                 :class="[
                     'text-[11px] px-2 py-0.5 rounded-full font-bold',
@@ -102,7 +102,7 @@ const emit = defineEmits(['selectRole']);
             ]"
         >
             <span class="material-symbols-outlined text-xs" :class="activeRole === 'sales' ? 'text-[#c6ef4e]' : 'text-neutral-500'">point_of_sale</span>
-            <span>Sales Force</span>
+            <span>Sales & Kasir</span>
             <span
                 :class="[
                     'text-[11px] px-2 py-0.5 rounded-full font-bold',
@@ -125,7 +125,7 @@ const emit = defineEmits(['selectRole']);
             ]"
         >
             <span class="material-symbols-outlined text-xs" :class="activeRole === 'craftsman' ? 'text-[#c6ef4e]' : 'text-neutral-500'">precision_manufacturing</span>
-            <span>Pengrajin (Craftsmen)</span>
+            <span>Pengrajin / Tukang</span>
             <span
                 :class="[
                     'text-[11px] px-2 py-0.5 rounded-full font-bold',

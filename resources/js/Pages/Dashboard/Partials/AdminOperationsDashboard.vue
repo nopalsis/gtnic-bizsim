@@ -47,11 +47,11 @@ const inputBars = computed(() => {
                         {{ props.workshopName || 'OptimaBiz Leathercraft' }}
                     </h1>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0e0f0c] text-white">
-                        Admin Operasional · Input & Workflow
+                        Admin Toko & Bengkel · Pencatatan Harian
                     </span>
                 </div>
                 <p class="text-xs text-[#737868] font-medium mt-1">
-                    Pusat pencatatan transaksi, pengawasan kuantitas fisik stok, dan input inventaris bengkel
+                    Catat nota penjualan baru, cek sisa stok sepatu, dan periksa barang masuk dari pengrajin
                 </p>
             </div>
 
@@ -64,7 +64,7 @@ const inputBars = computed(() => {
                     <span class="material-symbols-outlined text-[18px] text-[#c6ef4e] group-hover:scale-110 transition-transform">
                         post_add
                     </span>
-                    <span>+ Input Transaksi</span>
+                    <span>+ Catat Penjualan</span>
                 </Link>
 
                 <Link
@@ -72,7 +72,7 @@ const inputBars = computed(() => {
                     class="flex-1 sm:flex-none bg-[#f4f4ed] hover:bg-[#e1e5d3] text-[#0e0f0c] text-xs font-bold px-4 py-2.5 rounded-2xl border border-[#dce0cd] transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                 >
                     <span class="material-symbols-outlined text-[18px]">add_box</span>
-                    <span>Kelola Stok</span>
+                    <span>Cek Stok Barang</span>
                 </Link>
             </div>
         </header>
@@ -83,7 +83,7 @@ const inputBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Transaksi Terinput
+                        Penjualan Dicatat
                     </span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Bulan Berjalan
@@ -93,7 +93,7 @@ const inputBars = computed(() => {
                     {{ props.adminOperationsData?.totalTransactionsInput || 0 }} Nota
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Total faktur penjualan dicatat ke sistem
+                    Total nota penjualan yang sudah masuk
                 </div>
             </div>
 
@@ -101,17 +101,17 @@ const inputBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Item Fisik Keluar
+                        Sepatu & Sandal Terjual
                     </span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c6ef4e]/30 text-[#0e0f0c] border border-[#a2c833]">
-                        Distribusi & Showroom
+                        Barang Keluar
                     </span>
                 </div>
                 <div class="text-2xl font-black text-[#0e0f0c] mt-2">
                     {{ props.adminOperationsData?.totalItemsSoldQty || 0 }} Pasang
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Sepatu & sandal yang terjual/terkirim
+                    Jumlah pasang yang keluar dari bengkel
                 </div>
             </div>
 
@@ -119,17 +119,17 @@ const inputBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Katalog Produk Aktif
+                        Model Produk Siap Jual
                     </span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-[#0e0f0c]">
-                        Siap Order
+                        Di Katalog
                     </span>
                 </div>
                 <div class="text-2xl font-black text-[#0e0f0c] mt-2">
-                    {{ props.adminOperationsData?.activeProductsCount || 0 }} SKU
+                    {{ props.adminOperationsData?.activeProductsCount || 0 }} Model
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Model sepatu, sandal & material kulit
+                    Model sepatu, sandal & lembaran kulit
                 </div>
             </div>
 
@@ -137,7 +137,7 @@ const inputBars = computed(() => {
             <div class="bg-white rounded-[22px] p-5 border border-[#dce0cd] shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-[#737868]">
-                        Stok Menipis
+                        Stok Hampir Habis
                     </span>
                     <span
                         :class="[
@@ -159,7 +159,7 @@ const inputBars = computed(() => {
                     {{ props.adminOperationsData?.lowStockCount || 0 }} Produk
                 </div>
                 <div class="text-[11px] text-[#737868] font-medium mt-1">
-                    Menyentuh batas minimal stok alert
+                    Perlu dibuat atau dibeli lagi
                 </div>
             </div>
         </section>
@@ -171,8 +171,8 @@ const inputBars = computed(() => {
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Frekuensi Input Transaksi Harian</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Volume nota/faktur penjualan yang dicatat setiap hari</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Jumlah Penjualan per Hari</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Berapa banyak nota yang dicatat setiap hari</p>
                         </div>
                         <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#f4f5ee] text-[#0e0f0c] border border-[#e1e5d3]">
                             {{ inputBars.length }} Periode
@@ -202,9 +202,9 @@ const inputBars = computed(() => {
                 </div>
 
                 <div class="flex items-center justify-between text-[11px] text-[#737868] pt-3">
-                    <span>Grafik memetakan beban administrasi input data harian</span>
+                    <span>Arahkan kursor ke batang untuk melihat jumlah nota harian</span>
                     <span class="font-bold text-[#0e0f0c]">
-                        Total: {{ props.adminOperationsData?.totalTransactionsInput || 0 }} Transaksi Terdata
+                        Total: {{ props.adminOperationsData?.totalTransactionsInput || 0 }} Transaksi
                     </span>
                 </div>
             </div>
@@ -214,8 +214,8 @@ const inputBars = computed(() => {
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h2 class="text-base font-black text-[#0e0f0c]">Status Stok Kritis / Menipis</h2>
-                            <p class="text-[11px] text-[#737868] font-medium">Prioritaskan koordinasi antrean produksi</p>
+                            <h2 class="text-base font-black text-[#0e0f0c]">Daftar Sepatu yang Stoknya Sedikit</h2>
+                            <p class="text-[11px] text-[#737868] font-medium">Beri tahu pengrajin untuk mulai buat model ini</p>
                         </div>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
                             Perlu Aksi
@@ -255,15 +255,15 @@ const inputBars = computed(() => {
                             v-if="!props.adminOperationsData?.lowStockProducts || props.adminOperationsData.lowStockProducts.length === 0"
                             class="p-4 text-center text-xs text-[#737868]"
                         >
-                            Seluruh stok produk berada dalam batas aman.
+                            Semua stok produk saat ini masih aman.
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px]">
-                    <span class="text-[#737868]">Input mutasi stok barang masuk dari bengkel</span>
+                    <span class="text-[#737868]">Periksa barang masuk dari tukang</span>
                     <Link href="/inventory" class="font-bold text-[#0e0f0c] hover:underline">
-                        Buka Gudang →
+                        Buka Stok Barang →
                     </Link>
                 </div>
             </div>
@@ -273,14 +273,14 @@ const inputBars = computed(() => {
         <section class="bg-white rounded-[24px] p-5 border border-[#dce0cd] shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-base font-black text-[#0e0f0c]">Aktivitas Input Transaksi Terkini</h2>
-                    <p class="text-[11px] text-[#737868] font-medium">5 Transaksi terakhir yang dicatat ke sistem workshop</p>
+                    <h2 class="text-base font-black text-[#0e0f0c]">5 Penjualan Terakhir yang Dicatat</h2>
+                    <p class="text-[11px] text-[#737868] font-medium">Transaksi penjualan yang baru saja disimpan ke sistem</p>
                 </div>
                 <Link
                     href="/sales"
                     class="text-xs font-bold text-[#0e0f0c] hover:underline flex items-center gap-1"
                 >
-                    Lihat Semua Transaksi
+                    Lihat Semua Penjualan
                     <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </Link>
             </div>
@@ -320,10 +320,9 @@ const inputBars = computed(() => {
                     v-if="!props.adminOperationsData?.recentInputActivities || props.adminOperationsData.recentInputActivities.length === 0"
                     class="p-6 text-center text-[#737868] text-xs"
                 >
-                    Belum ada riwayat transaksi terinput.
+                    Belum ada riwayat penjualan yang dicatat.
                 </div>
             </div>
         </section>
     </div>
 </template>
-

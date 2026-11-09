@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
     show: Boolean,
@@ -12,6 +12,8 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const searchQuery = ref('');
+const ledgerPage = ref(1);
+const ledgerPerPage = ref(8);
 
 const formatRupiah = (number) => {
     if (number === null || number === undefined) return 'Rp 0';
@@ -34,6 +36,34 @@ const filteredTransactions = computed(() => {
             tx.items?.toLowerCase().includes(q)
     );
 });
+
+watch(searchQuery, () => {
+    ledgerPage.value = 1;
+});
+
+const ledgerTotalPages = computed(() => {
+    return Math.max(1, Math.ceil(filteredTransactions.value.length / ledgerPerPage.value));
+});
+
+const paginatedLedgerTransactions = computed(() => {
+    const start = (ledgerPage.value - 1) * ledgerPerPage.value;
+    return filteredTransactions.value.slice(start, start + ledgerPerPage.value);
+});
+
+const startLedgerIndex = computed(() => {
+    if (filteredTransactions.value.length === 0) return 0;
+    return (ledgerPage.value - 1) * ledgerPerPage.value + 1;
+});
+
+const endLedgerIndex = computed(() => {
+    return Math.min(ledgerPage.value * ledgerPerPage.value, filteredTransactions.value.length);
+});
+
+const goToLedgerPage = (p) => {
+    if (p >= 1 && p <= ledgerTotalPages.value) {
+        ledgerPage.value = p;
+    }
+};
 
 const handleExport = () => {
     const txs = props.transactions;
@@ -66,8 +96,8 @@ const handleExport = () => {
             <!-- Header -->
             <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
                 <div>
-                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Besar Penjualan Sepatu & Sandal</h3>
-                    <p class="text-xs text-neutral-500 mt-0.5">Daftar riil seluruh transaksi eceran & wholesale dari database</p>
+                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Catatan Penjualan</h3>
+                    <p class="text-xs text-neutral-500 mt-0.5">Daftar lengkap seluruh transaksi penjualan eceran & pesanan grosir</p>
                 </div>
                 <button
                     type="button"
@@ -83,7 +113,7 @@ const handleExport = () => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Cari nomor invoice, nama pelanggan/toko, sales, atau model sepatu..."
+                    placeholder="Cari nomor nota, nama pembeli/toko, sales, atau model sepatu..."
                     class="w-full bg-[#f4f5ee] rounded-xl px-4 py-2.5 text-xs font-semibold border-0 focus:ring-2 focus:ring-[#0e0f0c] outline-none"
                 />
                 <button
@@ -113,7 +143,7 @@ const handleExport = () => {
                     </thead>
                     <tbody class="divide-y divide-neutral-100">
                         <tr
-                            v-for="tx in filteredTransactions"
+                            v-for="tx in paginatedLedgerTransactions"
                             :key="tx.id"
                             class="hover:bg-[#fafbf7] transition-colors"
                         >
@@ -152,6 +182,50 @@ const handleExport = () => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Footer Pagination Modal -->
+            <div class="p-4 border-t border-neutral-100 bg-[#fafbf7] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div class="text-[#737868] font-medium text-[11px]">
+                    Menampilkan <span class="font-bold text-[#0e0f0c]">{{ startLedgerIndex }} - {{ endLedgerIndex }}</span> dari <span class="font-bold text-[#0e0f0c]">{{ filteredTransactions.length }}</span> transaksi
+                </div>
+
+                <div v-if="ledgerTotalPages > 1" class="flex items-center gap-1.5">
+                    <button
+                        type="button"
+                        @click="goToLedgerPage(ledgerPage - 1)"
+                        :disabled="ledgerPage === 1"
+                        class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
+                    >
+                        ← Sebelumnya
+                    </button>
+
+                    <div class="flex items-center gap-1">
+                        <button
+                            v-for="p in ledgerTotalPages"
+                            :key="'lp-' + p"
+                            type="button"
+                            @click="goToLedgerPage(p)"
+                            :class="[
+                                'w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center transition-all cursor-pointer',
+                                ledgerPage === p
+                                    ? 'bg-[#0e0f0c] text-[#c6ef4e]'
+                                    : 'text-[#737868] hover:bg-neutral-100'
+                            ]"
+                        >
+                            {{ p }}
+                        </button>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="goToLedgerPage(ledgerPage + 1)"
+                        :disabled="ledgerPage === ledgerTotalPages"
+                        class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
+                    >
+                        Selanjutnya →
+                    </button>
+                </div>
             </div>
         </div>
     </div>
