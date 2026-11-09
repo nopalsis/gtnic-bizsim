@@ -17,16 +17,18 @@ class StaffSeeder extends Seeder
         $hasPayrollColumns = Schema::hasColumn('users', 'salary_type');
 
         $staffMembers = [
+            // 1. Super Admin (1 user)
             [
-                'name' => 'Pemilik Workshop OptimaBiz (Super Admin)',
+                'name' => 'Pemilik Workshop (Super Admin)',
                 'email' => 'owner@optimabiz.test',
                 'role' => 'superadmin',
                 'phone' => '+62 811-0000-1111',
                 'salary_type' => 'fixed_monthly',
-                'base_salary' => 5000000,
+                'base_salary' => 6000000,
                 'piece_rate' => 0,
                 'is_active' => true,
             ],
+            // 2. Admin (1 user)
             [
                 'name' => 'Dewi (Admin Operasional)',
                 'email' => 'admin@optimabiz.test',
@@ -37,8 +39,9 @@ class StaffSeeder extends Seeder
                 'piece_rate' => 0,
                 'is_active' => true,
             ],
+            // 3. Sales (3 users)
             [
-                'name' => 'Kang Asep (Sales Pengrajin)',
+                'name' => 'Kang Asep (Sales Retail)',
                 'email' => 'asep@optimabiz.test',
                 'role' => 'sales',
                 'phone' => '+62 811-2345-6789',
@@ -48,27 +51,17 @@ class StaffSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name' => 'Pak Bambang (Workshop Head)',
-                'email' => 'bambang@optimabiz.test',
-                'role' => 'craftsman',
-                'phone' => '+62 812-9876-5432',
-                'salary_type' => 'fixed_monthly',
-                'base_salary' => 3600000,
-                'piece_rate' => 0,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Rian (Wholesale & Store)',
+                'name' => 'Rian (Sales Grosir & Partai)',
                 'email' => 'rian@optimabiz.test',
                 'role' => 'sales',
                 'phone' => '+62 878-3344-5566',
                 'salary_type' => 'hybrid',
-                'base_salary' => 2000000,
-                'piece_rate' => 75000,
+                'base_salary' => 2500000,
+                'piece_rate' => 5000,
                 'is_active' => true,
             ],
             [
-                'name' => 'Siti (Admin Toko & Reseller)',
+                'name' => 'Siti (Sales Reseller & Toko)',
                 'email' => 'siti@optimabiz.test',
                 'role' => 'sales',
                 'phone' => '+62 819-0123-4567',
@@ -77,67 +70,61 @@ class StaffSeeder extends Seeder
                 'piece_rate' => 0,
                 'is_active' => true,
             ],
+            // 4. Craftsman / Pengrajin (3 users)
             [
-                'name' => 'Budi Santoso (Tukang Pola & Skiving)',
-                'email' => 'budi.s@optimabiz.id',
+                'name' => 'Pak Bambang (Tukang Pola & Seset)',
+                'email' => 'bambang@optimabiz.test',
                 'role' => 'craftsman',
-                'phone' => '+62 856-1122-3344',
+                'phone' => '+62 812-9876-5432',
                 'salary_type' => 'piece_rate',
                 'base_salary' => 0,
-                'piece_rate' => 25000,
+                'piece_rate' => 35000,
                 'is_active' => true,
             ],
             [
-                'name' => 'Alex Rivera (Tukang Jahit Upper)',
-                'email' => 'alex.tech@optimabiz.id',
+                'name' => 'Budi Santoso (Tukang Jahit Upper)',
+                'email' => 'budi@optimabiz.test',
                 'role' => 'craftsman',
-                'phone' => '+62 821-4455-6677',
+                'phone' => '+62 856-1122-3344',
                 'salary_type' => 'piece_rate',
                 'base_salary' => 0,
                 'piece_rate' => 30000,
                 'is_active' => true,
             ],
             [
-                'name' => 'Joko Susilo (Lasting & Sol Manual)',
-                'email' => 'joko.s@optimabiz.id',
+                'name' => 'Pak Hadi (Tukang Sol & Lasting)',
+                'email' => 'hadi@optimabiz.test',
                 'role' => 'craftsman',
-                'phone' => '+62 813-5566-7788',
-                'salary_type' => 'hybrid',
-                'base_salary' => 1500000,
-                'piece_rate' => 20000,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Hendra Saputra (Finishing & QC)',
-                'email' => 'hendra.s@optimabiz.id',
-                'role' => 'craftsman',
-                'phone' => '+62 812-4433-2211',
-                'salary_type' => 'fixed_monthly',
-                'base_salary' => 3200000,
-                'piece_rate' => 0,
+                'phone' => '+62 821-4455-6677',
+                'salary_type' => 'piece_rate',
+                'base_salary' => 0,
+                'piece_rate' => 32000,
                 'is_active' => true,
             ],
         ];
 
+        $validEmails = array_column($staffMembers, 'email');
+        User::whereNotIn('email', $validEmails)->delete();
+
         foreach ($staffMembers as $staff) {
-            $data = [
+            $userData = [
                 'name' => $staff['name'],
+                'role' => $staff['role'],
+                'phone' => $staff['phone'],
+                'is_active' => $staff['is_active'],
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
             ];
 
             if ($hasPayrollColumns) {
-                $data['role'] = $staff['role'];
-                $data['phone'] = $staff['phone'];
-                $data['salary_type'] = $staff['salary_type'];
-                $data['base_salary'] = $staff['base_salary'];
-                $data['piece_rate'] = $staff['piece_rate'];
-                $data['is_active'] = $staff['is_active'];
+                $userData['salary_type'] = $staff['salary_type'];
+                $userData['base_salary'] = $staff['base_salary'];
+                $userData['piece_rate'] = $staff['piece_rate'];
             }
 
             User::updateOrCreate(
                 ['email' => $staff['email']],
-                $data
+                $userData
             );
         }
     }
