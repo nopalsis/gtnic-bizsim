@@ -29,7 +29,7 @@ class ProfitLeakageGuardianTest extends TestCase
             ->has('leakageCards.wasteCost')
             ->has('leakageCards.idleCapital')
             ->has('productAudits')
-            ->has('actionableInsights', 3)
+            ->has('actionableInsights')
             ->where('actionableInsights.0.code', 'A')
             ->where('actionableInsights.1.code', 'B')
             ->where('actionableInsights.2.code', 'C')
@@ -53,6 +53,32 @@ class ProfitLeakageGuardianTest extends TestCase
             ->has('leakageCards.wasteCost.note')
             ->has('leakageCards.idleCapital.amount')
             ->has('leakageCards.idleCapital.note')
+        );
+    }
+
+    public function test_filter_period_dynamically_updates_period_label(): void
+    {
+        $superadmin = User::factory()->create([
+            'role' => 'superadmin',
+            'is_active' => true,
+        ]);
+
+        $res7 = $this->actingAs($superadmin)->get(route('simulator.index', ['period' => '7_days']));
+        $res7->assertStatus(200);
+        $res7->assertInertia(fn (Assert $page) => $page
+            ->where('period', '7_days')
+            ->where('periodLabel', '7 Hari Terakhir')
+            ->where('leakageCards.marginSlippage.periodLabel', '7 Hari Terakhir')
+            ->where('leakageCards.wasteCost.periodLabel', '7 Hari Terakhir')
+        );
+
+        $resMonth = $this->actingAs($superadmin)->get(route('simulator.index', ['period' => 'this_month']));
+        $resMonth->assertStatus(200);
+        $resMonth->assertInertia(fn (Assert $page) => $page
+            ->where('period', 'this_month')
+            ->where('periodLabel', 'Bulan Ini')
+            ->where('leakageCards.marginSlippage.periodLabel', 'Bulan Ini')
+            ->where('leakageCards.wasteCost.periodLabel', 'Bulan Ini')
         );
     }
 

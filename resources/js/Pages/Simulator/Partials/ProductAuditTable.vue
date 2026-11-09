@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
     products: {
@@ -15,12 +15,39 @@ const props = defineProps({
 const emit = defineEmits(['select-product']);
 
 const activeStatusFilter = ref('all');
+const activeCategoryFilter = ref('all');
 const searchQuery = ref('');
+const currentPage = ref(1);
+const itemsPerPage = 7;
+
+// Kategori unik yang tersedia dari data produk
+const availableCategories = computed(() => {
+    const cats = new Set();
+    props.products.forEach((p) => {
+        if (p.category) cats.add(p.category);
+    });
+    return Array.from(cats);
+});
+
+// Reset page ketika filter berubah
+watch([activeStatusFilter, activeCategoryFilter, searchQuery], () => {
+    currentPage.value = 1;
+});
 
 const filteredProducts = computed(() => {
     return props.products.filter((prod) => {
         const matchStatus =
             activeStatusFilter.value === 'all' || prod.status === activeStatusFilter.value;
+
+        const matchCategory =
+            activeCategoryFilter.value === 'all' ||
+            (activeCategoryFilter.value === 'sandal' &&
+                (prod.category?.toLowerCase().includes('sandal') || prod.name?.toLowerCase().includes('sandal'))) ||
+            (activeCategoryFilter.value === 'sepatu_pria' && prod.category === 'Sepatu Pria') ||
+            (activeCategoryFilter.value === 'sepatu_wanita' && prod.category === 'Sepatu Wanita') ||
+            (activeCategoryFilter.value === 'aksesoris' && prod.category?.toLowerCase().includes('aksesoris')) ||
+            prod.category === activeCategoryFilter.value;
+
         const q = searchQuery.value.toLowerCase().trim();
         const matchSearch =
             !q ||
@@ -29,8 +56,17 @@ const filteredProducts = computed(() => {
             prod.leakPoint.toLowerCase().includes(q) ||
             prod.sku.toLowerCase().includes(q);
 
-        return matchStatus && matchSearch;
+        return matchStatus && matchCategory && matchSearch;
     });
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(filteredProducts.value.length / itemsPerPage) || 1;
+});
+
+const paginatedProducts = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    return filteredProducts.value.slice(start, start + itemsPerPage);
 });
 
 const statusCount = computed(() => {
@@ -46,23 +82,19 @@ const statusCount = computed(() => {
 <template>
     <div class="bg-white rounded-[26px] border border-[#dce0cd] shadow-xs overflow-hidden flex flex-col justify-between">
         <!-- Header Panel Kiri -->
-        <div class="p-5 lg:p-6 border-b border-[#eaecdf]">
+        <div class="p-5 lg:p-6 border-b border-[#eaecdf] space-y-3.5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f4f6ee] text-[#4d5240] text-xs font-bold mb-1">
-                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                        Panel Audit Per Model
-                    </div>
                     <h3 class="text-xl font-black text-[#0e0f0c] tracking-tight">
-                        Mana Model yang Bocor?
+                        Audit Laba Per Model Produk
                     </h3>
-                    <p class="text-xs text-[#737868] mt-0.5">
-                        Membedah selisih target margin vs realisasi di lapangan. Klik baris produk untuk rincian HPP riil.
+                    <p class="text-xs text-[#737868] mt-0.5 font-medium">
+                        Klik baris produk untuk membedah rincian HPP, limbah, dan selisih diskon.
                     </p>
                 </div>
 
                 <!-- Status Filter Tabs -->
-                <div class="flex items-center gap-1.5 bg-[#fafbf7] p-1 rounded-2xl border border-[#dce0cd] text-xs font-bold shrink-0">
+                <div class="flex items-center gap-1.5 bg-[#fafbf7] p-1 rounded-2xl border border-[#dce0cd] text-xs font-bold shrink-0 flex-wrap">
                     <button
                         type="button"
                         @click="activeStatusFilter = 'all'"
@@ -98,25 +130,65 @@ const statusCount = computed(() => {
                 </div>
             </div>
 
-            <!-- Quick Search Bar -->
-            <div class="mt-4 relative">
-                <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="Cari model sepatu, sandal, atau kata kunci kebocoran..."
-                    class="w-full bg-[#fafbf7] border border-[#dce0cd] rounded-xl px-3.5 py-2 pl-9 text-xs text-[#0e0f0c] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#8fae26]"
-                />
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-xs">
-                    🔍
-                </span>
-                <button
-                    v-if="searchQuery"
-                    type="button"
-                    @click="searchQuery = ''"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs cursor-pointer"
-                >
-                    ✕
-                </button>
+            <!-- Category Filter Pills & Search Bar -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                <!-- Category Pills -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-[11px] font-extrabold text-[#737868]">
+                    <span class="text-[10px] uppercase tracking-wider text-neutral-400 font-bold shrink-0">Kategori:</span>
+                    <button
+                        type="button"
+                        @click="activeCategoryFilter = 'all'"
+                        class="px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
+                        :class="activeCategoryFilter === 'all' ? 'bg-[#0e0f0c] text-[#c6ef4e]' : 'bg-[#fafbf7] border border-[#dce0cd] hover:bg-white'"
+                    >
+                        Semua
+                    </button>
+                    <button
+                        type="button"
+                        @click="activeCategoryFilter = 'sandal'"
+                        class="px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0 flex items-center gap-1"
+                        :class="activeCategoryFilter === 'sandal' ? 'bg-[#0e0f0c] text-[#c6ef4e]' : 'bg-[#fafbf7] border border-[#dce0cd] hover:bg-white'"
+                    >
+                        <span>🩴</span> Sandal Kulit & Karet
+                    </button>
+                    <button
+                        type="button"
+                        @click="activeCategoryFilter = 'sepatu_pria'"
+                        class="px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
+                        :class="activeCategoryFilter === 'sepatu_pria' ? 'bg-[#0e0f0c] text-[#c6ef4e]' : 'bg-[#fafbf7] border border-[#dce0cd] hover:bg-white'"
+                    >
+                        Sepatu Pria
+                    </button>
+                    <button
+                        type="button"
+                        @click="activeCategoryFilter = 'sepatu_wanita'"
+                        class="px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
+                        :class="activeCategoryFilter === 'sepatu_wanita' ? 'bg-[#0e0f0c] text-[#c6ef4e]' : 'bg-[#fafbf7] border border-[#dce0cd] hover:bg-white'"
+                    >
+                        Sepatu Wanita
+                    </button>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative sm:w-64 shrink-0">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Cari sandal, sepatu, SKU..."
+                        class="w-full bg-[#fafbf7] border border-[#dce0cd] rounded-xl px-3 py-1.5 pl-8 text-xs text-[#0e0f0c] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#8fae26]"
+                    />
+                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs">
+                        🔍
+                    </span>
+                    <button
+                        v-if="searchQuery"
+                        type="button"
+                        @click="searchQuery = ''"
+                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 text-xs cursor-pointer"
+                    >
+                        ✕
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -134,7 +206,7 @@ const statusCount = computed(() => {
                 </thead>
                 <tbody class="divide-y divide-[#eaecdf]">
                     <tr
-                        v-for="prod in filteredProducts"
+                        v-for="prod in paginatedProducts"
                         :key="prod.id"
                         @click="emit('select-product', prod)"
                         class="cursor-pointer transition-all hover:bg-[#f4f6ee]/70 group"
@@ -167,7 +239,8 @@ const statusCount = computed(() => {
                                     <div class="text-[11px] text-[#737868] flex items-center gap-1.5 mt-0.5">
                                         <span>{{ prod.category }}</span>
                                         <span>·</span>
-                                        <span class="font-mono">{{ prod.sku }}</span>
+                                        <span class="font-mono text-[10px]">{{ prod.sku }}</span>
+                                        <span v-if="prod.currentStock > 0" class="text-neutral-400">· Stok: {{ prod.currentStock }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -195,8 +268,16 @@ const statusCount = computed(() => {
                             >
                                 {{ prod.realMargin }}
                             </div>
-                            <div class="text-[10px]" :class="prod.status === 'kritis' ? 'text-rose-500 font-bold' : 'text-[#737868]'">
-                                {{ prod.status === 'kritis' ? '⚠️ Anjlok -57%' : (prod.status === 'waspada' ? 'Tertekan' : 'Sesuai Target') }}
+                            <div class="text-[10px]" :class="prod.status === 'kritis' ? 'text-rose-600 font-bold' : 'text-[#737868]'">
+                                <template v-if="prod.hppBreakdown?.realDealPrice < prod.hppBreakdown?.materialCost">
+                                    🚨 Jual Rugi Modal!
+                                </template>
+                                <template v-else-if="prod.realMarginPct < prod.targetMarginPct">
+                                    ⚠️ Turun -{{ (prod.targetMarginPct - prod.realMarginPct).toFixed(1) }}%
+                                </template>
+                                <template v-else>
+                                    ✓ Sesuai Target
+                                </template>
                             </div>
                         </td>
 
@@ -242,14 +323,37 @@ const statusCount = computed(() => {
             </table>
         </div>
 
-        <!-- Table Footer Hint -->
-        <div class="p-3.5 bg-[#fafbf7] border-t border-[#eaecdf] flex items-center justify-between text-[11px] text-[#737868]">
+        <!-- Table Footer: Pagination & Hint -->
+        <div class="p-3.5 bg-[#fafbf7] border-t border-[#eaecdf] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#737868]">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#8fae26]"></span>
-                <span>💡 <strong>Tips:</strong> Klik salah satu baris produk di atas untuk melihat rincian pembentuk HPP riil per pasang sepatu/sandal.</span>
+                <span>💡 <strong>Klik baris produk</strong> untuk membedah 5 komponen pembentuk HPP riil.</span>
             </div>
-            <span class="font-bold text-[#0e0f0c]">{{ filteredProducts.length }} Model Diaudit</span>
+
+            <!-- Pagination Controls -->
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+                <span class="font-bold text-[#0e0f0c]">
+                    Halaman {{ currentPage }} dari {{ totalPages }} ({{ filteredProducts.length }} Model)
+                </span>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        @click="currentPage = Math.max(1, currentPage - 1)"
+                        :disabled="currentPage <= 1"
+                        class="px-2.5 py-1 rounded-lg border border-[#dce0cd] bg-white font-bold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 transition-colors"
+                    >
+                        ← Prev
+                    </button>
+                    <button
+                        type="button"
+                        @click="currentPage = Math.min(totalPages, currentPage + 1)"
+                        :disabled="currentPage >= totalPages"
+                        class="px-2.5 py-1 rounded-lg border border-[#dce0cd] bg-white font-bold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 transition-colors"
+                    >
+                        Next →
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
-

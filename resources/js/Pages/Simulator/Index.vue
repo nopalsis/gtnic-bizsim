@@ -6,7 +6,7 @@ import LeakageSummaryCards from './Partials/LeakageSummaryCards.vue';
 import ProductAuditTable from './Partials/ProductAuditTable.vue';
 import ProductHppModal from './Partials/ProductHppModal.vue';
 import ActionableInsights from './Partials/ActionableInsights.vue';
-import SettingsModal from './Partials/SettingsModal.vue';
+import AllActionsModal from './Partials/AllActionsModal.vue';
 
 const props = defineProps({
     systemName: {
@@ -15,11 +15,23 @@ const props = defineProps({
     },
     systemTagline: {
         type: String,
-        default: 'Pusat Audit Kebocoran Laba & Pemandu Keputusan',
+        default: 'Audit Kebocoran Laba & Pemandu Keputusan',
+    },
+    pageTitle: {
+        type: String,
+        default: 'Audit Kebocoran Laba',
+    },
+    pageSubtitle: {
+        type: String,
+        default: 'Pantau laba yang hilang akibat diskon berlebih, limbah kulit, dan stok mandek.',
     },
     period: {
         type: String,
         default: '30_days',
+    },
+    periodLabel: {
+        type: String,
+        default: '30 Hari Terakhir',
     },
     periodOptions: {
         type: Array,
@@ -48,9 +60,16 @@ const props = defineProps({
 });
 
 // UI State
-const showSettingsModal = ref(false);
+const showActionsModal = ref(false);
 const selectedProduct = ref(null);
 const showHppModal = ref(false);
+
+// State Tindakan yang telah dijalankan (disinkronisasi antara panel samping & modal)
+const executedActions = ref({
+    floor_price_guardrail: false,
+    smart_craftsman_assignment: false,
+    cash_liquidation_clearance: false,
+});
 
 // Toast Notification State
 const toastMessage = ref('');
@@ -82,13 +101,29 @@ const handleSelectProduct = (product) => {
 };
 
 // Action Executed Feedback
-const handleActionExecuted = (payload) => {
-    triggerToast(payload.message);
+const handleToggleAction = (insight) => {
+    executedActions.value[insight.id] = !executedActions.value[insight.id];
+    const isNowActive = executedActions.value[insight.id];
+    triggerToast(
+        isNowActive
+            ? `${insight.activeStatus} berhasil diaktifkan!`
+            : `Status ${insight.title} dinonaktifkan.`
+    );
+};
+
+// Copy Instruction Feedback
+const handleCopySingleInstruction = (insight) => {
+    triggerToast(`Instruksi "${insight.title}" berhasil disalin ke clipboard!`);
+};
+
+const handleCopyAllBriefing = () => {
+    triggerToast('Seluruh instruksi & SOP tindakan workshop berhasil disalin ke clipboard!');
 };
 
 // Apply Action from HPP Modal
 const handleApplyActionFromModal = (product) => {
-    triggerToast(`Rekomendasi untuk "${product.name}" telah disiapkan di Panel Tindakan Konkret!`);
+    showActionsModal.value = true;
+    triggerToast(`Membuka Pusat Tindakan untuk model "${product.name}"...`);
 };
 </script>
 
@@ -101,28 +136,24 @@ const handleApplyActionFromModal = (product) => {
 
         <!-- Main Content Area -->
         <main class="flex-1 flex flex-col gap-5 min-w-0">
-            <!-- Header Bar (Executive Bento Header) -->
+            <!-- Header Bar -->
             <header class="bg-white rounded-[28px] border border-[#dce0cd] p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-2 flex-wrap mb-1">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0e0f0c] text-[#c6ef4e] text-xs font-black uppercase tracking-wider">
-                            <span>🛡️</span> Auditor Internal Otomatis
-                        </span>
-                        <span class="text-xs text-neutral-400">·</span>
-                        <span class="text-xs font-bold text-[#4d5240]">
-                            👞 {{ props.workshopInfo?.name || 'OptimaBiz Leathercraft & Shoes' }}
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#f4f6ee] text-[#4d5240] text-xs font-bold border border-[#eaecdf]">
+                            👞 {{ props.workshopInfo?.name || 'OptimaBiz Workshop' }}
                         </span>
                     </div>
 
                     <h1 class="text-2xl sm:text-3xl font-black text-[#0e0f0c] tracking-tight">
-                        {{ props.systemName }}
+                        {{ props.pageTitle }}
                     </h1>
-                    <p class="text-xs sm:text-sm text-[#737868] mt-0.5 font-medium">
-                        {{ props.systemTagline }} — Membedah kebocoran laba riil dari catatan transaksi, meja potong kulit, dan gaji pengrajin.
+                    <p class="text-xs sm:text-sm text-[#737868] mt-1 font-medium">
+                        {{ props.pageSubtitle }}
                     </p>
                 </div>
 
-                <!-- Controls: Periode Audit & Pengaturan Bengkel -->
+                <!-- Controls: Periode Audit & Rekomendasi Tindakan -->
                 <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
                     <!-- Dropdown Periode Audit -->
                     <div class="relative">
@@ -146,63 +177,54 @@ const handleApplyActionFromModal = (product) => {
                         </div>
                     </div>
 
-                    <!-- Tombol Pengaturan Kapasitas & Beban Bengkel -->
+                    <!-- Tombol Buka Rekomendasi Tindakan Lengkap -->
                     <button
                         type="button"
-                        @click="showSettingsModal = true"
-                        title="Atur standar gaji tukang, sewa workshop, dan kapasitas produksi fisik"
-                        class="p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border border-[#dce0cd] bg-[#fafbf7] hover:bg-white text-[#0e0f0c] text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all shadow-2xs shrink-0"
+                        @click="showActionsModal = true"
+                        class="px-4 py-2.5 rounded-2xl bg-[#0e0f0c] text-[#c6ef4e] hover:bg-[#2d4000] text-xs sm:text-sm font-black flex items-center gap-2 cursor-pointer transition-all shadow-xs shrink-0"
                     >
-                        <svg class="w-4 h-4 text-[#737868]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span class="hidden sm:inline">Kapasitas Bengkel</span>
+                        <span>⚡ Rekomendasi Tindakan</span>
+                        <span class="px-1.5 py-0.2 rounded-full bg-[#c6ef4e] text-[#0e0f0c] text-[10px] font-black">
+                            {{ props.actionableInsights.length }}
+                        </span>
                     </button>
                 </div>
             </header>
 
-            <!-- 1. Baris Atas: 3 Kartu Deteksi Kebocoran Kas (Leakage Summary Cards) -->
+            <!-- 1. Baris Atas: 3 Kartu Deteksi Kebocoran Kas -->
             <LeakageSummaryCards
                 :cards="props.leakageCards"
+                :period-label="props.periodLabel"
             />
 
-            <!-- Bento Grid: Baris Bawah (Panel Kiri & Panel Kanan) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                <!-- 2. Panel Kiri: Tabel Audit Produk ("Mana Model yang Bocor?") (Col 7) -->
-                <div class="lg:col-span-7">
-                    <ProductAuditTable
-                        :products="props.productAudits"
-                        :selected-product-id="selectedProduct?.id || null"
-                        @select-product="handleSelectProduct"
-                    />
-                </div>
+            <!-- 2. Tabel Audit Produk ("Mana Model yang Bocor?") (Full Width) -->
+            <section class="w-full">
+                <ProductAuditTable
+                    :products="props.productAudits"
+                    :selected-product-id="selectedProduct?.id || null"
+                    @select-product="handleSelectProduct"
+                />
+            </section>
 
-                <!-- 3. Panel Kanan: Kotak Tindakan Konkret (Actionable Insights) (Col 5) -->
-                <div class="lg:col-span-5">
-                    <ActionableInsights
-                        :insights="props.actionableInsights"
-                        @action-executed="handleActionExecuted"
-                    />
-                </div>
-            </div>
+            <!-- 3. Kotak Tindakan Konkret (Actionable Insights) (Berada di Bawah Tabel) -->
+            <section class="w-full">
+                <ActionableInsights
+                    :insights="props.actionableInsights"
+                    :executed-actions="executedActions"
+                    @toggle-action="handleToggleAction"
+                    @open-modal="showActionsModal = true"
+                />
+            </section>
 
-            <!-- Footer Informatif: Prinsip Auditor Lapangan -->
-            <footer class="bg-white/80 backdrop-blur-xs rounded-2xl border border-[#dce0cd] px-5 py-3.5 text-xs text-[#737868] flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <span class="font-bold text-[#0e0f0c] flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#8fae26]"></span>
-                        Prinsip Audit OptimaBiz:
-                    </span>
-                    <span>1. Bukan Ramalan Abstrak (berdasarkan catatan transaksi riil)</span>
-                    <span class="text-neutral-300">·</span>
-                    <span>2. Terintegrasi Tanpa Input Rumit</span>
-                    <span class="text-neutral-300">·</span>
-                    <span>3. Bahasa Operasional Bengkel Lapangan</span>
+            <!-- Footer Informatif -->
+            <footer class="bg-white/80 backdrop-blur-xs rounded-2xl border border-[#dce0cd] px-5 py-3 text-xs text-[#737868] flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#8fae26]"></span>
+                    <span class="font-medium text-[#4d5240]">Data transaksi & limbah terintegrasi otomatis dari catatan bengkel.</span>
                 </div>
 
                 <div class="text-[11px] text-[#4d5240] font-semibold">
-                    Staf Aktif: {{ props.workshopInfo?.employeeCount || 5 }} Tukang | Kapasitas: {{ props.workshopInfo?.monthlyMaxCapacity || 500 }} psg/bln
+                    Staf Pengrajin Aktif: {{ props.workshopInfo?.employeeCount || 5 }} Orang
                 </div>
             </footer>
         </main>
@@ -215,11 +237,15 @@ const handleApplyActionFromModal = (product) => {
             @apply-action="handleApplyActionFromModal"
         />
 
-        <!-- Settings Modal (Atur Tukang, Gaji, Beban Tetap, Kapasitas) -->
-        <SettingsModal
-            :show="showSettingsModal"
-            :baseline="props.baseline"
-            @close="showSettingsModal = false"
+        <!-- All Actions Hub Modal (Pusat Rekomendasi & Tindakan Lengkap) -->
+        <AllActionsModal
+            :show="showActionsModal"
+            :insights="props.actionableInsights"
+            :executed-actions="executedActions"
+            @close="showActionsModal = false"
+            @toggle-action="handleToggleAction"
+            @copy-instruction="handleCopySingleInstruction"
+            @copy-all="handleCopyAllBriefing"
         />
 
         <!-- Floating Toast Notification -->
