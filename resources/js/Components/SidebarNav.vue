@@ -34,8 +34,11 @@ const handleLogout = () => {
 </script>
 
 <template>
-    <!-- Navigation Container: Fixed Bottom Navigation Bar on Mobile (< md), Sleek Left Sticky Rail on Desktop (>= md) -->
-    <aside class="fixed bottom-0 left-0 right-0 z-50 w-full max-w-full overflow-x-hidden bg-[#0e0f0c]/95 backdrop-blur-md border-t border-[#262822] px-2 py-1.5 md:py-4 md:px-2.5 flex flex-row md:flex-col items-center justify-around md:justify-between shadow-2xl md:shadow-xl flex-shrink-0 md:static md:sticky md:top-4 md:self-start md:h-[calc(100vh-2rem)] md:w-[72px] md:bg-[#0e0f0c] md:rounded-[24px] md:border-0">
+    <!-- Spacer di Desktop agar konten utama tetap sejajar dan tidak tertutup sidebar yang fixed -->
+    <div class="hidden md:block w-[72px] shrink-0" aria-hidden="true"></div>
+
+    <!-- Navigation Container: Fixed Bottom Navigation Bar on Mobile (< md), Fixed Left Sidebar Rail on Desktop (>= md) -->
+    <aside class="fixed bottom-0 left-0 right-0 z-40 w-full max-w-full overflow-x-hidden md:overflow-y-auto bg-[#0e0f0c]/95 backdrop-blur-md border-t border-[#262822] px-2 py-1.5 md:py-4 md:px-2.5 flex flex-row md:flex-col items-center justify-around md:justify-between shadow-2xl md:shadow-xl flex-shrink-0 md:top-5 md:left-5 md:bottom-auto md:right-auto md:h-[calc(100vh-2.5rem)] md:w-[72px] md:bg-[#0e0f0c] md:rounded-[24px] md:border-0">
         <!-- Logo Brand OptimaBiz (Desktop only) -->
         <Link href="/dashboard" class="hidden md:flex group relative items-center justify-center w-11 h-11" title="OptimaBiz Leathercraft">
             <svg class="w-9 h-9 transition-transform duration-300 group-hover:scale-105" fill="none" viewBox="0 0 44 44">

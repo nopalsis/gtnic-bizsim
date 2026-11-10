@@ -43,7 +43,7 @@ const submit = () => {
                 <div class="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 px-2">
                     <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#c6ef4e] shrink-0"></span>
                     <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#737868]">
-                        Bengkel Sepatu & Sandal Kulit
+                        UMKM SEPATU DAN SANDAL KULIT
                     </span>
                 </div>
 
@@ -51,9 +51,6 @@ const submit = () => {
                 <h1 class="text-xl sm:text-2xl md:text-[26px] font-extrabold text-[#0e0f0c] tracking-tight">
                     Masuk ke Sistem
                 </h1>
-                <p class="text-[11px] sm:text-xs text-[#737868] mt-1 sm:mt-1.5 max-w-xs mx-auto leading-relaxed">
-                    Masukkan email dan kata sandi Anda untuk mulai bekerja
-                </p>
             </div>
 
             <!-- Pesan Peringatan / Salah Sandi -->
@@ -136,9 +133,6 @@ const submit = () => {
                         <span class="text-[#3a3d34] text-[11px] sm:text-xs">Ingat saya</span>
                     </label>
 
-                    <span class="text-[10px] sm:text-[11px] text-[#737868] text-right whitespace-nowrap">
-                        Lupa sandi? Hubungi admin
-                    </span>
                 </div>
 
                 <!-- Tombol Masuk -->
