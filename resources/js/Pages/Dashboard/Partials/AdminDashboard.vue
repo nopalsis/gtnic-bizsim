@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import PaginationNav from '@/Components/PaginationNav.vue';
+import { useChartSelection } from '@/Composables/useChartSelection';
 
 const props = defineProps({
     workshopName: String,
@@ -19,7 +20,17 @@ const props = defineProps({
 const emit = defineEmits(['openLedger']);
 
 const trendPeriod = ref('7d'); // '7d' (7 Hari Terakhir), 'weekly' (Per 7 Hari / Mingguan), 'all_months' (Semua - Per Bulan)
-const hoveredItem = ref(null);
+const {
+    selectedItem,
+    activeItem,
+    isActive,
+    onPointerEnter,
+    onPointerLeave,
+    toggleSelect,
+    clearSelection,
+} = useChartSelection((item) => item?.key ?? item?.date);
+
+watch(trendPeriod, clearSelection);
 
 // Pagination Riwayat Transaksi Penjualan Dashboard
 const txCurrentPage = ref(1);
@@ -326,35 +337,48 @@ const maxTrendCount = computed(() => {
                         </div>
                     </div>
 
-                    <!-- Strip Rincian Interaktif (Tidak akan pernah terpotong) -->
+                    <!-- Strip Rincian Interaktif (Tidak akan pernah terpotong, support tap mobile & hover desktop) -->
                     <div
-                        v-if="hoveredItem"
-                        class="mb-3 px-3.5 py-2 rounded-xl bg-[#0e0f0c] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs shadow-md border border-neutral-800 transition-all"
+                        v-if="activeItem"
+                        class="mb-3 px-3.5 py-2 rounded-xl bg-[#0e0f0c] text-white flex items-center justify-between gap-2 text-xs shadow-md border border-neutral-800 transition-all"
                     >
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#c6ef4e] animate-pulse"></span>
-                            <span class="font-bold text-[#c6ef4e]">{{ hoveredItem.full_date || hoveredItem.date }}</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 flex-1 min-w-0">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e] animate-pulse shrink-0"></span>
+                                <span class="font-bold text-[#c6ef4e] truncate">{{ activeItem.full_date || activeItem.date }}</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-white shrink-0"></span>
+                                    Omset: <strong class="text-white font-black">{{ formatRupiah(activeItem.amount) }}</strong>
+                                </span>
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-[#c6ef4e] shrink-0"></span>
+                                    Transaksi: <strong class="text-[#c6ef4e] font-black">{{ activeItem.count }} Nota</strong>
+                                </span>
+                            </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] font-semibold">
-                            <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-white shrink-0"></span>
-                                Omset: <strong class="text-white font-black">{{ formatRupiah(hoveredItem.amount) }}</strong>
-                            </span>
-                            <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e] shrink-0"></span>
-                                Transaksi: <strong class="text-[#c6ef4e] font-black">{{ hoveredItem.count }} Nota</strong>
-                            </span>
-                        </div>
+
+                        <button
+                            v-if="selectedItem"
+                            type="button"
+                            @click="clearSelection"
+                            class="w-5 h-5 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white text-[10px] font-bold flex items-center justify-center shrink-0 cursor-pointer"
+                            title="Tutup rincian"
+                            aria-label="Tutup rincian"
+                        >
+                            ✕
+                        </button>
                     </div>
 
-                    <!-- Strip Status Standar saat tidak di-hover -->
+                    <!-- Strip Status Standar saat tidak aktif -->
                     <div
                         v-else
                         class="mb-3 px-3.5 py-2 rounded-xl bg-[#fafbf7] border border-[#e5e9db] text-[#737868] flex items-center justify-between text-xs"
                     >
                         <div class="flex items-center gap-2 text-[11px]">
                             <span class="material-symbols-outlined text-[15px] text-[#0e0f0c]">touch_app</span>
-                            <span>Arahkan kursor atau sentuh batang untuk melihat angka detail</span>
+                            <span>Ketuk batang grafik untuk melihat angka detail</span>
                         </div>
                         <div class="text-[11px] font-bold text-[#0e0f0c] hidden sm:block">
                             Puncak {{ trendPeriod === 'all_months' ? 'Bulanan' : (trendPeriod === 'weekly' ? 'Mingguan' : 'Harian') }}:
@@ -379,9 +403,21 @@ const maxTrendCount = computed(() => {
                             <div
                                 v-for="(item, idx) in activeChartData"
                                 :key="'chart-item-' + idx"
-                                @mouseenter="hoveredItem = item"
-                                @mouseleave="hoveredItem = null"
-                                class="flex-1 max-w-[120px] h-full flex flex-col items-center justify-end group cursor-pointer rounded-xl hover:bg-neutral-100/70 py-1 transition-colors"
+                                role="button"
+                                tabindex="0"
+                                :aria-pressed="isActive(item)"
+                                :aria-label="`Detail ${item.full_date || item.date}`"
+                                @click="toggleSelect(item)"
+                                @keydown.enter.prevent="toggleSelect(item)"
+                                @keydown.space.prevent="toggleSelect(item)"
+                                @pointerenter="onPointerEnter($event, item)"
+                                @pointerleave="onPointerLeave($event)"
+                                :class="[
+                                    'flex-1 max-w-[120px] h-full flex flex-col items-center justify-end group cursor-pointer rounded-xl py-1 transition-colors select-none touch-manipulation outline-none',
+                                    isActive(item)
+                                        ? 'bg-neutral-100/90 ring-1 ring-[#a2c833]'
+                                        : 'hover:bg-neutral-100/70 focus-visible:ring-1 focus-visible:ring-[#0e0f0c]'
+                                ]"
                             >
                                 <!-- 2 Batang Berdampingan: Omset & Transaksi -->
                                 <div class="w-full h-40 flex items-end justify-center gap-1 sm:gap-1.5 pb-1">
@@ -410,7 +446,10 @@ const maxTrendCount = computed(() => {
                                 <div class="w-full text-center mt-1">
                                     <div
                                         :class="[
-                                            'font-bold text-[#737868] group-hover:text-[#0e0f0c] group-hover:font-black transition-colors truncate px-0.5',
+                                            'transition-colors truncate px-0.5',
+                                            isActive(item)
+                                                ? 'font-black text-[#0e0f0c]'
+                                                : 'font-bold text-[#737868] group-hover:text-[#0e0f0c] group-hover:font-black',
                                             trendPeriod === 'all_months' ? 'text-[11px] sm:text-xs' : 'text-[10px] sm:text-[11px]'
                                         ]"
                                     >

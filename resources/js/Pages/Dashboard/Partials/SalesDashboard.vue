@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import SingleBarChart from '@/Components/SingleBarChart.vue';
 
 const props = defineProps({
     workshopName: String,
@@ -167,30 +168,29 @@ const trendBars = computed(() => {
                         </span>
                     </div>
 
-                    <!-- Bar Chart Visualizer -->
-                    <div class="h-44 flex items-end gap-2 pt-6 pb-2 px-2 border-b border-[#f0f1eb]">
-                        <div
-                            v-for="(bar, idx) in trendBars"
-                            :key="idx"
-                            class="flex-1 flex flex-col items-center group relative cursor-pointer"
-                        >
-                            <!-- Tooltip on Hover -->
-                            <div class="opacity-0 group-hover:opacity-100 absolute -top-10 bg-[#0e0f0c] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg pointer-events-none transition-all whitespace-nowrap z-20 shadow-md">
-                                {{ bar.date }}: {{ formatRupiah(bar.amount) }} ({{ bar.count }} nota)
-                            </div>
-                            <div
-                                class="w-full max-w-[36px] bg-[#0e0f0c] group-hover:bg-[#c6ef4e] rounded-t-lg transition-all"
-                                :style="{ height: `${bar.heightPct}%` }"
-                            ></div>
-                            <span class="text-[9px] font-bold text-[#737868] mt-2 truncate w-full text-center">
-                                {{ bar.date }}
+                    <!-- Bar Chart Visualizer (Support tap di HP & hover di desktop) -->
+                    <SingleBarChart
+                        :bars="trendBars"
+                        hint-text="Ketuk batang grafik untuk detail penjualan"
+                        empty-text="Belum ada catatan penjualan Anda."
+                    >
+                        <template #detail="{ bar }">
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#c6ef4e] animate-pulse shrink-0"></span>
+                                <span class="font-bold text-[#c6ef4e]">{{ bar.date }}</span>
                             </span>
-                        </div>
-                    </div>
+                            <span class="text-[11px] font-semibold">
+                                Omset: <strong class="text-white font-black">{{ formatRupiah(bar.amount) }}</strong>
+                            </span>
+                            <span class="text-[11px] font-semibold text-[#c6ef4e]">
+                                ({{ bar.count }} nota)
+                            </span>
+                        </template>
+                    </SingleBarChart>
                 </div>
 
                 <div class="flex flex-wrap items-center justify-between text-[11px] text-[#737868] pt-3 gap-1">
-                    <span>Sentuh batang untuk detail rupiah</span>
+                    <span>Geser grafik jika periode panjang</span>
                     <span class="font-bold text-[#0e0f0c]">
                         Total: {{ formatRupiah(props.salesData?.myNetRevenue) }}
                     </span>
