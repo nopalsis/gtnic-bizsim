@@ -35,7 +35,7 @@ class DashboardTest extends TestCase
             ->has('trendHistory')
             ->has('inventoryStats')
             ->has('staffPerformance')
-            ->has('healthScore')
+            ->missing('healthScore')
             ->has('alerts')
             ->has('quickSimulatorBaseline')
         );

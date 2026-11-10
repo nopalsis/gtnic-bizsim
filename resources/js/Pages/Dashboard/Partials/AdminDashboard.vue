@@ -12,7 +12,6 @@ const props = defineProps({
     recentTransactions: Array,
     topProducts: Array,
     trendHistory: Array,
-    healthScore: Object,
     alerts: Array,
     quickSimulatorBaseline: Object,
 });
@@ -179,30 +178,15 @@ const maxTrendCount = computed(() => {
                 </p>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                <!-- Status Kondisi Usaha -->
-                <div class="flex items-center gap-2 bg-[#f4f5ee] px-2.5 sm:px-3.5 py-1.5 rounded-xl sm:rounded-2xl border border-[#e1e5d3]">
-                    <div class="text-right">
-                        <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#737868] leading-tight">Kondisi Usaha</div>
-                        <div class="text-[11px] sm:text-xs font-black text-[#0e0f0c] leading-tight">
-                            {{ props.healthScore?.grade || 'A-' }} · {{ props.healthScore?.score || 88 }} Poin
-                        </div>
-                    </div>
-                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#0e0f0c] text-[#c6ef4e] font-black text-xs flex items-center justify-center shrink-0">
-                        {{ props.healthScore?.grade?.charAt(0) || 'A' }}
-                    </div>
-                </div>
-
-                <!-- Tombol Buku Besar -->
-                <button
-                    type="button"
-                    @click="emit('openLedger')"
-                    class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap shrink-0"
-                >
-                    <span class="material-symbols-outlined text-[16px] text-[#c6ef4e]">menu_book</span>
-                    <span>Buku Penjualan</span>
-                </button>
-            </div>
+            <!-- Tombol Buku Besar -->
+            <button
+                type="button"
+                @click="emit('openLedger')"
+                class="bg-[#0e0f0c] hover:bg-neutral-800 text-white text-xs font-bold px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap w-full sm:w-auto shrink-0"
+            >
+                <span class="material-symbols-outlined text-[16px] text-[#c6ef4e]">menu_book</span>
+                <span>Buku Penjualan</span>
+            </button>
         </header>
 
         <!-- 4 Kartu Ringkasan Utama: 1. Total Penjualan (Omset), 2. Jumlah Transaksi, 3. Produk Terjual, 4. Rata-rata Omset per Hari -->

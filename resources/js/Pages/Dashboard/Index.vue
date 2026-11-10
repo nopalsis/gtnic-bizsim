@@ -21,7 +21,6 @@ const props = defineProps({
     trendHistory: Array,
     inventoryStats: Object,
     staffPerformance: Array,
-    healthScore: Object,
     alerts: Array,
     quickSimulatorBaseline: Object,
     adminOperationsData: Object,
@@ -73,7 +72,6 @@ const showLedgerModal = ref(false);
             :recent-transactions="props.recentTransactions"
             :top-products="props.topProducts"
             :trend-history="props.trendHistory"
-            :health-score="props.healthScore"
             :alerts="props.alerts"
             :quick-simulator-baseline="props.quickSimulatorBaseline"
             @open-ledger="showLedgerModal = true"

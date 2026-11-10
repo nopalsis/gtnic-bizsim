@@ -237,26 +237,6 @@ class DashboardController extends Controller
                 'count' => (int) $t->tx_count,
             ]);
 
-        // Health Score
-        $marginPoints = min(40, max(0, ($profitMargin / 55) * 40));
-        $wasteRatio = $netRevenue > 0 ? ($wasteCost / $netRevenue) * 100 : 0.0;
-        $wastePoints = $wasteRatio <= 2.5 ? 30 : max(0, 30 - (($wasteRatio - 2.5) * 5));
-        $discountPoints = $discountRate <= 10.0 ? 30 : max(0, 30 - (($discountRate - 10.0) * 2));
-        $healthScoreValue = (int) round($marginPoints + $wastePoints + $discountPoints);
-
-        $grade = match (true) {
-            $healthScoreValue >= 90 => 'A',
-            $healthScoreValue >= 80 => 'A-',
-            $healthScoreValue >= 70 => 'B+',
-            $healthScoreValue >= 60 => 'B',
-            default => 'C',
-        };
-        $healthStatus = match (true) {
-            $healthScoreValue >= 85 => 'Kondisi Keuangan Bengkel Sangat Baik',
-            $healthScoreValue >= 70 => 'Penjualan & Produksi Berjalan Lancar',
-            default => 'Perlu Perhatian: Kurangi Bahan Rusak & Diskon',
-        };
-
         // Staff Performance Metrics
         $staffPerformance = Transaction::select(
             'sales_person_name',
@@ -596,11 +576,6 @@ class DashboardController extends Controller
                 'lowStockProducts' => $lowStockProducts,
             ],
             'staffPerformance' => $isSuperAdmin ? $staffPerformance : [],
-            'healthScore' => $isSuperAdmin ? [
-                'score' => $healthScoreValue,
-                'grade' => $grade,
-                'status' => $healthStatus,
-            ] : null,
             'alerts' => $alerts,
             'quickSimulatorBaseline' => $isSuperAdmin ? $quickSimulatorBaseline : null,
             'adminOperationsData' => $adminOperationsData,
