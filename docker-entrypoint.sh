@@ -1,10 +1,11 @@
 #!/bin/bash
 set -e
 
-# Sinkronkan public/build dari image ke host jika belum ada (akibat tertimpa volume mount)
-if [ ! -d "/var/www/html/public/build" ] && [ -d "/tmp/build" ]; then
-    echo "Syncing public/build from image to host..."
-    cp -r /tmp/build /var/www/html/public/build
+# Selalu sinkronkan hasil build terbaru dari image ke host volume
+if [ -d "/tmp/build" ]; then
+    echo "Updating public/build from latest image build..."
+    mkdir -p /var/www/html/public/build
+    cp -rf /tmp/build/. /var/www/html/public/build/
     chmod -R 755 /var/www/html/public/build 2>/dev/null || true
 fi
 
