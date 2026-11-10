@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+import PaginationNav from '@/Components/PaginationNav.vue';
 
 const props = defineProps({
     products: {
@@ -62,6 +63,10 @@ const filteredProducts = computed(() => {
 
 const totalPages = computed(() => {
     return Math.ceil(filteredProducts.value.length / itemsPerPage) || 1;
+});
+
+watch(totalPages, (max) => {
+    if (currentPage.value > max) currentPage.value = max;
 });
 
 const paginatedProducts = computed(() => {
@@ -331,28 +336,19 @@ const statusCount = computed(() => {
             </div>
 
             <!-- Pagination Controls -->
-            <div class="flex items-center gap-2 self-end sm:self-auto">
+            <div class="flex flex-col sm:flex-row items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                 <span class="font-bold text-[#0e0f0c]">
                     Halaman {{ currentPage }} dari {{ totalPages }} ({{ filteredProducts.length }} Model)
                 </span>
-                <div class="flex items-center gap-1">
-                    <button
-                        type="button"
-                        @click="currentPage = Math.max(1, currentPage - 1)"
-                        :disabled="currentPage <= 1"
-                        class="px-2.5 py-1 rounded-lg border border-[#dce0cd] bg-white font-bold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 transition-colors"
-                    >
-                        ← Prev
-                    </button>
-                    <button
-                        type="button"
-                        @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                        :disabled="currentPage >= totalPages"
-                        class="px-2.5 py-1 rounded-lg border border-[#dce0cd] bg-white font-bold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 transition-colors"
-                    >
-                        Next →
-                    </button>
-                </div>
+                <PaginationNav
+                    v-if="totalPages > 1"
+                    variant="compact"
+                    prev-label="Prev"
+                    next-label="Next"
+                    :current-page="currentPage"
+                    :total-pages="totalPages"
+                    @change="(p) => currentPage = p"
+                />
             </div>
         </div>
     </div>

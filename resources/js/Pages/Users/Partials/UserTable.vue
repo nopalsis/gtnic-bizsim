@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import PaginationNav from '@/Components/PaginationNav.vue';
 
 const props = defineProps({
     users: {
@@ -93,6 +94,14 @@ const totalPages = computed(() => {
     return Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage.value));
 });
 
+watch(() => props.activeRole, () => {
+    currentPage.value = 1;
+});
+
+watch(totalPages, (max) => {
+    if (currentPage.value > max) currentPage.value = max;
+});
+
 const paginatedUsers = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
     return filteredUsers.value.slice(start, start + itemsPerPage.value);
@@ -122,7 +131,7 @@ const toggleUserStatus = (user) => {
 </script>
 
 <template>
-    <div class="flex flex-col bg-white rounded-[28px] shadow-xs p-5 md:p-6 overflow-hidden border border-[#e1e5d3]">
+    <div class="flex flex-col bg-white rounded-2xl sm:rounded-[28px] shadow-xs p-3.5 sm:p-5 md:p-6 overflow-hidden border border-[#e1e5d3]">
         <!-- Table Toolbar -->
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-5 border-b border-[#f0f1eb]">
             <!-- Search Input -->
@@ -355,7 +364,7 @@ const toggleUserStatus = (user) => {
                                 <p class="text-sm font-medium text-neutral-600">Tidak ada staf yang sesuai dengan kriteria filter.</p>
                                 <button
                                     type="button"
-                                    @click="searchQuery = ''; statusFilter = 'all'"
+                                    @click="searchQuery = ''; statusFilter = 'all'; currentPage = 1"
                                     class="text-xs text-[#0e0f0c] font-semibold underline mt-1 cursor-pointer"
                                 >
                                     Reset Filter & Pencarian
@@ -369,45 +378,17 @@ const toggleUserStatus = (user) => {
 
         <!-- Pagination Bar -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 mt-2 border-t border-[#f4f4ed]">
-            <span class="text-xs text-[#868b7d]">
+            <span class="text-xs text-[#868b7d] text-center sm:text-left">
                 Menampilkan <span class="font-bold text-[#0e0f0c]">{{ showingStart }}-{{ showingEnd }}</span> dari
                 <span class="font-bold text-[#0e0f0c]">{{ filteredUsers.length }}</span> staf
             </span>
 
-            <div class="flex items-center gap-1.5">
-                <button
-                    type="button"
-                    @click="goToPage(currentPage - 1)"
-                    :disabled="currentPage <= 1"
-                    class="px-3 py-1.5 rounded-full bg-[#f4f4ed] text-[#4c4546] hover:text-[#0e0f0c] text-xs font-medium cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                    Sebelumnya
-                </button>
-
-                <button
-                    v-for="page in totalPages"
-                    :key="page"
-                    type="button"
-                    @click="goToPage(page)"
-                    :class="[
-                        'w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer',
-                        currentPage === page
-                            ? 'bg-[#0e0f0c] text-white shadow-xs'
-                            : 'bg-[#f4f4ed] text-[#0e0f0c] hover:bg-[#e8e9e2]'
-                    ]"
-                >
-                    {{ page }}
-                </button>
-
-                <button
-                    type="button"
-                    @click="goToPage(currentPage + 1)"
-                    :disabled="currentPage >= totalPages"
-                    class="px-3 py-1.5 rounded-full bg-[#f4f4ed] text-[#0e0f0c] hover:bg-[#e8e9e2] text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                    Selanjutnya
-                </button>
-            </div>
+            <PaginationNav
+                variant="pill"
+                :current-page="currentPage"
+                :total-pages="totalPages"
+                @change="goToPage"
+            />
         </div>
     </div>
 </template>

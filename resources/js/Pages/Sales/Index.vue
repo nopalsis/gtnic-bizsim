@@ -2,6 +2,7 @@
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import SidebarNav from '@/Components/SidebarNav.vue';
+import PaginationNav from '@/Components/PaginationNav.vue';
 
 const props = defineProps({
     transactions: {
@@ -55,6 +56,10 @@ watch(searchQuery, () => {
 
 const totalPages = computed(() => {
     return Math.max(1, Math.ceil(filteredTransactions.value.length / perPage.value));
+});
+
+watch(totalPages, (max) => {
+    if (currentPage.value > max) currentPage.value = max;
 });
 
 const paginatedTransactions = computed(() => {
@@ -230,7 +235,7 @@ const submitOrder = () => {
             </section>
 
             <!-- Table of Transactions -->
-            <section class="bg-white rounded-[28px] p-6 border border-[#dce0cd] shadow-sm flex flex-col gap-4">
+            <section class="bg-white rounded-2xl sm:rounded-[28px] p-3.5 sm:p-6 border border-[#dce0cd] shadow-sm flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                         <h2 class="text-base font-black text-[#0e0f0c]">Riwayat Penjualan & Pesanan</h2>
@@ -323,48 +328,16 @@ const submitOrder = () => {
 
                 <!-- Kontrol Navigasi Halaman (Pagination) -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-neutral-100 text-xs">
-                    <div class="text-[#737868] font-medium text-[11px]">
+                    <div class="text-[#737868] font-medium text-[11px] text-center sm:text-left">
                         Menampilkan <span class="font-bold text-[#0e0f0c]">{{ startItemIndex }} - {{ endItemIndex }}</span> dari <span class="font-bold text-[#0e0f0c]">{{ filteredTransactions.length }}</span> riwayat penjualan
                     </div>
 
-                    <div v-if="totalPages > 1" class="flex items-center gap-1.5">
-                        <button
-                            type="button"
-                            @click="goToPage(currentPage - 1)"
-                            :disabled="currentPage === 1"
-                            class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer flex items-center gap-1"
-                        >
-                            <span>←</span>
-                            <span>Sebelumnya</span>
-                        </button>
-
-                        <div class="flex items-center gap-1">
-                            <button
-                                v-for="p in totalPages"
-                                :key="'page-' + p"
-                                type="button"
-                                @click="goToPage(p)"
-                                :class="[
-                                    'w-8 h-8 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center',
-                                    currentPage === p
-                                        ? 'bg-[#0e0f0c] text-[#c6ef4e] shadow-xs'
-                                        : 'text-[#737868] hover:bg-neutral-100'
-                                ]"
-                            >
-                                {{ p }}
-                            </button>
-                        </div>
-
-                        <button
-                            type="button"
-                            @click="goToPage(currentPage + 1)"
-                            :disabled="currentPage === totalPages"
-                            class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer flex items-center gap-1"
-                        >
-                            <span>Selanjutnya</span>
-                            <span>→</span>
-                        </button>
-                    </div>
+                    <PaginationNav
+                        v-if="totalPages > 1"
+                        :current-page="currentPage"
+                        :total-pages="totalPages"
+                        @change="goToPage"
+                    />
                 </div>
             </section>
         </main>

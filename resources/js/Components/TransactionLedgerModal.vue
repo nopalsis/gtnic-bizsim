@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+import PaginationNav from '@/Components/PaginationNav.vue';
 
 const props = defineProps({
     show: Boolean,
@@ -43,6 +44,10 @@ watch(searchQuery, () => {
 
 const ledgerTotalPages = computed(() => {
     return Math.max(1, Math.ceil(filteredTransactions.value.length / ledgerPerPage.value));
+});
+
+watch(ledgerTotalPages, (max) => {
+    if (ledgerPage.value > max) ledgerPage.value = max;
 });
 
 const paginatedLedgerTransactions = computed(() => {
@@ -89,15 +94,15 @@ const handleExport = () => {
 <template>
     <div
         v-if="show"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0e0f0c]/60 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-[#0e0f0c]/60 backdrop-blur-sm"
         @click.self="emit('close')"
     >
-        <div class="bg-white rounded-[28px] w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl border border-[#dce0cd] overflow-hidden">
+        <div class="bg-white rounded-2xl sm:rounded-[28px] w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl border border-[#dce0cd] overflow-hidden">
             <!-- Header -->
-            <div class="p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7]">
-                <div>
-                    <h3 class="text-xl font-black text-[#0e0f0c]">Buku Catatan Penjualan</h3>
-                    <p class="text-xs text-neutral-500 mt-0.5">Daftar lengkap seluruh transaksi penjualan eceran & pesanan grosir</p>
+            <div class="p-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between bg-[#fafbf7] gap-3">
+                <div class="min-w-0">
+                    <h3 class="text-lg sm:text-xl font-black text-[#0e0f0c] truncate">Buku Catatan Penjualan</h3>
+                    <p class="text-xs text-neutral-500 mt-0.5 truncate">Daftar lengkap seluruh transaksi penjualan eceran & pesanan grosir</p>
                 </div>
                 <button
                     type="button"
@@ -185,47 +190,17 @@ const handleExport = () => {
             </div>
 
             <!-- Footer Pagination Modal -->
-            <div class="p-4 border-t border-neutral-100 bg-[#fafbf7] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                <div class="text-[#737868] font-medium text-[11px]">
+            <div class="p-3 sm:p-4 border-t border-neutral-100 bg-[#fafbf7] flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-xs">
+                <div class="text-[#737868] font-medium text-[11px] text-center sm:text-left">
                     Menampilkan <span class="font-bold text-[#0e0f0c]">{{ startLedgerIndex }} - {{ endLedgerIndex }}</span> dari <span class="font-bold text-[#0e0f0c]">{{ filteredTransactions.length }}</span> transaksi
                 </div>
 
-                <div v-if="ledgerTotalPages > 1" class="flex items-center gap-1.5">
-                    <button
-                        type="button"
-                        @click="goToLedgerPage(ledgerPage - 1)"
-                        :disabled="ledgerPage === 1"
-                        class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
-                    >
-                        ← Sebelumnya
-                    </button>
-
-                    <div class="flex items-center gap-1">
-                        <button
-                            v-for="p in ledgerTotalPages"
-                            :key="'lp-' + p"
-                            type="button"
-                            @click="goToLedgerPage(p)"
-                            :class="[
-                                'w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center transition-all cursor-pointer',
-                                ledgerPage === p
-                                    ? 'bg-[#0e0f0c] text-[#c6ef4e]'
-                                    : 'text-[#737868] hover:bg-neutral-100'
-                            ]"
-                        >
-                            {{ p }}
-                        </button>
-                    </div>
-
-                    <button
-                        type="button"
-                        @click="goToLedgerPage(ledgerPage + 1)"
-                        :disabled="ledgerPage === ledgerTotalPages"
-                        class="px-3 py-1.5 rounded-xl border border-[#dce0cd] font-bold text-[11px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
-                    >
-                        Selanjutnya →
-                    </button>
-                </div>
+                <PaginationNav
+                    v-if="ledgerTotalPages > 1"
+                    :current-page="ledgerPage"
+                    :total-pages="ledgerTotalPages"
+                    @change="goToLedgerPage"
+                />
             </div>
         </div>
     </div>

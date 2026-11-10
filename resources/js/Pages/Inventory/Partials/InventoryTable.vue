@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import PaginationNav from '@/Components/PaginationNav.vue';
 
 const props = defineProps({
     products: {
@@ -89,6 +90,10 @@ const totalPages = computed(() => {
     return Math.max(1, Math.ceil(filteredProducts.value.length / itemsPerPage.value));
 });
 
+watch(totalPages, (max) => {
+    if (currentPage.value > max) currentPage.value = max;
+});
+
 const paginatedProducts = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
     return filteredProducts.value.slice(start, start + itemsPerPage.value);
@@ -115,7 +120,7 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
 </script>
 
 <template>
-    <section class="bg-white rounded-2xl md:rounded-[24px] p-4 md:p-6 shadow-xs border border-[#dce0cd] overflow-hidden flex flex-col">
+    <section class="bg-white rounded-2xl md:rounded-[24px] p-3.5 sm:p-4 md:p-6 shadow-xs border border-[#dce0cd] overflow-hidden flex flex-col">
         <!-- Toolbar Header Row with Search & Dropdowns -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5 pb-4 border-b border-[#dce0cd]">
             <div>
@@ -364,7 +369,7 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
                                 <p class="text-xs font-medium text-neutral-600">Tidak ada item inventaris yang sesuai kriteria.</p>
                                 <button
                                     type="button"
-                                    @click="searchQuery = ''; statusFilter = 'all'; activeCategoryTab = 'all'"
+                                    @click="searchQuery = ''; statusFilter = 'all'; activeCategoryTab = 'all'; currentPage = 1"
                                     class="text-xs text-[#0e0f0c] font-semibold underline mt-0.5 cursor-pointer"
                                 >
                                     Reset Filter
@@ -378,45 +383,17 @@ const rawCount = computed(() => props.products.filter((p) => p.category_type ===
 
         <!-- Pagination Footer -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-[#dce0cd]">
-            <span class="text-xs text-[#737868]">
+            <span class="text-xs text-[#737868] text-center sm:text-left">
                 Menampilkan <strong class="text-[#0e0f0c]">{{ showingStart }}-{{ showingEnd }}</strong> dari
                 <strong class="text-[#0e0f0c]">{{ filteredProducts.length }}</strong> total inventaris terdaftar
             </span>
 
-            <div class="flex items-center gap-1">
-                <button
-                    type="button"
-                    @click="goToPage(currentPage - 1)"
-                    :disabled="currentPage <= 1"
-                    class="px-2.5 py-1 rounded-full bg-[#f2f4ec] text-[#0e0f0c] text-xs hover:bg-[#eaecdf] transition disabled:opacity-40 disabled:cursor-not-allowed font-medium cursor-pointer"
-                >
-                    Sebelumnya
-                </button>
-
-                <button
-                    v-for="page in totalPages"
-                    :key="page"
-                    type="button"
-                    @click="goToPage(page)"
-                    :class="[
-                        'w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer',
-                        currentPage === page
-                            ? 'bg-[#0e0f0c] text-white shadow-xs'
-                            : 'bg-[#f2f4ec] text-[#0e0f0c] hover:bg-[#eaecdf]'
-                    ]"
-                >
-                    {{ page }}
-                </button>
-
-                <button
-                    type="button"
-                    @click="goToPage(currentPage + 1)"
-                    :disabled="currentPage >= totalPages"
-                    class="px-2.5 py-1 rounded-full bg-[#f2f4ec] text-[#0e0f0c] text-xs hover:bg-[#eaecdf] transition disabled:opacity-40 disabled:cursor-not-allowed font-medium cursor-pointer"
-                >
-                    Selanjutnya
-                </button>
-            </div>
+            <PaginationNav
+                variant="pill"
+                :current-page="currentPage"
+                :total-pages="totalPages"
+                @change="goToPage"
+            />
         </div>
     </section>
 </template>

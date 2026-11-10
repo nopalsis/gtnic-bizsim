@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import PaginationNav from '@/Components/PaginationNav.vue';
 
 const props = defineProps({
     workshopName: String,
@@ -27,6 +28,10 @@ const txPerPage = ref(5);
 const txTotalPages = computed(() => {
     const list = props.recentTransactions || [];
     return Math.max(1, Math.ceil(list.length / txPerPage.value));
+});
+
+watch(txTotalPages, (max) => {
+    if (txCurrentPage.value > max) txCurrentPage.value = max;
 });
 
 const paginatedRecentTransactions = computed(() => {
@@ -578,7 +583,7 @@ const maxTrendCount = computed(() => {
                 </div>
 
                 <!-- Footer Pagination & Tautan Buku Penjualan -->
-                <div class="pt-3 mt-3 border-t border-neutral-100 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#737868] gap-2">
+                <div class="pt-3 mt-3 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#737868] gap-2.5">
                     <div class="flex items-center gap-2">
                         <span>Halaman {{ txCurrentPage }} dari {{ txTotalPages }}</span>
                         <span class="text-neutral-300">·</span>
@@ -592,42 +597,15 @@ const maxTrendCount = computed(() => {
                     </div>
 
                     <!-- Tombol Navigasi Pagination Halaman -->
-                    <div v-if="txTotalPages > 1" class="flex items-center gap-1 self-end sm:self-auto">
-                        <button
-                            type="button"
-                            @click="goToTxPage(txCurrentPage - 1)"
-                            :disabled="txCurrentPage === 1"
-                            class="px-2.5 py-1 rounded-lg border border-[#dce0cd] font-bold text-[10px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
-                        >
-                            ← Prev
-                        </button>
-
-                        <div class="flex items-center gap-1">
-                            <button
-                                v-for="pg in txTotalPages"
-                                :key="'tx-pg-' + pg"
-                                type="button"
-                                @click="goToTxPage(pg)"
-                                :class="[
-                                    'w-6 h-6 rounded-md font-bold text-[10px] flex items-center justify-center transition-all cursor-pointer',
-                                    txCurrentPage === pg
-                                        ? 'bg-[#0e0f0c] text-[#c6ef4e]'
-                                        : 'text-[#737868] hover:bg-neutral-100'
-                                ]"
-                            >
-                                {{ pg }}
-                            </button>
-                        </div>
-
-                        <button
-                            type="button"
-                            @click="goToTxPage(txCurrentPage + 1)"
-                            :disabled="txCurrentPage === txTotalPages"
-                            class="px-2.5 py-1 rounded-lg border border-[#dce0cd] font-bold text-[10px] transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-100 cursor-pointer"
-                        >
-                            Next →
-                        </button>
-                    </div>
+                    <PaginationNav
+                        v-if="txTotalPages > 1"
+                        variant="compact"
+                        prev-label="Prev"
+                        next-label="Next"
+                        :current-page="txCurrentPage"
+                        :total-pages="txTotalPages"
+                        @change="goToTxPage"
+                    />
                 </div>
             </div>
         </section>
